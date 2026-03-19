@@ -9,6 +9,7 @@ import 'auth_wrapper.dart';
 import 'pharmacist/pharmacist_profile_wrapper.dart';
 import 'user/user_chat_list_view.dart';
 import 'pharmacist/pharmacist_chat_list_view.dart';
+import 'reminder_view.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -94,7 +95,7 @@ class _HomePageState extends State<HomePage> {
 
   List<Widget> get _pages {
     // Shared first, second and fourth tabs
-    final home = const Center(child: Text("Home Page"));
+    final home = const ReminderHomeView();
     final chat = _role == 'pharmacist'
     ? const PharmacistChatListView()
     : const ChatListView();
