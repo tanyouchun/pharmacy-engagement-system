@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../views/auth_wrapper.dart';
+
 import '../viewmodels/login_viewmodel.dart';
 import '../widgets/custom_textfield.dart';
 import 'signup_view.dart';
@@ -59,7 +62,21 @@ class LoginView extends StatelessWidget {
                 vm.isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : ElevatedButton(
-                      onPressed: vm.login,
+                      onPressed:
+                          vm.isLoading
+                              ? null
+                              : () async {
+                                await vm.login();
+
+                                if (FirebaseAuth.instance.currentUser != null) {
+                                  Navigator.of(context).pushAndRemoveUntil(
+                                    MaterialPageRoute(
+                                      builder: (_) => const AuthWrapper(),
+                                    ),
+                                    (route) => false,
+                                  );
+                                }
+                              },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blueAccent,
                         minimumSize: const Size(double.infinity, 55),
