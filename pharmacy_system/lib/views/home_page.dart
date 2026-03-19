@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pharmacy_system/views/prescription_view.dart';
+import 'package:pharmacy_system/services/auth_service.dart';
 import 'profile_wrapper.dart';
+import 'pharmacist/pharmacist_chatbot_view.dart';
+import 'auth_wrapper.dart';
+import 'pharmacist/pharmacist_profile_wrapper.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -11,37 +16,118 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String get _title {
-  switch (_currentIndex) {
-    case 0:
-      return "Home";
-    case 1:
-      return "Chat";
-    case 2:
-      return "Prescription";
-    case 3:
-      return "Profile";
-    default:
-      return "Home";
-  }
-}
   int _currentIndex = 0;
+  String? _role;
+  bool _isLoadingRole = true;
 
-  final List<Widget> _pages = const [
-    const Center(child: Text("Home Page")),
-    const Center(child: Text("Chat Page")),
-    const PrescriptionPage(),
-    const ProfileWrapper(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadUserRole();
+  }
+
+
+  Future<void> _loadUserRole() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      setState(() {
+        _role = null;
+        _isLoadingRole = false;
+      });
+      return;
+    }
+
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      setState(() {
+        _role = doc.data()?['role'] as String?;
+        _isLoadingRole = false;
+      });
+    } catch (_) {
+      setState(() {
+        _role = null;
+        _isLoadingRole = false;
+      });
+    }
+  }
+
+  Future<void> _logout() async {
+    try {
+      await AuthService().signOut();
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const AuthWrapper()),
+        (route) => false,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Logout failed: $e')),
+      );
+    }
+  }
+
+  String get _title {
+    switch (_currentIndex) {
+      case 0:
+        return "Home";
+      case 1:
+        return "Chat";
+      case 2:
+        // For pharmacists, show chatbot instead of prescription
+        if (_role == 'pharmacist') {
+          return "Chatbot";
+        }
+        return "Prescription";
+      case 3:
+        return "Profile";
+      default:
+        return "Home";
+    }
+  }
+
+  List<Widget> get _pages {
+    // Shared first, second and fourth tabs
+    final home = const Center(child: Text("Home Page"));
+    final chat = const Center(child: Text("Chat Page"));
+    final profile =
+        _role == 'pharmacist' ? const PharmacistProfileWrapper() : const ProfileWrapper();
+
+    if (_role == 'pharmacist') {
+      return [
+        home,
+        chat,
+        const PharmacistChatbotView(),
+        profile,
+      ];
+    }
+
+    return [
+      home,
+      chat,
+      const PrescriptionPage(),
+      profile,
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoadingRole) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(_title),
         actions: [
           IconButton(
-            onPressed: () => FirebaseAuth.instance.signOut(),
+            onPressed: _logout,
             icon: const Icon(Icons.logout),
           ),
         ],
@@ -74,17 +160,22 @@ class _HomePageState extends State<HomePage> {
             selectedItemColor: Colors.blue,
             unselectedItemColor: Colors.grey,
             type: BottomNavigationBarType.fixed,
-            items: const [
-              BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-              BottomNavigationBarItem(
+            items: [
+              const BottomNavigationBarItem(
+                  icon: Icon(Icons.home), label: "Home"),
+              const BottomNavigationBarItem(
                 icon: Icon(Icons.chat_bubble_outline),
                 label: "Chat",
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.medication_outlined),
-                label: "Prescription",
+                icon: Icon(
+                  _role == 'pharmacist'
+                      ? Icons.smart_toy_outlined
+                      : Icons.medication_outlined,
+                ),
+                label: _role == 'pharmacist' ? "Chatbot" : "Prescription",
               ),
-              BottomNavigationBarItem(
+              const BottomNavigationBarItem(
                 icon: Icon(Icons.person_outline),
                 label: "Profile",
               ),

@@ -1,24 +1,20 @@
-class UserProfile {
-  final String id; // Unique identifier for the user
-  final String name;
+import 'profile.dart';
+
+class UserProfile extends Profile {
   final int age;
-  final String role; // e.g., "patient", "pharmacist"
   final String gender;
-  final String healthInfo;
   final String height;
   final String weight;
   final String allergies;
 
   UserProfile({
-    required this.id,
-    required this.name,
+    required super.id,
+    required super.name,
     required this.age,
-    required this.role,
     required this.gender,
-    this.healthInfo = '',
-    this.height = '',
-    this.weight = '',
-    this.allergies = '',
+    required this.height,
+    required this.weight,
+    required this.allergies,
   });
 
   Map<String, dynamic> toMap() {
@@ -26,8 +22,22 @@ class UserProfile {
       'id': id,
       'name': name,
       'age': age,
-      'role': role,
       'gender': gender,
+      'height': height,
+      'weight': weight,
+      'allergies': allergies,
     };
+  }
+
+  factory UserProfile.fromMap(Map<String, dynamic> map) {
+    return UserProfile(
+      id: map['id'],
+      name: map['name'],
+      age: map['age'] ?? 0,
+      gender: map['gender'] ?? '',
+      height: map['height'] ?? '',
+      weight: map['weight'] ?? '',
+      allergies: map['allergies'] ?? '',
+    );
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../viewmodels/profile_viewmodel.dart';
+import '../viewmodels/user_profile_viewmodel.dart';
 import 'profile.dart';
 import 'create_profile_view.dart';
 
@@ -9,7 +9,7 @@ class ProfileWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<ProfileViewModel>(context);
+    final vm = Provider.of<UserProfileViewModel>(context);
 
     // first time load
     if (!vm.hasProfile && !vm.isLoading) {

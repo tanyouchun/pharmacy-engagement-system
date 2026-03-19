@@ -5,9 +5,10 @@ import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'viewmodels/login_viewmodel.dart';
 import 'viewmodels/signup_viewmodel.dart';
-import 'viewmodels/profile_viewmodel.dart';
+import 'viewmodels/user_profile_viewmodel.dart';
 import 'viewmodels/prescription_viewmodel.dart';
 import 'views/auth_wrapper.dart';
+import 'views/pharmacist/pharmacist_profile_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,12 +26,14 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => LoginViewModel()),
         ChangeNotifierProvider(create: (_) => SignupViewModel()),
-        ChangeNotifierProvider(create: (_) => ProfileViewModel()),
+        ChangeNotifierProvider(create: (_) => UserProfileViewModel()),
         ChangeNotifierProvider(create: (_) => PrescriptionViewModel()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-
+        routes: {
+          '/pharmacistProfile': (context) => const PharmacistProfileView(),
+        },
         home: const AuthWrapper(),
       ),
     );

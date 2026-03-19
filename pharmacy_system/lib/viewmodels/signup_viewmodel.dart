@@ -1,25 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignupViewModel extends ChangeNotifier {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
+  /// Tracks whether the new user is a pharmacist or a regular user.
+  bool isPharmacist = false;
+
   bool isLoading = false;
   String? error;
 
-  Future<void> signup() async {
+  Future<void> signup(BuildContext context) async {
     try {
       isLoading = true;
       notifyListeners();
 
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      // 1. Create auth user
+      final credential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
 
+      final uid = credential.user?.uid;
+
+      // 2. Store basic role info in Firestore so we can route later
+      if (uid != null) {
+        await FirebaseFirestore.instance.collection('users').doc(uid).set({
+          'email': emailController.text.trim(),
+          'role': isPharmacist ? 'pharmacist' : 'user',
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+
+      // 3. Navigate:
+      //   - Pharmacist  → pharmacist profile form
+      //   - Regular user → just pop back (AuthWrapper will take them to HomePage)
+      if (isPharmacist) {
+        Navigator.pushReplacementNamed(context, '/pharmacistProfile');
+      } else {
+        Navigator.pop(context);
+      }
     } on FirebaseAuthException catch (e) {
       error = e.message;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error ?? 'Signup failed')),
+      );
     } finally {
       isLoading = false;
       notifyListeners();
