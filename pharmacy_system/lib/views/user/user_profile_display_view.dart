@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../viewmodels/user_profile_viewmodel.dart';
-import 'edit_profile_view.dart';
+import '../../viewmodels/user_profile_viewmodel.dart';
+import '../edit_profile_view.dart';
 
-class ProfileDisplayView extends StatefulWidget {
-  const ProfileDisplayView({super.key});
+class UserProfileDisplayView extends StatefulWidget {
+  const UserProfileDisplayView({super.key});
 
   @override
-  State<ProfileDisplayView> createState() => _ProfileDisplayViewState();
+  State<UserProfileDisplayView> createState() => _UserProfileDisplayViewState();
 }
 
-class _ProfileDisplayViewState extends State<ProfileDisplayView> {
+class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
   bool isLoading = true;
 
   @override

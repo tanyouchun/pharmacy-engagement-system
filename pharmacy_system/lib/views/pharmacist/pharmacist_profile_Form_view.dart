@@ -5,14 +5,14 @@ import '../home_page.dart';
 import '../auth_wrapper.dart';
 import '../../services/auth_service.dart';
 
-class PharmacistProfileView extends StatefulWidget {
-  const PharmacistProfileView({super.key});
+class PharmacistProfileFormView extends StatefulWidget {
+  const PharmacistProfileFormView({super.key});
 
   @override
-  State<PharmacistProfileView> createState() => _PharmacistProfileViewState();
+  State<PharmacistProfileFormView> createState() => _PharmacistProfileFormViewState();
 }
 
-class _PharmacistProfileViewState extends State<PharmacistProfileView> {
+class _PharmacistProfileFormViewState extends State<PharmacistProfileFormView> {
   final _formKey = GlobalKey<FormState>();
 
   Future<void> _logout() async {

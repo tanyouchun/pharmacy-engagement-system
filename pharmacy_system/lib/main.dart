@@ -7,8 +7,10 @@ import 'viewmodels/login_viewmodel.dart';
 import 'viewmodels/signup_viewmodel.dart';
 import 'viewmodels/user_profile_viewmodel.dart';
 import 'viewmodels/prescription_viewmodel.dart';
+import 'viewmodels/chat_viewmodel.dart';
+import 'viewmodels/pharmacist_list_viewmodel.dart';
 import 'views/auth_wrapper.dart';
-import 'views/pharmacist/pharmacist_profile_view.dart';
+import 'views/pharmacist/pharmacist_profile_Form_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,11 +30,13 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => SignupViewModel()),
         ChangeNotifierProvider(create: (_) => UserProfileViewModel()),
         ChangeNotifierProvider(create: (_) => PrescriptionViewModel()),
+        ChangeNotifierProvider(create: (_) => ChatViewModel()),
+        ChangeNotifierProvider(create: (_) => PharmacistViewModel()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         routes: {
-          '/pharmacistProfile': (context) => const PharmacistProfileView(),
+          '/pharmacistProfile': (context) => const PharmacistProfileFormView(),
         },
         home: const AuthWrapper(),
       ),

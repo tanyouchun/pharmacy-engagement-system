@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../viewmodels/user_profile_viewmodel.dart';
-import 'profile.dart';
-import 'create_profile_view.dart';
+import '../../viewmodels/user_profile_viewmodel.dart';
+import 'user_profile_display_view.dart';
+import '../create_profile_view.dart';
 
-class ProfileWrapper extends StatelessWidget {
-  const ProfileWrapper({super.key});
+class UserProfileWrapper extends StatelessWidget {
+  const UserProfileWrapper({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class ProfileWrapper extends StatelessWidget {
     }
 
     return vm.hasProfile
-        ? const ProfileDisplayView()
+        ? const UserProfileDisplayView()
         : const ProfileView();
   }
 }

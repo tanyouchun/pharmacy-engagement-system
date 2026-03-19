@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'pharmacist_profile_display_view.dart';
-import 'pharmacist_profile_view.dart';
+import 'pharmacist_profile_Form_view.dart';
 import '../../viewmodels/pharmacist_profile_viewmodel.dart';
 
 class PharmacistProfileWrapper extends StatelessWidget {
@@ -22,7 +22,7 @@ class PharmacistProfileWrapper extends StatelessWidget {
 
           return vm.hasProfile
               ? const PharmacistProfileDisplayView()
-              : const PharmacistProfileView();
+              : const PharmacistProfileFormView();
         },
       ),
     );

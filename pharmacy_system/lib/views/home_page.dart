@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:pharmacy_system/views/prescription_view.dart';
+import 'package:pharmacy_system/views/user/user_prescription_view.dart';
 import 'package:pharmacy_system/services/auth_service.dart';
-import 'profile_wrapper.dart';
+import 'user/user_profile_wrapper.dart';
 import 'pharmacist/pharmacist_chatbot_view.dart';
 import 'auth_wrapper.dart';
 import 'pharmacist/pharmacist_profile_wrapper.dart';
+import 'user/user_chat_list_view.dart';
+import 'pharmacist/pharmacist_chat_list_view.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -93,9 +95,11 @@ class _HomePageState extends State<HomePage> {
   List<Widget> get _pages {
     // Shared first, second and fourth tabs
     final home = const Center(child: Text("Home Page"));
-    final chat = const Center(child: Text("Chat Page"));
+    final chat = _role == 'pharmacist'
+    ? const PharmacistChatListView()
+    : const ChatListView();
     final profile =
-        _role == 'pharmacist' ? const PharmacistProfileWrapper() : const ProfileWrapper();
+        _role == 'pharmacist' ? const PharmacistProfileWrapper() : const UserProfileWrapper();
 
     if (_role == 'pharmacist') {
       return [

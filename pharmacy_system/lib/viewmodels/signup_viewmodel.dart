@@ -8,7 +8,6 @@ class SignupViewModel extends ChangeNotifier {
 
   /// Tracks whether the new user is a pharmacist or a regular user.
   bool isPharmacist = false;
-
   bool isLoading = false;
   String? error;
 
@@ -17,7 +16,7 @@ class SignupViewModel extends ChangeNotifier {
       isLoading = true;
       notifyListeners();
 
-      // 1. Create auth user
+      // Create auth user
       final credential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailController.text.trim(),
@@ -26,7 +25,7 @@ class SignupViewModel extends ChangeNotifier {
 
       final uid = credential.user?.uid;
 
-      // 2. Store basic role info in Firestore so we can route later
+      // Store basic role info in Firestore 
       if (uid != null) {
         await FirebaseFirestore.instance.collection('users').doc(uid).set({
           'email': emailController.text.trim(),
@@ -35,7 +34,7 @@ class SignupViewModel extends ChangeNotifier {
         });
       }
 
-      // 3. Navigate:
+      //   Navigate:
       //   - Pharmacist  → pharmacist profile form
       //   - Regular user → just pop back (AuthWrapper will take them to HomePage)
       if (isPharmacist) {

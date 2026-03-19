@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../viewmodels/prescription_viewmodel.dart';
-import '../models/prescription.dart';
+import '../../viewmodels/prescription_viewmodel.dart';
+import '../../models/prescription.dart';
 
 class PrescriptionPage extends StatefulWidget {
   const PrescriptionPage({super.key});
