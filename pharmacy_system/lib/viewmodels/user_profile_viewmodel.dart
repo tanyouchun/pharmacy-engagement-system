@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
-class ProfileViewModel extends ChangeNotifier {
+class UserProfileViewModel extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   String name = "";
@@ -41,7 +41,7 @@ class ProfileViewModel extends ChangeNotifier {
       return;
     }
 
-    final doc = await _firestore.collection("profiles").doc(user.uid).get();
+    final doc = await _firestore.collection("user_profiles").doc(user.uid).get();
 
     hasProfile = doc.exists;
     notifyListeners();
@@ -54,7 +54,7 @@ class ProfileViewModel extends ChangeNotifier {
 
       final user = FirebaseAuth.instance.currentUser;
 
-      await _firestore.collection("profiles").doc(user!.uid).set({
+      await _firestore.collection("user_profiles").doc(user!.uid).set({
         "name": nameController.text,
         "age": int.tryParse(ageController.text) ?? 0,
         "gender": genderController.text,
@@ -63,7 +63,7 @@ class ProfileViewModel extends ChangeNotifier {
         "allergies": allergiesController.text,
       });
 
-      hasProfile = true; // 🔥 IMPORTANT
+      hasProfile = true;
       isLoading = false;
       notifyListeners();
 
@@ -78,11 +78,13 @@ class ProfileViewModel extends ChangeNotifier {
 
   Future<void> loadProfile() async {
     try {
+      
       final user = FirebaseAuth.instance.currentUser;
 
       if (user == null) return;
 
-      final doc = await _firestore.collection("profiles").doc(user.uid).get();
+      final doc =
+          await _firestore.collection("user_profiles").doc(user.uid).get();
 
       if (doc.exists) {
         final data = doc.data()!;
@@ -116,7 +118,7 @@ class ProfileViewModel extends ChangeNotifier {
 
       final user = FirebaseAuth.instance.currentUser;
 
-      await _firestore.collection("profiles").doc(user!.uid).update({
+      await _firestore.collection("user_profiles").doc(user!.uid).update({
         "name": nameController.text,
         "age": int.tryParse(ageController.text) ?? 0,
         "gender": genderController.text,
@@ -126,7 +128,6 @@ class ProfileViewModel extends ChangeNotifier {
         "updatedAt": FieldValue.serverTimestamp(),
       });
 
-      // update local variables (important)
       name = nameController.text;
       age = ageController.text;
       gender = genderController.text;
@@ -153,11 +154,11 @@ class ProfileViewModel extends ChangeNotifier {
 
       final user = FirebaseAuth.instance.currentUser;
 
-      await _firestore.collection("profiles").doc(user!.uid).delete();
+      await _firestore.collection("user_profiles").doc(user!.uid).delete();
 
       clearControllers();
 
-      hasProfile = false; // 🔥 VERY IMPORTANT
+      hasProfile = false;
       isLoading = false;
       notifyListeners();
 

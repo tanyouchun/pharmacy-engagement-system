@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../viewmodels/profile_viewmodel.dart';
+import '../viewmodels/user_profile_viewmodel.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<ProfileViewModel>(context);
+    final vm = Provider.of<UserProfileViewModel>(context);
 
     return Scaffold(
       appBar: AppBar(title: const Text("Create Profile"), centerTitle: true),

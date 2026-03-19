@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../viewmodels/profile_viewmodel.dart';
+import '../viewmodels/user_profile_viewmodel.dart';
 import 'edit_profile_view.dart';
 
 class ProfileDisplayView extends StatefulWidget {
@@ -20,7 +20,7 @@ class _ProfileDisplayViewState extends State<ProfileDisplayView> {
   }
 
   Future<void> _loadData() async {
-    final vm = Provider.of<ProfileViewModel>(context, listen: false);
+    final vm = Provider.of<UserProfileViewModel>(context, listen: false);
     await vm.loadProfile();
 
     setState(() {
@@ -30,7 +30,7 @@ class _ProfileDisplayViewState extends State<ProfileDisplayView> {
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<ProfileViewModel>(context);
+    final vm = Provider.of<UserProfileViewModel>(context);
 
     if (isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));

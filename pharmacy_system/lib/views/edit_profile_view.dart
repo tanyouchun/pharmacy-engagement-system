@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../viewmodels/profile_viewmodel.dart';
+import '../viewmodels/user_profile_viewmodel.dart';
 
 class EditProfileView extends StatelessWidget {
   const EditProfileView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<ProfileViewModel>(context);
+    final vm = Provider.of<UserProfileViewModel>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -107,7 +107,7 @@ class EditProfileView extends StatelessWidget {
 }
 
 void _showDeleteDialog(BuildContext context) {
-  final vm = Provider.of<ProfileViewModel>(context, listen: false);
+  final vm = Provider.of<UserProfileViewModel>(context, listen: false);
 
   showDialog(
     context: context,

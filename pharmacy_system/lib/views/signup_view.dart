@@ -24,19 +24,45 @@ class SignupView extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 20),
-
             CustomTextField(
               hint: "Enter your email",
               icon: Icons.email,
               controller: vm.emailController,
             ),
             const SizedBox(height: 15),
-
             CustomTextField(
               hint: "Enter your password",
               icon: Icons.lock,
               isPassword: true,
               controller: vm.passwordController,
+            ),
+
+            const SizedBox(height: 20),
+
+            // Role selection: Pharmacist or regular user
+            Row(
+              children: [
+                const Text(
+                  "Are you a pharmacist?",
+                  style: TextStyle(fontSize: 14),
+                ),
+                const SizedBox(width: 16),
+                Switch(
+                  value: vm.isPharmacist,
+                  onChanged: (val) {
+                    vm.isPharmacist = val;
+                    vm.notifyListeners();
+                  },
+                  activeColor: Colors.blueAccent,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  vm.isPharmacist ? "Pharmacist" : "Regular user",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
 
             const Spacer(),
@@ -47,7 +73,7 @@ class SignupView extends StatelessWidget {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: vm.signup,
+                    onPressed: () => vm.signup(context),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blueAccent,
                     ),
