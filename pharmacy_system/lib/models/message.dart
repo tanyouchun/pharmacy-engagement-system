@@ -5,6 +5,7 @@ class Message {
   final String senderId;
   final String text;
   final bool edited;
+  final bool isRead;
   final DateTime timestamp;
 
   Message({
@@ -12,6 +13,7 @@ class Message {
     required this.senderId,
     required this.text,
     required this.edited,
+    this.isRead = false,
     required this.timestamp,
   });
 
@@ -19,6 +21,8 @@ class Message {
     return {
       'senderId': senderId,
       'text': text,
+      'edited': edited,
+      'isRead': isRead, 
       'timestamp': timestamp,
     };
   }
@@ -29,6 +33,7 @@ class Message {
       senderId: map['senderId'] ?? '',
       text: map['text'] ?? '',
       edited: map['edited'] ?? false,
+      isRead: map['isRead'] ?? false,
       timestamp:
           (map['timestamp'] as Timestamp).toDate(),
     );

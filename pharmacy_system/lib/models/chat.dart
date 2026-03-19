@@ -17,7 +17,7 @@ class Chat {
     return {
       'participants': participants,
       'lastMessage': lastMessage,
-      'lastTimestamp': lastTimestamp,
+      'lastTimestamp': Timestamp.fromDate(lastTimestamp),
     };
   }
 

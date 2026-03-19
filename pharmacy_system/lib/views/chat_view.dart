@@ -13,6 +13,11 @@ class ChatView extends StatefulWidget {
 
 class _ChatViewState extends State<ChatView> {
   final TextEditingController controller = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    _markMessagesAsRead();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +27,7 @@ class _ChatViewState extends State<ChatView> {
       appBar: AppBar(title: const Text("Chat")),
       body: Column(
         children: [
-          // 🔥 MESSAGES
+          // MESSAGES
           Expanded(
             child: StreamBuilder(
               stream:
@@ -36,7 +41,6 @@ class _ChatViewState extends State<ChatView> {
                 if (!snapshot.hasData) return Container();
 
                 final docs = snapshot.data!.docs;
-
                 return ListView(
                   children:
                       docs.map((doc) {
@@ -151,6 +155,8 @@ class _ChatViewState extends State<ChatView> {
                         'text': controller.text,
                         'senderId': user.uid,
                         'timestamp': FieldValue.serverTimestamp(),
+                        'isEdited': false,
+                        'isRead': false,
                       });
 
                   controller.clear();
@@ -194,5 +200,24 @@ class _ChatViewState extends State<ChatView> {
         );
       },
     );
+  }
+
+  void _markMessagesAsRead() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    FirebaseFirestore.instance
+        .collection('chats')
+        .doc(widget.chatId)
+        .collection('messages')
+        .where('isRead', isEqualTo: false)
+        .snapshots()
+        .listen((snapshot) async {
+          for (var doc in snapshot.docs) {
+            if (doc['senderId'] != user.uid) {
+              await doc.reference.update({'isRead': true});
+            }
+          }
+        });
   }
 }

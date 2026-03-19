@@ -23,7 +23,7 @@ class ChatService {
     final newChat = await chats.add({
       'participants': [user.uid, pharmacistId],
       'lastMessage': '',
-      'lastTimestamp': FieldValue.serverTimestamp(),
+      'lastTimestamp': Timestamp.now(),
     });
 
     return newChat.id;

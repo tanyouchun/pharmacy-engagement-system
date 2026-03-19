@@ -25,7 +25,8 @@ class ChatViewModel extends ChangeNotifier {
       'senderId': user.uid,
       'text': text,
       'timestamp': FieldValue.serverTimestamp(),
-      'edited': false, // 🔥 ADD THIS
+      'edited': false,
+      'isRead': false,
     };
 
     await _firestore
