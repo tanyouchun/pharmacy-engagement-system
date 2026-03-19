@@ -4,20 +4,52 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../chat_view.dart';
 
-class PharmacistChatListView extends StatelessWidget {
+class PharmacistChatListView extends StatefulWidget {
   const PharmacistChatListView({super.key});
+
+  @override
+  State<PharmacistChatListView> createState() => _PharmacistChatListViewState();
+}
+
+class _PharmacistChatListViewState extends State<PharmacistChatListView> {
+  String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser!;
 
     return Scaffold(
-      body: StreamBuilder(
+      appBar: AppBar(
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(20),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Search chats...',
+                prefixIcon: const Icon(Icons.search),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value.toLowerCase();
+                });
+              },
+            ),
+          ),
+        ),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
         stream:
             FirebaseFirestore.instance
                 .collection('chats')
                 .where('participants', arrayContains: user.uid)
-                // .orderBy('lastTimestamp', descending: true)
                 .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
@@ -34,16 +66,15 @@ class PharmacistChatListView extends StatelessWidget {
             itemCount: chats.length,
             itemBuilder: (context, index) {
               final chat = chats[index];
-              final data = chat.data();
+              final data = chat.data() as Map<String, dynamic>;
 
               final participants = List<String>.from(data['participants']);
 
-              // 🔥 Get the OTHER user (not pharmacist)
               final otherUserId = participants.firstWhere(
                 (id) => id != user.uid,
               );
 
-              return FutureBuilder(
+              return FutureBuilder<DocumentSnapshot>(
                 future:
                     FirebaseFirestore.instance
                         .collection('user_profiles')
@@ -53,137 +84,163 @@ class PharmacistChatListView extends StatelessWidget {
                   String name = "User";
 
                   if (userSnap.hasData && userSnap.data!.exists) {
-                    name = userSnap.data!['name'] ?? "User";
+                    final map = userSnap.data!.data() as Map<String, dynamic>?;
+                    name = map?['name'] ?? "User";
                   }
 
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(16),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ChatView(chatId: chat.id),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 233, 238, 240),
-                          borderRadius: BorderRadius.circular(16),
+                  return StreamBuilder<QuerySnapshot>(
+                    stream:
+                        FirebaseFirestore.instance
+                            .collection('chats')
+                            .doc(chat.id)
+                            .collection('messages')
+                            .orderBy('timestamp', descending: true)
+                            .limit(1)
+                            .snapshots(),
+                    builder: (context, msgSnap) {
+                      String lastMessage = '';
+                      Timestamp? lastTimestamp;
 
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 8,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
+                      if (msgSnap.hasData && msgSnap.data!.docs.isNotEmpty) {
+                        final msg =
+                            msgSnap.data!.docs.first.data()
+                                as Map<String, dynamic>;
+                        lastMessage = (msg['text'] ?? '').toString();
+                        lastTimestamp = msg['timestamp'] as Timestamp?;
+                      } else {
+                        lastMessage = (data['lastMessage'] ?? '').toString();
+                        lastTimestamp = data['lastTimestamp'] as Timestamp?;
+                      }
+
+                      final matchesSearch =
+                          _searchQuery.isEmpty ||
+                          name.toLowerCase().contains(_searchQuery);
+
+                      if (!matchesSearch) return const SizedBox.shrink();
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
                         ),
-
-                        child: Row(
-                          children: [
-                            // 👤 Avatar
-                            const CircleAvatar(
-                              radius: 28,
-                              backgroundImage: NetworkImage(
-                                "https://i.pravatar.cc/150",
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ChatView(chatId: chat.id),
                               ),
-                            ),
-
-                            const SizedBox(width: 12),
-
-                            // 📄 Name + Message
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    name,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-
-                                  const SizedBox(height: 4),
-
-                                  Text(
-                                    data['lastMessage'] ?? "",
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(color: Colors.grey[600]),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            // 🕒 Time
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  _formatTime(data['lastTimestamp']),
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.black,
-                                  ),
-                                ),
-
-                                const SizedBox(height: 6),
-
-                                // 🔥 UNREAD BADGE
-                                StreamBuilder<QuerySnapshot>(
-                                  stream:
-                                      FirebaseFirestore.instance
-                                          .collection('chats')
-                                          .doc(chat.id)
-                                          .collection('messages')
-                                          .where('isRead', isEqualTo: false)
-                                          .snapshots(),
-                                  builder: (context, snapshot) {
-                                    if (!snapshot.hasData)
-                                      return const SizedBox();
-
-                                    final user =
-                                        FirebaseAuth.instance.currentUser!;
-                                    final unreadDocs = snapshot.data!.docs;
-
-                                    final count =
-                                        unreadDocs.where((doc) {
-                                          return doc['senderId'] != user.uid;
-                                        }).length;
-
-                                    // ❌ hide everything if no unread
-                                    if (count == 0) return const SizedBox();
-
-                                    return Container(
-                                      padding: const EdgeInsets.all(6),
-                                      decoration: BoxDecoration(
-                                        color: Colors.redAccent,
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Text(
-                                        "$count",
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    );
-                                  },
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: const Color.fromARGB(255, 233, 238, 240),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
                                 ),
                               ],
                             ),
-                          ],
+                            child: Row(
+                              children: [
+                                const CircleAvatar(
+                                  radius: 28,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        name,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        lastMessage,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      _formatTime(lastTimestamp),
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    StreamBuilder<QuerySnapshot>(
+                                      stream:
+                                          FirebaseFirestore.instance
+                                              .collection('chats')
+                                              .doc(chat.id)
+                                              .collection('messages')
+                                              .where('isRead', isEqualTo: false)
+                                              .snapshots(),
+                                      builder: (context, snapshot) {
+                                        if (!snapshot.hasData) {
+                                          return const SizedBox();
+                                        }
+
+                                        final currentUser =
+                                            FirebaseAuth.instance.currentUser!;
+                                        final unreadDocs = snapshot.data!.docs;
+
+                                        final count =
+                                            unreadDocs.where((doc) {
+                                              final map =
+                                                  doc.data()
+                                                      as Map<String, dynamic>;
+                                              return map['senderId'] !=
+                                                  currentUser.uid;
+                                            }).length;
+
+                                        if (count == 0) return const SizedBox();
+
+                                        return Container(
+                                          padding: const EdgeInsets.all(6),
+                                          decoration: BoxDecoration(
+                                            color: Colors.redAccent,
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            "$count",
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
+                      );
+                    },
                   );
                 },
               );
@@ -201,10 +258,8 @@ class PharmacistChatListView extends StatelessWidget {
     final now = DateTime.now();
 
     if (now.difference(date).inDays == 0) {
-      // today → show time
       return "${date.hour}:${date.minute.toString().padLeft(2, '0')}";
     } else {
-      // older → show date
       return "${date.day}/${date.month}";
     }
   }
