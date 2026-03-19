@@ -8,8 +8,8 @@ import 'views/home_page.dart';
 import 'viewmodels/login_viewmodel.dart';
 import 'viewmodels/signup_viewmodel.dart';
 import 'viewmodels/profile_viewmodel.dart';
+import 'viewmodels/prescription_viewmodel.dart';
 import 'views/start_screen.dart';
-import 'views/create_profile_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +30,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => LoginViewModel()),
         ChangeNotifierProvider(create: (_) => SignupViewModel()),
         ChangeNotifierProvider(create: (_) => ProfileViewModel()),
+        ChangeNotifierProvider(create: (_) => PrescriptionViewModel()),
       ],
      child: MaterialApp(
   debugShowCheckedModeBanner: false,

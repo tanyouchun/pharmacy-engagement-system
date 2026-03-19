@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../viewmodels/profile_viewmodel.dart';
-import 'profile_wrapper.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});

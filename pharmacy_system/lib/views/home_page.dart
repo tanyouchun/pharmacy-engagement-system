@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pharmacy_system/views/prescription_view.dart';
 import 'profile_wrapper.dart';
 
 class HomePage extends StatefulWidget {
@@ -29,7 +30,7 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> _pages = const [
     const Center(child: Text("Home Page")),
     const Center(child: Text("Chat Page")),
-    const Center(child: Text("Prescription Page")),
+    const PrescriptionPage(),
     const ProfileWrapper(),
   ];
 
