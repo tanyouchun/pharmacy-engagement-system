@@ -7,6 +7,7 @@ import 'profile_wrapper.dart';
 import 'pharmacist/pharmacist_chatbot_view.dart';
 import 'auth_wrapper.dart';
 import 'pharmacist/pharmacist_profile_wrapper.dart';
+import 'pharmacist_list_view.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -93,7 +94,7 @@ class _HomePageState extends State<HomePage> {
   List<Widget> get _pages {
     // Shared first, second and fourth tabs
     final home = const Center(child: Text("Home Page"));
-    final chat = const Center(child: Text("Chat Page"));
+    final chat = const ChatListView();
     final profile =
         _role == 'pharmacist' ? const PharmacistProfileWrapper() : const ProfileWrapper();
 
