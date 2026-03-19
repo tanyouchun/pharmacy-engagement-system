@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:pharmacy_system/views/prescription_view.dart';
+import 'package:pharmacy_system/views/user/user_prescription_view.dart';
 import 'package:pharmacy_system/services/auth_service.dart';
 import 'user/user_profile_wrapper.dart';
 import 'pharmacist/pharmacist_chatbot_view.dart';
 import 'auth_wrapper.dart';
 import 'pharmacist/pharmacist_profile_wrapper.dart';
-import 'chat_list_view.dart';
+import 'user/user_chat_list_view.dart';
 import 'pharmacist/pharmacist_chat_list_view.dart';
 
 class HomePage extends StatefulWidget {
