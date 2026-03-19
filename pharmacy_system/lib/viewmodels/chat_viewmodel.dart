@@ -25,7 +25,7 @@ class ChatViewModel extends ChangeNotifier {
       'senderId': user.uid,
       'text': text,
       'timestamp': FieldValue.serverTimestamp(),
-      'edited': false,
+      'isEdited': false,
       'isRead': false,
     };
 
@@ -61,7 +61,7 @@ class ChatViewModel extends ChangeNotifier {
     // 🔒 only allow editing own message
     if (doc['senderId'] != user.uid) return;
 
-    await messageRef.update({'text': newText, 'edited': true});
+    await messageRef.update({'text': newText, 'isEdited': true});
 
     // optional: update last message if needed
     await _firestore.collection('chats').doc(chatId).update({

@@ -4,7 +4,7 @@ class Message {
   final String id;
   final String senderId;
   final String text;
-  final bool edited;
+  final bool isEdited;
   final bool isRead;
   final DateTime timestamp;
 
@@ -12,7 +12,7 @@ class Message {
     required this.id,
     required this.senderId,
     required this.text,
-    required this.edited,
+    required this.isEdited,
     this.isRead = false,
     required this.timestamp,
   });
@@ -21,7 +21,7 @@ class Message {
     return {
       'senderId': senderId,
       'text': text,
-      'edited': edited,
+      'edited': isEdited,
       'isRead': isRead, 
       'timestamp': timestamp,
     };
@@ -32,7 +32,7 @@ class Message {
       id: id,
       senderId: map['senderId'] ?? '',
       text: map['text'] ?? '',
-      edited: map['edited'] ?? false,
+      isEdited: map['isEdited'] ?? false,
       isRead: map['isRead'] ?? false,
       timestamp:
           (map['timestamp'] as Timestamp).toDate(),

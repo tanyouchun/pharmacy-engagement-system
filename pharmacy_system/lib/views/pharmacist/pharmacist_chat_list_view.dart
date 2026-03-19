@@ -116,7 +116,9 @@ class _PharmacistChatListViewState extends State<PharmacistChatListView> {
                           _searchQuery.isEmpty ||
                           name.toLowerCase().contains(_searchQuery);
 
-                      if (!matchesSearch) return const SizedBox.shrink();
+                      if (!matchesSearch) {
+                        return const SizedBox.shrink();
+                      }
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(
@@ -148,9 +150,7 @@ class _PharmacistChatListViewState extends State<PharmacistChatListView> {
                             ),
                             child: Row(
                               children: [
-                                const CircleAvatar(
-                                  radius: 28,
-                                ),
+                                const CircleAvatar(radius: 28),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
@@ -185,53 +185,6 @@ class _PharmacistChatListViewState extends State<PharmacistChatListView> {
                                         fontSize: 12,
                                         color: Colors.black,
                                       ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    StreamBuilder<QuerySnapshot>(
-                                      stream:
-                                          FirebaseFirestore.instance
-                                              .collection('chats')
-                                              .doc(chat.id)
-                                              .collection('messages')
-                                              .where('isRead', isEqualTo: false)
-                                              .snapshots(),
-                                      builder: (context, snapshot) {
-                                        if (!snapshot.hasData) {
-                                          return const SizedBox();
-                                        }
-
-                                        final currentUser =
-                                            FirebaseAuth.instance.currentUser!;
-                                        final unreadDocs = snapshot.data!.docs;
-
-                                        final count =
-                                            unreadDocs.where((doc) {
-                                              final map =
-                                                  doc.data()
-                                                      as Map<String, dynamic>;
-                                              return map['senderId'] !=
-                                                  currentUser.uid;
-                                            }).length;
-
-                                        if (count == 0) return const SizedBox();
-
-                                        return Container(
-                                          padding: const EdgeInsets.all(6),
-                                          decoration: BoxDecoration(
-                                            color: Colors.redAccent,
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            "$count",
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        );
-                                      },
                                     ),
                                   ],
                                 ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
+import '../viewmodels/chat_viewmodel.dart';
 
 class ChatView extends StatefulWidget {
   final String chatId;
@@ -13,10 +15,16 @@ class ChatView extends StatefulWidget {
 
 class _ChatViewState extends State<ChatView> {
   final TextEditingController controller = TextEditingController();
+
   @override
   void initState() {
     super.initState();
-    _markMessagesAsRead();
+
+    // Start listening via ViewModel
+    Future.microtask(() {
+      final vm = Provider.of<ChatViewModel>(context, listen: false);
+      vm.listenMessages(widget.chatId);
+    });
   }
 
   @override
@@ -27,119 +35,70 @@ class _ChatViewState extends State<ChatView> {
       appBar: AppBar(title: const Text("Chat")),
       body: Column(
         children: [
-          // MESSAGES
+          /// ✅ MESSAGES FROM VIEWMODEL
           Expanded(
-            child: StreamBuilder(
-              stream:
-                  FirebaseFirestore.instance
-                      .collection('chats')
-                      .doc(widget.chatId)
-                      .collection('messages')
-                      .orderBy('timestamp')
-                      .snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) return Container();
-
-                final docs = snapshot.data!.docs;
+            child: Consumer<ChatViewModel>(
+              builder: (context, vm, _) {
                 return ListView(
-                  children:
-                      docs.map((doc) {
-                        final data = doc.data();
-                        final isEdited = data['isEdited'] ?? false;
-                        final isMe = data['senderId'] == user.uid;
+                  children: vm.messages.map((msg) {
+                    final isMe = msg.senderId == user.uid;
 
-                        return GestureDetector(
-                          onLongPress:
-                              isMe
-                                  ? () {
-                                    showModalBottomSheet(
-                                      context: context,
-                                      builder: (_) {
-                                        return Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            ListTile(
-                                              leading: const Icon(Icons.edit),
-                                              title: const Text("Edit"),
-                                              onTap: () {
-                                                Navigator.pop(context);
-                                                _showEditDialog(
-                                                  doc.id,
-                                                  data['text'],
-                                                );
-                                              },
-                                            ),
-                                            ListTile(
-                                              leading: const Icon(Icons.delete),
-                                              title: const Text("Delete"),
-                                              onTap: () async {
-                                                Navigator.pop(context);
-
-                                                await FirebaseFirestore.instance
-                                                    .collection('chats')
-                                                    .doc(widget.chatId)
-                                                    .collection('messages')
-                                                    .doc(doc.id)
-                                                    .delete();
-                                              },
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
-                                  }
-                                  : null,
-                          child: Align(
-                            alignment:
-                                isMe
-                                    ? Alignment.centerRight
-                                    : Alignment.centerLeft,
-                            child: Container(
-                              margin: const EdgeInsets.all(8),
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: isMe ? Colors.blue : Colors.grey[300],
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    data['text'],
-                                    style: TextStyle(
-                                      color: isMe ? Colors.white : Colors.black,
-                                    ),
-                                  ),
-                                  if (isEdited)
-                                    Text(
-                                      "edited",
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        fontStyle: FontStyle.italic,
-                                        color:
-                                            isMe
-                                                ? Colors.white70
-                                                : Colors.black54,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
+                    return GestureDetector(
+                      onLongPress: isMe
+                          ? () => _showOptions(context, msg.id, msg.text)
+                          : null,
+                      child: Align(
+                        alignment: isMe
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        child: Container(
+                          margin: const EdgeInsets.all(8),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: isMe ? Colors.blue : Colors.grey[300],
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                        );
-                      }).toList(),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                msg.text,
+                                style: TextStyle(
+                                  color: isMe
+                                      ? Colors.white
+                                      : Colors.black,
+                                ),
+                              ),
+                              if (msg.isEdited)
+                                Text(
+                                  "edited",
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontStyle: FontStyle.italic,
+                                    color: isMe
+                                        ? Colors.white70
+                                        : Colors.black54,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 );
               },
             ),
           ),
 
-          // ✏️ INPUT
+          /// ✏️ INPUT
           Row(
             children: [
               Expanded(
                 child: TextField(
                   controller: controller,
-                  decoration: const InputDecoration(hintText: "Message..."),
+                  decoration:
+                      const InputDecoration(hintText: "Message..."),
                 ),
               ),
               IconButton(
@@ -147,17 +106,10 @@ class _ChatViewState extends State<ChatView> {
                 onPressed: () async {
                   if (controller.text.isEmpty) return;
 
-                  await FirebaseFirestore.instance
-                      .collection('chats')
-                      .doc(widget.chatId)
-                      .collection('messages')
-                      .add({
-                        'text': controller.text,
-                        'senderId': user.uid,
-                        'timestamp': FieldValue.serverTimestamp(),
-                        'isEdited': false,
-                        'isRead': false,
-                      });
+                  final vm =
+                      Provider.of<ChatViewModel>(context, listen: false);
+
+                  await vm.sendMessage(widget.chatId, controller.text);
 
                   controller.clear();
                 },
@@ -166,6 +118,39 @@ class _ChatViewState extends State<ChatView> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showOptions(BuildContext context, String messageId, String text) {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit),
+              title: const Text("Edit"),
+              onTap: () {
+                Navigator.pop(context);
+                _showEditDialog(messageId, text);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete),
+              title: const Text("Delete"),
+              onTap: () async {
+                Navigator.pop(context);
+
+                final vm =
+                    Provider.of<ChatViewModel>(context, listen: false);
+
+                await vm.deleteMessage(widget.chatId, messageId);
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -185,12 +170,14 @@ class _ChatViewState extends State<ChatView> {
             ),
             TextButton(
               onPressed: () async {
-                await FirebaseFirestore.instance
-                    .collection('chats')
-                    .doc(widget.chatId)
-                    .collection('messages')
-                    .doc(messageId)
-                    .update({'text': editController.text, 'isEdited': true});
+                final vm =
+                    Provider.of<ChatViewModel>(context, listen: false);
+
+                await vm.editMessage(
+                  widget.chatId,
+                  messageId,
+                  editController.text,
+                );
 
                 Navigator.pop(context);
               },
@@ -200,24 +187,5 @@ class _ChatViewState extends State<ChatView> {
         );
       },
     );
-  }
-
-  void _markMessagesAsRead() {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    FirebaseFirestore.instance
-        .collection('chats')
-        .doc(widget.chatId)
-        .collection('messages')
-        .where('isRead', isEqualTo: false)
-        .snapshots()
-        .listen((snapshot) async {
-          for (var doc in snapshot.docs) {
-            if (doc['senderId'] != user.uid) {
-              await doc.reference.update({'isRead': true});
-            }
-          }
-        });
   }
 }

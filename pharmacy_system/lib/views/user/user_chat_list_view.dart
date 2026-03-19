@@ -68,6 +68,7 @@ class _ChatListViewState extends State<ChatListView> {
               final data = chat.data() as Map<String, dynamic>;
 
               final participants = List<String>.from(data['participants']);
+
               final otherUserId = participants.firstWhere(
                 (id) => id != user.uid,
               );
@@ -114,7 +115,9 @@ class _ChatListViewState extends State<ChatListView> {
                           _searchQuery.isEmpty ||
                           name.toLowerCase().contains(_searchQuery);
 
-                      if (!matchesSearch) return const SizedBox.shrink();
+                      if (!matchesSearch) {
+                        return const SizedBox.shrink();
+                      }
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(
@@ -146,9 +149,7 @@ class _ChatListViewState extends State<ChatListView> {
                             ),
                             child: Row(
                               children: [
-                                const CircleAvatar(
-                                  radius: 26,
-                                ),
+                                const CircleAvatar(radius: 26),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
@@ -183,53 +184,6 @@ class _ChatListViewState extends State<ChatListView> {
                                         fontSize: 12,
                                         color: Colors.black54,
                                       ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    StreamBuilder<QuerySnapshot>(
-                                      stream:
-                                          FirebaseFirestore.instance
-                                              .collection('chats')
-                                              .doc(chat.id)
-                                              .collection('messages')
-                                              .where('isRead', isEqualTo: false)
-                                              .snapshots(),
-                                      builder: (context, snapshot) {
-                                        if (!snapshot.hasData) {
-                                          return const SizedBox();
-                                        }
-
-                                        final unreadDocs = snapshot.data!.docs;
-
-                                        final count =
-                                            unreadDocs.where((doc) {
-                                              final map =
-                                                  doc.data()
-                                                      as Map<String, dynamic>;
-                                              return map['senderId'] !=
-                                                  user.uid;
-                                            }).length;
-
-                                        if (count == 0) {
-                                          return const SizedBox();
-                                        }
-
-                                        return Container(
-                                          padding: const EdgeInsets.all(6),
-                                          decoration: BoxDecoration(
-                                            color: Colors.redAccent,
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            "$count",
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        );
-                                      },
                                     ),
                                   ],
                                 ),
