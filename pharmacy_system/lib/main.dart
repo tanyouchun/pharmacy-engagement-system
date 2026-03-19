@@ -7,7 +7,9 @@ import 'firebase_options.dart';
 import 'views/home_page.dart';
 import 'viewmodels/login_viewmodel.dart';
 import 'viewmodels/signup_viewmodel.dart';
+import 'viewmodels/profile_viewmodel.dart';
 import 'views/start_screen.dart';
+import 'views/create_profile_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,11 +29,13 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => LoginViewModel()),
         ChangeNotifierProvider(create: (_) => SignupViewModel()),
+        ChangeNotifierProvider(create: (_) => ProfileViewModel()),
       ],
-      child: const MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: AuthWrapper(),
-      ),
+     child: MaterialApp(
+  debugShowCheckedModeBanner: false,
+
+  home: const AuthWrapper(),
+),
     );
   }
 }
