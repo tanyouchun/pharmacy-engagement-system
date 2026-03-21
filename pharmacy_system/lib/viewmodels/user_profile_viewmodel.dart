@@ -22,6 +22,7 @@ class UserProfileViewModel extends ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
   bool hasProfile = false;
+  List<Map<String, dynamic>> prescriptions = [];
 
   void clearControllers() {
     nameController.clear();
@@ -110,6 +111,29 @@ class UserProfileViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> loadUserProfile(String userId) async {
+  try {
+    final doc =
+        await _firestore.collection("user_profiles").doc(userId).get();
+
+    if (doc.exists) {
+      final data = doc.data()!;
+
+      name = data["name"] ?? "";
+      age = data["age"].toString();
+      gender = data["gender"] ?? "";
+      weight = data["weight"] ?? "";
+      height = data["height"] ?? "";
+      allergies = data["allergies"] ?? "";
+
+      notifyListeners();
+    }
+  } catch (e) {
+    errorMessage = "Failed to load profile.";
+    notifyListeners();
+  }
+}
 
   Future<bool> updateProfile() async {
     try {

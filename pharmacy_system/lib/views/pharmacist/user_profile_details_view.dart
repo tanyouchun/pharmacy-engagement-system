@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../viewmodels/user_profile_viewmodel.dart';
-import '../edit_profile_view.dart';
 
-class UserProfileDisplayView extends StatefulWidget {
-  const UserProfileDisplayView({super.key});
+class UserProfileDetailsView extends StatefulWidget {
+  final String userId;
+  const UserProfileDetailsView({super.key, required this.userId});
 
   @override
-  State<UserProfileDisplayView> createState() => _UserProfileDisplayViewState();
+  State<UserProfileDetailsView> createState() => _UserProfileDetailsViewState();
 }
 
-class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
+class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
   bool isLoading = true;
 
   @override
@@ -21,7 +21,7 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
 
   Future<void> _loadData() async {
     final vm = Provider.of<UserProfileViewModel>(context, listen: false);
-    await vm.loadProfile();
+    await vm.loadUserProfile(widget.userId);
 
     setState(() {
       isLoading = false;
@@ -38,12 +38,20 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context); // 🔙 go back to chat
+          },
+        ),
+      ),
       body: SafeArea(
         child: Column(
           children: [
             const SizedBox(height: 20),
 
-//TODO: replace with real profile picture
+            //TODO: replace with real profile picture
             CircleAvatar(
               radius: 50,
               backgroundImage: NetworkImage("https://i.pravatar.cc/150?img=3"),
@@ -71,21 +79,6 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
             ),
 
             const Spacer(),
-
-            Padding(
-              padding: const EdgeInsets.only(bottom: 30),
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const EditProfileView()),
-                  );
-                },
-                icon: const Icon(Icons.add),
-                label: const Text("Edit Profile"),
-              ),
-              
-            ),
           ],
         ),
       ),

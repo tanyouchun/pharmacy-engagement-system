@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharmacy_system/views/pharmacist/user_profile_details_view.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -6,8 +7,9 @@ import '../viewmodels/chat_viewmodel.dart';
 
 class ChatView extends StatefulWidget {
   final String chatId;
+  final String? otherUserId;
 
-  const ChatView({super.key, required this.chatId});
+  const ChatView({super.key, required this.chatId, this.otherUserId});
 
   @override
   State<ChatView> createState() => _ChatViewState();
@@ -32,60 +34,86 @@ class _ChatViewState extends State<ChatView> {
     final user = FirebaseAuth.instance.currentUser!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Chat")),
+      appBar: AppBar(
+        title: const Text("Chat"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () {
+              if (widget.otherUserId == null || widget.otherUserId!.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("User not available")),
+                );
+                return;
+              }
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (_) =>
+                          UserProfileDetailsView(userId: widget.otherUserId!),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       body: Column(
         children: [
-          /// ✅ MESSAGES FROM VIEWMODEL
           Expanded(
             child: Consumer<ChatViewModel>(
               builder: (context, vm, _) {
                 return ListView(
-                  children: vm.messages.map((msg) {
-                    final isMe = msg.senderId == user.uid;
+                  children:
+                      vm.messages.map((msg) {
+                        final isMe = msg.senderId == user.uid;
 
-                    return GestureDetector(
-                      onLongPress: isMe
-                          ? () => _showOptions(context, msg.id, msg.text)
-                          : null,
-                      child: Align(
-                        alignment: isMe
-                            ? Alignment.centerRight
-                            : Alignment.centerLeft,
-                        child: Container(
-                          margin: const EdgeInsets.all(8),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: isMe ? Colors.blue : Colors.grey[300],
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                msg.text,
-                                style: TextStyle(
-                                  color: isMe
-                                      ? Colors.white
-                                      : Colors.black,
-                                ),
+                        return GestureDetector(
+                          onLongPress:
+                              isMe
+                                  ? () =>
+                                      _showOptions(context, msg.id, msg.text)
+                                  : null,
+                          child: Align(
+                            alignment:
+                                isMe
+                                    ? Alignment.centerRight
+                                    : Alignment.centerLeft,
+                            child: Container(
+                              margin: const EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: isMe ? Colors.blue : Colors.grey[300],
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              if (msg.isEdited)
-                                Text(
-                                  "edited",
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontStyle: FontStyle.italic,
-                                    color: isMe
-                                        ? Colors.white70
-                                        : Colors.black54,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    msg.text,
+                                    style: TextStyle(
+                                      color: isMe ? Colors.white : Colors.black,
+                                    ),
                                   ),
-                                ),
-                            ],
+                                  if (msg.isEdited)
+                                    Text(
+                                      "edited",
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontStyle: FontStyle.italic,
+                                        color:
+                                            isMe
+                                                ? Colors.white70
+                                                : Colors.black54,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
+                        );
+                      }).toList(),
                 );
               },
             ),
@@ -97,8 +125,7 @@ class _ChatViewState extends State<ChatView> {
               Expanded(
                 child: TextField(
                   controller: controller,
-                  decoration:
-                      const InputDecoration(hintText: "Message..."),
+                  decoration: const InputDecoration(hintText: "Message..."),
                 ),
               ),
               IconButton(
@@ -106,8 +133,7 @@ class _ChatViewState extends State<ChatView> {
                 onPressed: () async {
                   if (controller.text.isEmpty) return;
 
-                  final vm =
-                      Provider.of<ChatViewModel>(context, listen: false);
+                  final vm = Provider.of<ChatViewModel>(context, listen: false);
 
                   await vm.sendMessage(widget.chatId, controller.text);
 
@@ -142,8 +168,7 @@ class _ChatViewState extends State<ChatView> {
               onTap: () async {
                 Navigator.pop(context);
 
-                final vm =
-                    Provider.of<ChatViewModel>(context, listen: false);
+                final vm = Provider.of<ChatViewModel>(context, listen: false);
 
                 await vm.deleteMessage(widget.chatId, messageId);
               },
@@ -170,8 +195,7 @@ class _ChatViewState extends State<ChatView> {
             ),
             TextButton(
               onPressed: () async {
-                final vm =
-                    Provider.of<ChatViewModel>(context, listen: false);
+                final vm = Provider.of<ChatViewModel>(context, listen: false);
 
                 await vm.editMessage(
                   widget.chatId,

@@ -131,7 +131,7 @@ class _PharmacistChatListViewState extends State<PharmacistChatListView> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => ChatView(chatId: chat.id),
+                                builder: (_) => ChatView(chatId: chat.id, otherUserId: otherUserId),
                               ),
                             );
                           },
