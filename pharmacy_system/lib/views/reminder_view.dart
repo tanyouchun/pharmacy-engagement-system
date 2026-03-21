@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/reminder_viewmodel.dart';
 import 'create_reminder_view.dart';
-import 'pharmacist/pharmacist_chatbot_view.dart';
+import 'chatbot_view.dart';
 
 class ReminderHomeView extends StatefulWidget {
-  const ReminderHomeView({super.key});
+  final String? role;
+  final VoidCallback? onOpenChatbot;
+  const ReminderHomeView({super.key, this.role, this.onOpenChatbot});
 
   @override
   State<ReminderHomeView> createState() => _ReminderHomeViewState();
@@ -16,19 +18,21 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
   void initState() {
     super.initState();
 
-    // Load data once
-    Future.microtask(
-      () =>
-          Provider.of<ReminderViewModel>(
-            context,
-            listen: false,
-          ).fetchReminders(),
-    );
+    if (widget.role != 'pharmacist') {
+      Future.microtask(
+        () =>
+            Provider.of<ReminderViewModel>(
+              context,
+              listen: false,
+            ).fetchReminders(),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final vm = Provider.of<ReminderViewModel>(context);
+    final isPharmacist = widget.role == 'pharmacist';
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -92,13 +96,7 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
 
                             GestureDetector(
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder:
-                                        (_) => const PharmacistChatbotView(),
-                                  ),
-                                );
+                                widget.onOpenChatbot?.call();
                               },
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
@@ -122,13 +120,14 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                         ),
                       ),
 
+                      //TODO insert avatar here if needed
                       /// USER AVATAR
-                      const CircleAvatar(
-                        radius: 20,
-                        backgroundImage: AssetImage(
-                          "assets/avatar.png",
-                        ), // replace if needed
-                      ),
+                      // const CircleAvatar(
+                      //   radius: 20,
+                      //   backgroundImage: AssetImage(
+                      //     "assets/avatar.png",
+                      //   ), // replace if needed
+                      // ),
                     ],
                   ),
                 ),
@@ -141,15 +140,49 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
           const SizedBox(height: 10),
 
           /// TITLE BELOW
-          const Text(
-            "Medication Reminder",
-            style: TextStyle(color: Colors.black, fontSize: 18),
-          ),
+          isPharmacist
+              ? const Text(
+                "Pharmacist Home Page",
+                style: TextStyle(color: Colors.black, fontSize: 18),
+              )
+              : const Text(
+                "Medication Reminders",
+                style: TextStyle(color: Colors.black, fontSize: 18),
+              ),
 
           /// LIST
           Expanded(
             child:
-                vm.reminders.isEmpty
+                isPharmacist
+                    /// 👇 PHARMACIST VIEW (AI-focused empty state)
+                    ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.smart_toy,
+                            size: 60,
+                            color: Colors.grey,
+                          ),
+                          const SizedBox(height: 10),
+                          const Text(
+                            "Use AI Assistant to help patients",
+                            style: TextStyle(color: Colors.grey),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          ElevatedButton(
+                            onPressed: () {
+                              widget.onOpenChatbot?.call();
+                            },
+                            child: const Text("Open Chatbot"),
+                          ),
+                        ],
+                      ),
+                    )
+                    /// 👇 PATIENT VIEW (normal reminders)
+                    : vm.reminders.isEmpty
                     ? const Center(child: Text("No reminders yet"))
                     : ListView.builder(
                       itemCount: vm.reminders.length,
@@ -167,7 +200,6 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                             trailing: Text(
                               "${r.time.hour}:${r.time.minute.toString().padLeft(2, '0')}",
                             ),
-
                             onTap: () => _showReminderDetails(context, r),
                             onLongPress: () => _confirmDelete(context, r.id),
                           ),
@@ -178,15 +210,20 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
         ],
       ),
 
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const CreateReminderView()),
-          );
-        },
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton:
+          isPharmacist
+              ? null
+              : FloatingActionButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const CreateReminderView(),
+                    ),
+                  );
+                },
+                child: const Icon(Icons.add),
+              ),
     );
   }
 

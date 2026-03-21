@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pharmacy_system/views/user/user_prescription_view.dart';
 import 'package:pharmacy_system/services/auth_service.dart';
 import 'user/user_profile_wrapper.dart';
-import 'pharmacist/pharmacist_chatbot_view.dart';
+import 'chatbot_view.dart';
 import 'auth_wrapper.dart';
 import 'pharmacist/pharmacist_profile_wrapper.dart';
 import 'user/user_chat_list_view.dart';
@@ -29,7 +29,6 @@ class _HomePageState extends State<HomePage> {
     _loadUserRole();
   }
 
-
   Future<void> _loadUserRole() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -41,10 +40,11 @@ class _HomePageState extends State<HomePage> {
     }
 
     try {
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
+      final doc =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .get();
       setState(() {
         _role = doc.data()?['role'] as String?;
         _isLoadingRole = false;
@@ -68,73 +68,58 @@ class _HomePageState extends State<HomePage> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Logout failed: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Logout failed: $e')));
     }
   }
 
   String get _title {
-    switch (_currentIndex) {
-      case 0:
-        return "Home";
-      case 1:
-        return "Chat";
-      case 2:
-        // For pharmacists, show chatbot instead of prescription
-        if (_role == 'pharmacist') {
-          return "Chatbot";
-        }
-        return "Prescription";
-      case 3:
-        return "Profile";
-      default:
-        return "Home";
-    }
+    final titles =
+        _role == 'pharmacist'
+            ? ["Home", "Chat", "Chatbot", "Profile"]
+            : ["Home", "Chat", "AI Assistant", "Prescription", "Profile"];
+
+    return (_currentIndex < titles.length) ? titles[_currentIndex] : "Home";
   }
 
   List<Widget> get _pages {
     // Shared first, second and fourth tabs
-    final home = const ReminderHomeView();
-    final chat = _role == 'pharmacist'
-    ? const PharmacistChatListView()
-    : const ChatListView();
+    final home = ReminderHomeView(
+      role: _role,
+      onOpenChatbot: () {
+        setState(() {
+          _currentIndex = 2; // 👈 switch to chatbot tab
+        });
+      },
+    );
+    final chat =
+        _role == 'pharmacist'
+            ? const PharmacistChatListView()
+            : const ChatListView();
     final profile =
-        _role == 'pharmacist' ? const PharmacistProfileWrapper() : const UserProfileWrapper();
+        _role == 'pharmacist'
+            ? const PharmacistProfileWrapper()
+            : const UserProfileWrapper();
 
     if (_role == 'pharmacist') {
-      return [
-        home,
-        chat,
-        const PharmacistChatbotView(),
-        profile,
-      ];
+      return [home, chat, const ChatbotView(), profile];
     }
 
-    return [
-      home,
-      chat,
-      const PrescriptionPage(),
-      profile,
-    ];
+    return [home, chat, const ChatbotView(), const PrescriptionPage(), profile];
   }
 
   @override
   Widget build(BuildContext context) {
     if (_isLoadingRole) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
       appBar: AppBar(
         title: Text(_title),
         actions: [
-          IconButton(
-            onPressed: _logout,
-            icon: const Icon(Icons.logout),
-          ),
+          IconButton(onPressed: _logout, icon: const Icon(Icons.logout)),
         ],
       ),
 
@@ -165,26 +150,51 @@ class _HomePageState extends State<HomePage> {
             selectedItemColor: Colors.blue,
             unselectedItemColor: Colors.grey,
             type: BottomNavigationBarType.fixed,
-            items: [
-              const BottomNavigationBarItem(
-                  icon: Icon(Icons.home), label: "Home"),
-              const BottomNavigationBarItem(
-                icon: Icon(Icons.chat_bubble_outline),
-                label: "Chat",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(
-                  _role == 'pharmacist'
-                      ? Icons.smart_toy_outlined
-                      : Icons.medication_outlined,
-                ),
-                label: _role == 'pharmacist' ? "Chatbot" : "Prescription",
-              ),
-              const BottomNavigationBarItem(
-                icon: Icon(Icons.person_outline),
-                label: "Profile",
-              ),
-            ],
+            items:
+                _role == 'pharmacist'
+                    ? [
+                      const BottomNavigationBarItem(
+                        icon: Icon(Icons.home),
+                        label: "Home",
+                      ),
+                      const BottomNavigationBarItem(
+                        icon: Icon(Icons.chat_bubble_outline),
+                        label: "Chat",
+                      ),
+                      const BottomNavigationBarItem(
+                        icon: Icon(Icons.smart_toy_outlined),
+                        label: "Chatbot",
+                      ),
+                      const BottomNavigationBarItem(
+                        icon: Icon(Icons.person_outline),
+                        label: "Profile",
+                      ),
+                    ]
+                    : [
+                      const BottomNavigationBarItem(
+                        icon: Icon(Icons.home),
+                        label: "Home",
+                      ),
+                      const BottomNavigationBarItem(
+                        icon: Icon(Icons.chat_bubble_outline),
+                        label: "Chat",
+                      ),
+
+                      /// 🤖 AI CENTER
+                      const BottomNavigationBarItem(
+                        icon: Icon(Icons.smart_toy, size: 30),
+                        label: "AI",
+                      ),
+
+                      const BottomNavigationBarItem(
+                        icon: Icon(Icons.medication_outlined),
+                        label: "Prescription",
+                      ),
+                      const BottomNavigationBarItem(
+                        icon: Icon(Icons.person_outline),
+                        label: "Profile",
+                      ),
+                    ],
           ),
         ),
       ),

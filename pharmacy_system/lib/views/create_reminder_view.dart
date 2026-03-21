@@ -110,7 +110,7 @@ class _CreateReminderViewState extends State<CreateReminderView> {
             DropdownButton<String>(
               value: frequency,
               items:
-                  ["Once daily", "Twice daily"]
+                  ["Once daily", "Twice daily", "Thrice daily", "Every 6 hours", "Every 8 hours", "Every 12 hours", "Every 24 hours"]
                       .map((f) => DropdownMenuItem(value: f, child: Text(f)))
                       .toList(),
               onChanged: (v) => setState(() => frequency = v!),
