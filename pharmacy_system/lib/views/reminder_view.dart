@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/reminder_viewmodel.dart';
 import 'create_reminder_view.dart';
-import 'chatbot_view.dart';
 
 class ReminderHomeView extends StatefulWidget {
   final String? role;

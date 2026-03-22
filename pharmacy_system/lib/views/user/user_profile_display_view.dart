@@ -43,7 +43,7 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
           children: [
             const SizedBox(height: 20),
 
-//TODO: replace with real profile picture
+            //TODO: replace with real profile picture
             CircleAvatar(
               radius: 50,
               backgroundImage: NetworkImage("https://i.pravatar.cc/150?img=3"),
@@ -84,7 +84,6 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
                 icon: const Icon(Icons.add),
                 label: const Text("Edit Profile"),
               ),
-              
             ),
           ],
         ),

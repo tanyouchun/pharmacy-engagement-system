@@ -51,7 +51,7 @@ class SignupView extends StatelessWidget {
                   value: vm.isPharmacist,
                   onChanged: (val) {
                     vm.isPharmacist = val;
-                    vm.notifyListeners();
+                    // vm.notifyListeners();
                   },
                   activeColor: Colors.blueAccent,
                 ),

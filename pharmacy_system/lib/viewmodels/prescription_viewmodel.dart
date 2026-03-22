@@ -11,6 +11,7 @@ class PrescriptionViewModel extends ChangeNotifier {
   bool isLoadingPrescription = false;
   String? errorMessage;
 
+  //load prescriptions for current user: user_profiles/{userId}/prescriptions
   Future<void> loadPrescriptions() async {
     isLoadingPrescription = true;
     notifyListeners();
@@ -19,9 +20,9 @@ class PrescriptionViewModel extends ChangeNotifier {
 
     final snapshot =
         await _firestore
-            .collection("prescriptions")
+            .collection("user_profiles")
             .doc(user!.uid)
-            .collection("user_prescriptions")
+            .collection("prescriptions")
             .get();
 
     prescriptions =
@@ -33,38 +34,41 @@ class PrescriptionViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  //add: user_profiles/{userId}/prescriptions
   Future<void> addPrescription(String name, String notes) async {
     final user = FirebaseAuth.instance.currentUser;
 
     await _firestore
-        .collection("prescriptions")
+        .collection("user_profiles")
         .doc(user!.uid)
-        .collection("user_prescriptions")
-        .add({"name": name, "notes": notes, "date": DateTime.now().toString()});
+        .collection("prescriptions")
+        .add({"name": name, "notes": notes, "date": DateTime.now()});
 
     await loadPrescriptions();
   }
 
+  //update: user_profiles/{userId}/prescriptions/{prescriptionId}
   Future<void> updatePrescription(String id, String name, String notes) async {
     final user = FirebaseAuth.instance.currentUser;
 
     await _firestore
-        .collection("prescriptions")
+        .collection("user_profiles")
         .doc(user!.uid)
-        .collection("user_prescriptions")
+        .collection("prescriptions")
         .doc(id)
         .update({"name": name, "notes": notes});
 
     await loadPrescriptions();
   }
 
+  //delete: user_profiles/{userId}/prescriptions/{prescriptionId}
   Future<void> deletePrescription(String id) async {
     final user = FirebaseAuth.instance.currentUser;
 
     await _firestore
-        .collection("prescriptions")
+        .collection("user_profiles")
         .doc(user!.uid)
-        .collection("user_prescriptions")
+        .collection("prescriptions")
         .doc(id)
         .delete();
 
