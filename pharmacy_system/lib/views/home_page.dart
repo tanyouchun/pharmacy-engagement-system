@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -9,7 +11,7 @@ import 'auth_wrapper.dart';
 import 'pharmacist/pharmacist_profile_wrapper.dart';
 import 'user/user_chat_list_view.dart';
 import 'pharmacist/pharmacist_chat_list_view.dart';
-import 'reminder_view.dart';
+import 'user/user_reminder_view.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -32,6 +34,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _loadUserRole() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
+      if (!mounted) return;
       setState(() {
         _role = null;
         _isLoadingRole = false;
@@ -45,11 +48,14 @@ class _HomePageState extends State<HomePage> {
               .collection('users')
               .doc(user.uid)
               .get();
+              if (!mounted) return;
       setState(() {
         _role = doc.data()?['role'] as String?;
         _isLoadingRole = false;
       });
-    } catch (_) {
+    } catch (e) {
+      if (!mounted) return;
+      log("Failed to load user role for ${user.uid}: $e");
       setState(() {
         _role = null;
         _isLoadingRole = false;

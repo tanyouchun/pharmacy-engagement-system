@@ -58,7 +58,19 @@ class LoginView extends StatelessWidget {
 
                 const SizedBox(height: 10),
 
-                // Sign In button
+                if (vm.errorMessage != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Center(
+                      child: Text(
+                        vm.errorMessage!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ),
+
+                // Sign In butto
                 vm.isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : ElevatedButton(
@@ -77,6 +89,7 @@ class LoginView extends StatelessWidget {
                                   );
                                 }
                               },
+
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blueAccent,
                         minimumSize: const Size(double.infinity, 55),

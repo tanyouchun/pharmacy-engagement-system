@@ -69,24 +69,19 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
                 ],
               ),
             ),
-
-            const Spacer(),
-
-            Padding(
-              padding: const EdgeInsets.only(bottom: 30),
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const EditProfileView()),
-                  );
-                },
-                icon: const Icon(Icons.add),
-                label: const Text("Edit Profile"),
-              ),
-            ),
           ],
         ),
+      ),
+
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const EditProfileView()),
+          );
+        },
+        icon: const Icon(Icons.add),
+        label: const Text("Edit Profile"),
       ),
     );
   }

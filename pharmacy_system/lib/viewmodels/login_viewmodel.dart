@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -7,9 +9,9 @@ class LoginViewModel extends ChangeNotifier {
   final passwordController = TextEditingController();
 
   bool isLoading = false;
-  String? error;
+  String? errorMessage;
 
-  // 🔐 Email login (existing)
+  // Email login
   Future<void> login() async {
     try {
       isLoading = true;
@@ -20,14 +22,16 @@ class LoginViewModel extends ChangeNotifier {
         password: passwordController.text.trim(),
       );
     } on FirebaseAuthException catch (e) {
-      error = e.message;
+      log("Login error: $e");
+      errorMessage = "Incorrect email or password";
+      notifyListeners();
     } finally {
       isLoading = false;
       notifyListeners();
     }
   }
 
-  // 🔵 Google Sign-In
+  // Google Sign-In
   Future<void> signInWithGoogle() async {
     try {
       isLoading = true;
@@ -54,7 +58,7 @@ class LoginViewModel extends ChangeNotifier {
       await FirebaseAuth.instance.signInWithCredential(credential);
 
     } catch (e) {
-      error = e.toString();
+      errorMessage = e.toString();
     } finally {
       isLoading = false;
       notifyListeners();

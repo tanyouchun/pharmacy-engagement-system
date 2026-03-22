@@ -36,27 +36,30 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
                 itemBuilder: (context, index) {
                   final p = vm.prescriptions[index];
 
-                  return Card(
-                    child: ListTile(
-                      leading: const Icon(Icons.medication),
-                      title: Text(p.name),
-                      subtitle: Text("Added: ${p.date}"),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit),
-                            onPressed: () {
-                              _showEditDialog(context, p);
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () {
-                              vm.deletePrescription(p.id);
-                            },
-                          ),
-                        ],
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 5),
+                    child: Card(
+                      child: ListTile(
+                        leading: const Icon(Icons.medication),
+                        title: Text(p.name),
+                        subtitle: Text("Added: ${p.date}"),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit),
+                              onPressed: () {
+                                _showEditDialog(context, p);
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () {
+                                vm.deletePrescription(p.id);
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   );
