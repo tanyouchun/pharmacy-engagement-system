@@ -107,11 +107,12 @@ class EditProfileView extends StatelessWidget {
 }
 
 void _showDeleteDialog(BuildContext context) {
+  final parentContext = context;
   final vm = Provider.of<UserProfileViewModel>(context, listen: false);
 
   showDialog(
     context: context,
-    builder: (context) {
+    builder: (dialogContext) {
       return AlertDialog(
         title: const Text("Delete Profile"),
         content: const Text(
@@ -120,20 +121,20 @@ void _showDeleteDialog(BuildContext context) {
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.pop(context); // AF1: Cancel
+              Navigator.pop(dialogContext); // AF1: Cancel
             },
             child: const Text("Cancel"),
           ),
           TextButton(
             onPressed: () async {
-              Navigator.pop(context); // close dialog
+              Navigator.pop(dialogContext); // close dialog
 
               bool success = await vm.deleteProfile();
 
               if (success) {
-                Navigator.pop(context); // exit edit page
+                Navigator.pop(parentContext); // exit edit page
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(
+                ScaffoldMessenger.of(parentContext).showSnackBar(
                   SnackBar(content: Text(vm.errorMessage ?? "Delete failed")),
                 );
               }

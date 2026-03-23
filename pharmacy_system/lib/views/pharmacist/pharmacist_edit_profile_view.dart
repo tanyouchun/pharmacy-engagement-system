@@ -50,7 +50,9 @@ class PharmacistEditProfileView extends StatelessWidget {
 
               TextField(
                 controller: vm.experienceController,
-                decoration: const InputDecoration(labelText: "Experience (years)"),
+                decoration: const InputDecoration(
+                  labelText: "Experience (years)",
+                ),
               ),
 
               const SizedBox(height: 25),
@@ -92,12 +94,14 @@ class PharmacistEditProfileView extends StatelessWidget {
   }
 }
 
+//TODO: force pharmacist to create new profile if they want to use the app again after deletion.
 void _showDeleteDialog(BuildContext context) {
+  final parentContext = context;
   final vm = Provider.of<PharmacistProfileViewModel>(context, listen: false);
 
   showDialog(
     context: context,
-    builder: (context) {
+    builder: (dialogContext) {
       return AlertDialog(
         title: const Text("Delete Profile"),
         content: const Text(
@@ -106,20 +110,23 @@ void _showDeleteDialog(BuildContext context) {
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.pop(context); // AF1: Cancel
+              Navigator.pop(dialogContext); // AF1: Cancel
             },
             child: const Text("Cancel"),
           ),
           TextButton(
             onPressed: () async {
-              Navigator.pop(context); // close dialog
+              Navigator.pop(dialogContext); // close dialog
 
               bool success = await vm.deleteProfile();
 
               if (success) {
-                Navigator.pop(context); // exit edit page
+                Navigator.of(parentContext).pushNamedAndRemoveUntil(
+                  '/pharmacistProfile',
+                  (route) => false, // remove ALL previous screens
+                );
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(
+                ScaffoldMessenger.of(parentContext).showSnackBar(
                   SnackBar(content: Text(vm.errorMessage ?? "Delete failed")),
                 );
               }

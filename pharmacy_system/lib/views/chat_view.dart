@@ -1,8 +1,12 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:pharmacy_system/views/pharmacist/user_profile_details_view.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../views/user/pharmacist_profile_details_view.dart';
 import '../viewmodels/chat_viewmodel.dart';
 
 class ChatView extends StatefulWidget {
@@ -39,7 +43,9 @@ class _ChatViewState extends State<ChatView> {
         actions: [
           IconButton(
             icon: const Icon(Icons.person),
-            onPressed: () {
+
+            onPressed: () async {
+              log("Other User ID: ${widget.otherUserId}");
               if (widget.otherUserId == null || widget.otherUserId!.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("User not available")),
@@ -47,14 +53,39 @@ class _ChatViewState extends State<ChatView> {
                 return;
               }
 
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder:
-                      (_) =>
-                          UserProfileDetailsView(userId: widget.otherUserId!),
-                ),
-              );
+              final currentUser = FirebaseAuth.instance.currentUser!;
+
+              // Fetch current user's role
+              final doc =
+                  await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(currentUser.uid)
+                      .get();
+
+              final role = doc.data()?['role'] ?? 'user';
+
+              if (role == 'user') {
+                // user → view pharmacist profile
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (_) => PharmacistProfileDetailsView(
+                          pharmacistId: widget.otherUserId!,
+                        ),
+                  ),
+                );
+              } else {
+                // pharmacist → view user profile
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (_) =>
+                            UserProfileDetailsView(userId: widget.otherUserId!),
+                  ),
+                );
+              }
             },
           ),
         ],
@@ -119,7 +150,6 @@ class _ChatViewState extends State<ChatView> {
             ),
           ),
 
-          /// ✏️ INPUT
           Row(
             children: [
               Expanded(

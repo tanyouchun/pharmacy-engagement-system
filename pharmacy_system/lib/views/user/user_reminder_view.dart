@@ -38,7 +38,6 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
     final isPharmacist = widget.role == 'pharmacist';
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
       body: Column(
         children: [
           /// HEADER

@@ -3,61 +3,100 @@ import 'package:provider/provider.dart';
 import '../../viewmodels/pharmacist_profile_viewmodel.dart';
 import 'pharmacist_edit_profile_view.dart';
 
-class PharmacistProfileDisplayView extends StatelessWidget {
+class PharmacistProfileDisplayView extends StatefulWidget {
   const PharmacistProfileDisplayView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final vm = context.watch<PharmacistProfileViewModel>();
+  State<PharmacistProfileDisplayView> createState() =>
+      _PharmacistProfileDisplayViewState();
+}
 
-    if (vm.hasProfile && vm.name.isEmpty && !vm.isLoading) {
-      // lazy load details the first time we show the screen
-      Future.microtask(
-        () => context.read<PharmacistProfileViewModel>().loadProfile(),
-      );
+class _PharmacistProfileDisplayViewState
+    extends State<PharmacistProfileDisplayView> {
+  // bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      context.read<PharmacistProfileViewModel>().loadProfile();
+    });
+  }
+
+  Future<void> _loadData() async {
+    final vm = context.read<PharmacistProfileViewModel>();
+
+    await vm.loadProfile();
+
+    if (!mounted) return;
+
+    // setState(() {
+    //   isLoading = false;
+    // });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final vm = Provider.of<PharmacistProfileViewModel>(context);
+
+    if (vm.isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (!vm.hasProfile) {
+      Future.microtask(() {
+        Navigator.pushReplacementNamed(context, '/pharmacistProfile');
+      });
+
+      return const SizedBox();
     }
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
       body: SafeArea(
-        child:
-            vm.isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const SizedBox(height: 20),
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundColor: Colors.blue[100],
-                        child: const Icon(Icons.local_pharmacy, size: 50),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        vm.name.isEmpty ? 'Pharmacist' : vm.name,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      _tile('License', vm.license),
-                      _tile('Pharmacy', vm.pharmacyName),
-                      _tile(
-                        'Experience',
-                        vm.experience == 0 ? '' : '${vm.experience} yrs',
-                      ),
-                    ],
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
+
+            /// 👤 Avatar
+            CircleAvatar(
+              radius: 50,
+              backgroundColor: Colors.blue[100],
+              child: const Icon(Icons.local_pharmacy, size: 50),
+            ),
+
+            const SizedBox(height: 10),
+
+            /// 👤 Name
+            Text(
+              vm.name.isEmpty ? 'Pharmacist' : vm.name,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 20),
+
+            /// 📊 Stats (MATCH USER UI)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildStat(Icons.badge, "License", vm.license),
+                  _buildStat(Icons.local_pharmacy, "Pharmacy", vm.pharmacyName),
+                  _buildStat(
+                    Icons.work,
+                    "Experience",
+                    vm.experience == 0 ? "-" : "${vm.experience} yrs",
                   ),
-                ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
 
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          await Navigator.push(
             context,
             MaterialPageRoute(
               builder:
@@ -67,21 +106,29 @@ class PharmacistProfileDisplayView extends StatelessWidget {
                   ),
             ),
           );
-          vm.loadProfile();
         },
-        icon: const Icon(Icons.add),
+        icon: const Icon(Icons.edit),
         label: const Text("Edit Profile"),
       ),
     );
   }
 
-  Widget _tile(String label, String value) {
-    return Card(
-      elevation: 0,
-      child: ListTile(
-        title: Text(label),
-        subtitle: Text(value.isEmpty ? '-' : value),
-      ),
+  /// 🔹 SAME STYLE as UserProfile
+  Widget _buildStat(IconData icon, String title, String value) {
+    return Column(
+      children: [
+        Icon(icon, color: Colors.blue),
+        const SizedBox(height: 5),
+        Text(title, style: const TextStyle(fontSize: 12)),
+        const SizedBox(height: 3),
+        Text(
+          value.isEmpty ? "-" : value,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.blue,
+          ),
+        ),
+      ],
     );
   }
 }

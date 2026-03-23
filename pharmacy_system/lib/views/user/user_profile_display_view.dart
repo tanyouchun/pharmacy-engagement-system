@@ -37,7 +37,6 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
       body: SafeArea(
         child: Column(
           children: [

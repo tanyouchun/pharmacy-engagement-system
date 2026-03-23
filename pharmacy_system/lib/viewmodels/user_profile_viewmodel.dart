@@ -212,7 +212,7 @@ class UserProfileViewModel extends ChangeNotifier {
               .collection("prescriptions")
               .get();
 
-      log("Docs count: ${snapshot.docs.length}");
+      log("Prescriptions count: ${snapshot.docs.length}");
 
       prescriptions =
           snapshot.docs
