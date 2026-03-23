@@ -23,17 +23,13 @@ class _PharmacistProfileDisplayViewState
     });
   }
 
-  Future<void> _loadData() async {
-    final vm = context.read<PharmacistProfileViewModel>();
+  // Future<void> _loadData() async {
+  //   final vm = context.read<PharmacistProfileViewModel>();
 
-    await vm.loadProfile();
+  //   await vm.loadProfile();
 
-    if (!mounted) return;
-
-    // setState(() {
-    //   isLoading = false;
-    // });
-  }
+  //   if (!mounted) return;
+  // }
 
   @override
   Widget build(BuildContext context) {
