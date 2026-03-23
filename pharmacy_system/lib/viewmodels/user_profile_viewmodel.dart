@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:pharmacy_system/models/prescription.dart';
 
 class UserProfileViewModel extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -22,6 +25,8 @@ class UserProfileViewModel extends ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
   bool hasProfile = false;
+  List<Prescription> prescriptions = [];
+  bool isLoadingPrescription = false;
 
   void clearControllers() {
     nameController.clear();
@@ -41,7 +46,8 @@ class UserProfileViewModel extends ChangeNotifier {
       return;
     }
 
-    final doc = await _firestore.collection("user_profiles").doc(user.uid).get();
+    final doc =
+        await _firestore.collection("user_profiles").doc(user.uid).get();
 
     hasProfile = doc.exists;
     notifyListeners();
@@ -78,7 +84,6 @@ class UserProfileViewModel extends ChangeNotifier {
 
   Future<void> loadProfile() async {
     try {
-      
       final user = FirebaseAuth.instance.currentUser;
 
       if (user == null) return;
@@ -102,6 +107,29 @@ class UserProfileViewModel extends ChangeNotifier {
         weightController.text = weight;
         heightController.text = height;
         allergiesController.text = allergies;
+
+        notifyListeners();
+      }
+    } catch (e) {
+      errorMessage = "Failed to load profile.";
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadUserProfile(String userId) async {
+    try {
+      final doc =
+          await _firestore.collection("user_profiles").doc(userId).get();
+
+      if (doc.exists) {
+        final data = doc.data()!;
+
+        name = data["name"] ?? "";
+        age = data["age"].toString();
+        gender = data["gender"] ?? "";
+        weight = data["weight"] ?? "";
+        height = data["height"] ?? "";
+        allergies = data["allergies"] ?? "";
 
         notifyListeners();
       }
@@ -169,5 +197,75 @@ class UserProfileViewModel extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  //load prescriptions for current user: user_profiles/{userId}/prescriptions
+  Future<void> loadUserPrescriptions(String userId) async {
+    try {
+      isLoadingPrescription = true;
+      notifyListeners();
+
+      final snapshot =
+          await _firestore
+              .collection("user_profiles")
+              .doc(userId)
+              .collection("prescriptions")
+              .get();
+
+      log("Prescriptions count: ${snapshot.docs.length}");
+
+      prescriptions =
+          snapshot.docs
+              .map((doc) => Prescription.fromMap(doc.id, doc.data()))
+              .toList();
+
+      isLoadingPrescription = false;
+      notifyListeners();
+    } catch (e) {
+      log("ERROR: $e");
+      errorMessage = "Failed to load prescriptions";
+      isLoadingPrescription = false;
+      notifyListeners();
+    }
+  }
+
+  //add: user_profiles/{userId}/prescriptions/{prescriptionId}
+  Future<void> addPrescription(String userId, String name, String notes) async {
+    await _firestore
+        .collection("user_profiles")
+        .doc(userId)
+        .collection("prescriptions")
+        .add({"name": name, "notes": notes, "date": DateTime.now().toString()});
+
+    await loadUserPrescriptions(userId);
+  }
+
+  //update: user_profiles/{userId}/prescriptions/{prescriptionId}
+  Future<void> updatePrescription(
+    String userId,
+    String id,
+    String name,
+    String notes,
+  ) async {
+    await _firestore
+        .collection("user_profiles")
+        .doc(userId)
+        .collection("prescriptions")
+        .doc(id)
+        .update({"name": name, "notes": notes});
+
+    await loadUserPrescriptions(userId);
+  }
+
+  //delete: user_profiles/{userId}/prescriptions/{prescriptionId}
+  Future<void> deletePrescription(String userId, String id) async {
+    await _firestore
+        .collection("user_profiles")
+        .doc(userId)
+        .collection("prescriptions")
+        .doc(id)
+        .delete();
+
+    await loadUserPrescriptions(userId);
   }
 }

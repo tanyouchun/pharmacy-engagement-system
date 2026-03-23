@@ -37,12 +37,12 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
       body: SafeArea(
         child: Column(
           children: [
             const SizedBox(height: 20),
 
+            //TODO: replace with real profile picture
             CircleAvatar(
               radius: 50,
               backgroundImage: NetworkImage("https://i.pravatar.cc/150?img=3"),
@@ -68,25 +68,19 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
                 ],
               ),
             ),
-
-            const Spacer(),
-
-            Padding(
-              padding: const EdgeInsets.only(bottom: 30),
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const EditProfileView()),
-                  );
-                },
-                icon: const Icon(Icons.add),
-                label: const Text("Edit Profile"),
-              ),
-              
-            ),
           ],
         ),
+      ),
+
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const EditProfileView()),
+          );
+        },
+        icon: const Icon(Icons.add),
+        label: const Text("Edit Profile"),
       ),
     );
   }

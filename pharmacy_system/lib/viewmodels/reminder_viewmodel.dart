@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -25,7 +27,7 @@ class ReminderViewModel extends ChangeNotifier {
             .map((doc) => Reminder.fromMap(doc.id, doc.data()))
             .toList();
 
-    notifyListeners(); // 🔥 important
+    notifyListeners();
   }
 
   /// CREATE
@@ -34,14 +36,23 @@ class ReminderViewModel extends ChangeNotifier {
       await _db.collection('reminders').add(reminder.toMap());
       await fetchReminders(); // refresh UI
     } catch (e) {
+      log("Failed to create reminder: $e");
       throw Exception("Failed to create reminder");
     }
   }
 
   Future<void> updateReminder(Reminder reminder) async {
-    await _db.collection('reminders').doc(reminder.id).update(reminder.toMap());
+    try {
+      await _db
+          .collection('reminders')
+          .doc(reminder.id)
+          .update(reminder.toMap());
 
-    await fetchReminders(); // refresh UI
+      await fetchReminders(); // refresh UI
+    } catch (e) {
+      log("Failed to update reminder: $e");
+      throw Exception("Failed to update reminder");
+    }
   }
 
   /// DELETE

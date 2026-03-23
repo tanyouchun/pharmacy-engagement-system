@@ -130,7 +130,7 @@ class _ChatListViewState extends State<ChatListView> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => ChatView(chatId: chat.id),
+                                builder: (_) => ChatView(chatId: chat.id, otherUserId: otherUserId,),
                               ),
                             );
                           },

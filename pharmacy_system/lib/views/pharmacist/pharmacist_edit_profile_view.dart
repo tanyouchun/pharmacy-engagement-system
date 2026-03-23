@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../viewmodels/user_profile_viewmodel.dart';
+import '../../viewmodels/pharmacist_profile_viewmodel.dart';
 
-class EditProfileView extends StatelessWidget {
-  const EditProfileView({super.key});
+class PharmacistEditProfileView extends StatelessWidget {
+  const PharmacistEditProfileView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<UserProfileViewModel>(context);
+    final vm = Provider.of<PharmacistProfileViewModel>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -34,37 +34,25 @@ class EditProfileView extends StatelessWidget {
               const SizedBox(height: 15),
 
               TextField(
-                controller: vm.ageController,
+                controller: vm.licenseController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: "Age"),
+                decoration: const InputDecoration(labelText: "License Number"),
               ),
 
               const SizedBox(height: 15),
 
               TextField(
-                controller: vm.genderController,
-                decoration: const InputDecoration(labelText: "Gender"),
+                controller: vm.pharmacyNameController,
+                decoration: const InputDecoration(labelText: "Pharmacy Name"),
               ),
 
               const SizedBox(height: 15),
 
               TextField(
-                controller: vm.weightController,
-                decoration: const InputDecoration(labelText: "Weight"),
-              ),
-
-              const SizedBox(height: 15),
-
-              TextField(
-                controller: vm.heightController,
-                decoration: const InputDecoration(labelText: "Height"),
-              ),
-
-              const SizedBox(height: 15),
-
-              TextField(
-                controller: vm.allergiesController,
-                decoration: const InputDecoration(labelText: "Allergies"),
+                controller: vm.experienceController,
+                decoration: const InputDecoration(
+                  labelText: "Experience (years)",
+                ),
               ),
 
               const SizedBox(height: 25),
@@ -106,9 +94,10 @@ class EditProfileView extends StatelessWidget {
   }
 }
 
+//TODO: force pharmacist to create new profile if they want to use the app again after deletion.
 void _showDeleteDialog(BuildContext context) {
   final parentContext = context;
-  final vm = Provider.of<UserProfileViewModel>(context, listen: false);
+  final vm = Provider.of<PharmacistProfileViewModel>(context, listen: false);
 
   showDialog(
     context: context,
@@ -132,7 +121,10 @@ void _showDeleteDialog(BuildContext context) {
               bool success = await vm.deleteProfile();
 
               if (success) {
-                Navigator.pop(parentContext); // exit edit page
+                Navigator.of(parentContext).pushNamedAndRemoveUntil(
+                  '/pharmacistProfile',
+                  (route) => false, // remove ALL previous screens
+                );
               } else {
                 ScaffoldMessenger.of(parentContext).showSnackBar(
                   SnackBar(content: Text(vm.errorMessage ?? "Delete failed")),

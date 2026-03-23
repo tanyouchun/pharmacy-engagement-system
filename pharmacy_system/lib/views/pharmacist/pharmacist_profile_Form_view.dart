@@ -57,15 +57,6 @@ class _PharmacistProfileFormViewState extends State<PharmacistProfileFormView> {
   Widget build(BuildContext context) {
     final vm = context.watch<PharmacistProfileViewModel>();
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pharmacist Profile'),
-        actions: [
-          IconButton(
-            onPressed: _logout,
-            icon: const Icon(Icons.logout),
-          ),
-        ],
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
