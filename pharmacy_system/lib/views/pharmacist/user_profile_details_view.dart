@@ -38,7 +38,6 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),

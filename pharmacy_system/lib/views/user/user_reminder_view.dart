@@ -21,7 +21,7 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
   void initState() {
     super.initState();
 
-    if (widget.role != 'pharmacist') {
+    if (widget.role != 'pharmacist' && widget.role != 'admin') {
       Future.microtask(
         () =>
             Provider.of<ReminderViewModel>(
@@ -36,6 +36,7 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
   Widget build(BuildContext context) {
     final vm = Provider.of<ReminderViewModel>(context);
     final isPharmacist = widget.role == 'pharmacist';
+    final isAdmin = widget.role == 'admin';
 
     return Scaffold(
       body: Column(
@@ -184,6 +185,11 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                 "Pharmacist Home Page",
                 style: TextStyle(color: Colors.black, fontSize: 18),
               )
+              : isAdmin
+              ? const Text(
+                "Admin Homepage",
+                style: TextStyle(color: Colors.black, fontSize: 18),
+              )
               : const Text(
                 "Medication Reminders",
                 style: TextStyle(color: Colors.black, fontSize: 18),
@@ -191,7 +197,7 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
 
           Expanded(
             child:
-                isPharmacist
+                (isPharmacist || isAdmin)
                     // PHARMACIST VIEW (AI-focused empty state)
                     ? Center(
                       child: Column(
@@ -249,7 +255,7 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
       ),
 
       floatingActionButton:
-          isPharmacist
+          (isPharmacist || isAdmin)
               ? null
               : FloatingActionButton.extended(
                 onPressed: () {

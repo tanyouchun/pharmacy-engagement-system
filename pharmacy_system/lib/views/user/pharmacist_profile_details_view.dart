@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '../../viewmodels/pharmacist_profile_viewmodel.dart';
+import '../../viewmodels/admin_viewmodel.dart';
 
 class PharmacistProfileDetailsView extends StatefulWidget {
   final String pharmacistId;
@@ -55,6 +58,19 @@ class _PharmacistProfileDetailsViewState
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'report') {
+                _showReportDialog();
+              }
+            },
+            itemBuilder:
+                (context) => [
+                  const PopupMenuItem(value: 'report', child: Text("Report")),
+                ],
+          ),
+        ],
       ),
       body: SafeArea(
         child: Column(
@@ -148,5 +164,77 @@ class _PharmacistProfileDetailsViewState
         ),
       ],
     );
+  }
+
+  void _showReportDialog() {
+    final TextEditingController reasonController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder:
+          (_) => AlertDialog(
+            title: const Text("Report Pharmacist"),
+            content: TextField(
+              controller: reasonController,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                hintText: "Enter reason (e.g. fake account, spam...)",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Cancel"),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  await _submitReport(reasonController.text);
+                  Navigator.pop(context);
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Report submitted")),
+                  );
+                },
+                child: const Text("Submit"),
+              ),
+            ],
+          ),
+    );
+  }
+
+  Future<void> _submitReport(String reason) async {
+    final vmProfile = Provider.of<PharmacistProfileViewModel>(
+      context,
+      listen: false,
+    );
+
+    final adminVM = Provider.of<AdminManageUserViewModel>(
+      context,
+      listen: false,
+    );
+
+    final currentUser = FirebaseAuth.instance.currentUser;
+
+    final success = await adminVM.submitReport(
+      reportedUserId: widget.pharmacistId,
+      reportedName: vmProfile.name,
+      reportedRole: "pharmacist",
+      reportedBy: currentUser?.uid,
+      reason: reason,
+    );
+
+    if (!mounted) return;
+
+    if (!success) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(adminVM.error ?? "Failed")));
+      return;
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Report submitted")));
   }
 }
