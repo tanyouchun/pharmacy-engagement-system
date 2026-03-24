@@ -229,7 +229,7 @@ class _PharmacistProfileDetailsViewState
     if (!success) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(adminVM.error ?? "Failed")));
+      ).showSnackBar(SnackBar(content: Text(adminVM.reportError ?? "Failed")));
       return;
     }
 

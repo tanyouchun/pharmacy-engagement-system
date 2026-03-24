@@ -17,19 +17,24 @@ class SignupViewModel extends ChangeNotifier {
       notifyListeners();
 
       // Create auth user
-      final credential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
+      final credential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+            email: emailController.text.trim(),
+            password: passwordController.text.trim(),
+          );
 
       final uid = credential.user?.uid;
 
-      // Store basic role info in Firestore 
+      // Store basic role info in Firestore
       if (uid != null) {
         await FirebaseFirestore.instance.collection('users').doc(uid).set({
           'email': emailController.text.trim(),
           'role': isPharmacist ? 'pharmacist' : 'user',
+          'isBlocked': false,
+          'isPermanentBan': false,
+          'suspendUntil': null,
+          'reportCount': 0,
+          'name': '',
           'createdAt': FieldValue.serverTimestamp(),
         });
       }
@@ -44,9 +49,9 @@ class SignupViewModel extends ChangeNotifier {
       }
     } on FirebaseAuthException catch (e) {
       error = e.message;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error ?? 'Signup failed')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error ?? 'Signup failed')));
     } finally {
       isLoading = false;
       notifyListeners();
