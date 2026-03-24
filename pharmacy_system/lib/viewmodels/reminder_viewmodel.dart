@@ -14,7 +14,7 @@ class ReminderViewModel extends ChangeNotifier {
 
   String get userId => _auth.currentUser!.uid;
 
-  /// LOAD reminders
+  // get reminders/?userId={userId}
   Future<void> fetchReminders() async {
     final snapshot =
         await _db
@@ -30,7 +30,7 @@ class ReminderViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// CREATE
+  // add reminders/
   Future<void> createReminder(Reminder reminder) async {
     try {
       await _db.collection('reminders').add(reminder.toMap());
@@ -41,6 +41,7 @@ class ReminderViewModel extends ChangeNotifier {
     }
   }
 
+  //update reminders/{id}
   Future<void> updateReminder(Reminder reminder) async {
     try {
       await _db
@@ -55,7 +56,7 @@ class ReminderViewModel extends ChangeNotifier {
     }
   }
 
-  /// DELETE
+  // delete reminders/{id}
   Future<void> deleteReminder(String id) async {
     await _db.collection('reminders').doc(id).delete();
     await fetchReminders();

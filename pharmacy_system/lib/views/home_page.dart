@@ -172,7 +172,7 @@ class _HomePageState extends State<HomePage> {
                 _role == 'admin'
                     ? [
                       const BottomNavigationBarItem(
-                        icon: Icon(Icons.dashboard_outlined),
+                        icon: Icon(Icons.home),
                         label: "Home",
                       ),
                       const BottomNavigationBarItem(
@@ -199,8 +199,8 @@ class _HomePageState extends State<HomePage> {
                         label: "Chat",
                       ),
                       const BottomNavigationBarItem(
-                        icon: Icon(Icons.smart_toy_outlined),
-                        label: "Chatbot",
+                        icon: Icon(Icons.smart_toy, size: 30),
+                        label: "AI",
                       ),
                       const BottomNavigationBarItem(
                         icon: Icon(Icons.person_outline),

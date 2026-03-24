@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../viewmodels/admin_viewmodel.dart';
 import '../user/pharmacist_profile_details_view.dart';
+import '../pharmacist/user_profile_details_view.dart';
 
 class AdminManageUserView extends StatefulWidget {
   const AdminManageUserView({super.key});
@@ -130,8 +131,17 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
           builder: (_) => PharmacistProfileDetailsView(pharmacistId: userId),
         ),
       );
+    } else if (role == 'user') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => UserProfileDetailsView(userId: userId),
+        ),
+      );
     } else {
-      // TODO: Navigate to normal user profile
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Unknown role, cannot view profile")),
+      );
     }
   }
 

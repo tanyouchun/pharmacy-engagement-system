@@ -25,7 +25,7 @@ class LoginViewModel extends ChangeNotifier {
       final uid = credential.user?.uid;
 
       if (uid != null) {
-        await _checkUserStatus(uid); // 👈 ADD THIS
+        await _checkUserStatus(uid);
       }
     } on FirebaseAuthException catch (e) {
       log("Login error: $e");

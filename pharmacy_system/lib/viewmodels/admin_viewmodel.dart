@@ -90,16 +90,6 @@ class AdminManageUserViewModel extends ChangeNotifier {
         );
   }
 
-  /// 🔹 Block / Unblock
-  Future<void> toggleBlock(String uid, bool currentStatus) async {
-    try {
-      await _usersRef.doc(uid).update({"isBlocked": !currentStatus});
-    } catch (e) {
-      _userError = e.toString();
-      notifyListeners();
-    }
-  }
-
   Future<void> resolveReport(String reportId) async {
     try {
       await FirebaseFirestore.instance
@@ -149,11 +139,11 @@ class AdminManageUserViewModel extends ChangeNotifier {
   }
 
   Map<String, dynamic>? getUserData(String uid) {
-  try {
-    return _users.firstWhere((u) => u.id == uid).data()
-        as Map<String, dynamic>;
-  } catch (e) {
-    return null;
+    try {
+      return _users.firstWhere((u) => u.id == uid).data()
+          as Map<String, dynamic>;
+    } catch (e) {
+      return null;
+    }
   }
-}
 }

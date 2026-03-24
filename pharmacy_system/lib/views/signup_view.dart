@@ -4,8 +4,14 @@ import '../viewmodels/signup_viewmodel.dart';
 import '../widgets/custom_textfield.dart';
 import 'login_view.dart';
 
-class SignupView extends StatelessWidget {
+class SignupView extends StatefulWidget {
   const SignupView({super.key});
+  @override
+  State<SignupView> createState() => _SignupViewState();
+}
+
+class _SignupViewState extends State<SignupView> {
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -21,99 +27,100 @@ class SignupView extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            CustomTextField(
-              hint: "Enter your email",
-              icon: Icons.email,
-              controller: vm.emailController,
-            ),
-            const SizedBox(height: 15),
-            CustomTextField(
-              hint: "Enter your password",
-              icon: Icons.lock,
-              isPassword: true,
-              controller: vm.passwordController,
-            ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
 
-            const SizedBox(height: 20),
+              CustomTextField(
+                hint: "Enter your email",
+                icon: Icons.email,
+                controller: vm.emailController,
+              ),
 
-            // Role selection: Pharmacist or regular user
-            Row(
-              children: [
-                const Text(
-                  "Are you a pharmacist?",
-                  style: TextStyle(fontSize: 14),
-                ),
-                const SizedBox(width: 16),
-                Switch(
-                  value: vm.isPharmacist,
-                  onChanged: (val) {
-                    vm.isPharmacist = val;
-                    // vm.notifyListeners();
-                  },
-                  activeColor: Colors.blueAccent,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  vm.isPharmacist ? "Pharmacist" : "Regular user",
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
+              const SizedBox(height: 15),
+
+              CustomTextField(
+                hint: "Enter your password",
+                icon: Icons.lock,
+                isPassword: true,
+                controller: vm.passwordController,
+              ),
+
+              const SizedBox(height: 15),
+
+              CustomTextField(
+                hint: "Confirm your password",
+                icon: Icons.lock_outline,
+                isPassword: true,
+                controller: vm.confirmPasswordController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please confirm your password";
+                  }
+                  if (value != vm.passwordController.text) {
+                    return "Passwords do not match";
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 20),
+
+              // ✅ NOW INSIDE COLUMN
+              Row(
+                children: [
+                  const Text("Are you a pharmacist?"),
+                  const SizedBox(width: 16),
+                  Switch(
+                    value: vm.isPharmacist,
+                    onChanged: (val) {
+                      vm.isPharmacist = val;
+                      vm.notifyListeners();
+                    },
                   ),
-                ),
-              ],
-            ),
+                  const SizedBox(width: 8),
+                  Text(vm.isPharmacist ? "Pharmacist" : "Regular user"),
+                ],
+              ),
 
-            const Spacer(),
-            // Sign Up Button
-            vm.isLoading
-                ? const CircularProgressIndicator()
-                : SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: () => vm.signup(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                    ),
-                    child: const Text(
-                      "Sign Up",
-                      style: TextStyle(fontSize: 16, color: Colors.white),
+              const Spacer(),
+
+              vm.isLoading
+                  ? const CircularProgressIndicator()
+                  : SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                      ),
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          vm.signup(context);
+                        }
+                      },
+                      child: const Text(
+                        "Sign Up",
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
                     ),
                   ),
-                ),
 
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-            // Sign In Text
-            Center(
-              child: GestureDetector(
+              GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const LoginView()),
                   );
                 },
-                child: const Text.rich(
-                  TextSpan(
-                    text: "Already have an account? ",
-                    children: [
-                      TextSpan(
-                        text: "Sign In",
-                        style: TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                child: const Text("Already have an account? Sign In"),
               ),
-            ),
-
-            const SizedBox(height: 20),
-          ],
+            ],
+          ),
         ),
       ),
     );
