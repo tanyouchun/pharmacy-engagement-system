@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:pharmacy_system/models/prescription.dart';
 
 import '../models/user_profile.dart';
-import '../models/prescription.dart';
 
 class UserProfileViewModel extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
