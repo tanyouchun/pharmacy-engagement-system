@@ -150,28 +150,41 @@ class _ChatViewState extends State<ChatView> {
             ),
           ),
 
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: controller,
-                  decoration: const InputDecoration(hintText: "Message..."),
+          Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+              left: 12,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: controller,
+                    decoration: const InputDecoration(
+                      hintText: "Message...",
+                      border: InputBorder.none,
+                    ),
+                  ),
                 ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.send),
-                onPressed: () async {
-                  if (controller.text.isEmpty) return;
+                IconButton(
+                  icon: const Icon(Icons.send),
+                  onPressed: () async {
+                    if (controller.text.isEmpty) return;
 
-                  final vm = Provider.of<ChatViewModel>(context, listen: false);
+                    final vm = Provider.of<ChatViewModel>(
+                      context,
+                      listen: false,
+                    );
 
-                  await vm.sendMessage(widget.chatId, controller.text);
+                    await vm.sendMessage(widget.chatId, controller.text);
 
-                  controller.clear();
-                },
-              ),
-            ],
+                    controller.clear();
+                  },
+                ),
+              ],
+            ),
           ),
+          const SizedBox(height: 20),
         ],
       ),
     );

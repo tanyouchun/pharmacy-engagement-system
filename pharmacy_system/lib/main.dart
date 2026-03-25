@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:pharmacy_system/viewmodels/admin_viewmodel.dart';
 import 'package:provider/provider.dart';
 
 import 'firebase_options.dart';
@@ -34,6 +35,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ChatViewModel()),
         ChangeNotifierProvider(create: (_) => ReminderViewModel()),
         ChangeNotifierProvider(create: (_) => PharmacistProfileViewModel()),
+        ChangeNotifierProvider(create: (_) => AdminManageUserViewModel()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

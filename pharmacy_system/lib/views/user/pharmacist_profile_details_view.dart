@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../viewmodels/pharmacist_profile_viewmodel.dart';
+import '../../utils/report_helper.dart';
 
 class PharmacistProfileDetailsView extends StatefulWidget {
   final String pharmacistId;
@@ -55,6 +57,29 @@ class _PharmacistProfileDetailsViewState
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'report') {
+                final vm = Provider.of<PharmacistProfileViewModel>(
+                  context,
+                  listen: false,
+                );
+
+                ReportHelper.showReportDialog(
+                  context: context,
+                  reportedUserId: widget.pharmacistId,
+                  reportedName: vm.name,
+                  reportedRole: "pharmacist",
+                );
+              }
+            },
+            itemBuilder:
+                (context) => [
+                  const PopupMenuItem(value: 'report', child: Text("Report")),
+                ],
+          ),
+        ],
       ),
       body: SafeArea(
         child: Column(
@@ -149,4 +174,5 @@ class _PharmacistProfileDetailsViewState
       ],
     );
   }
+
 }

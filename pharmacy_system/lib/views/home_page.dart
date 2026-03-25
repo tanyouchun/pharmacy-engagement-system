@@ -3,6 +3,8 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:pharmacy_system/views/admin/admin_manage_config_view.dart';
+import 'package:pharmacy_system/views/admin/admin_manage_user_view.dart';
 import 'package:pharmacy_system/views/user/user_prescription_view.dart';
 import 'package:pharmacy_system/services/auth_service.dart';
 import 'user/user_profile_wrapper.dart';
@@ -48,7 +50,7 @@ class _HomePageState extends State<HomePage> {
               .collection('users')
               .doc(user.uid)
               .get();
-              if (!mounted) return;
+      if (!mounted) return;
       setState(() {
         _role = doc.data()?['role'] as String?;
         _isLoadingRole = false;
@@ -81,6 +83,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   String get _title {
+    if (_role == 'admin') {
+      final titles = ["Home", "Manage User", "AI Assistant", "Manage Config"];
+      return (_currentIndex < titles.length) ? titles[_currentIndex] : "Home";
+    }
     final titles =
         _role == 'pharmacist'
             ? ["Home", "Chat", "Chatbot", "Profile"]
@@ -95,7 +101,7 @@ class _HomePageState extends State<HomePage> {
       role: _role,
       onOpenChatbot: () {
         setState(() {
-          _currentIndex = 2; // 👈 switch to chatbot tab
+          _currentIndex = 2; // switch to chatbot tab
         });
       },
     );
@@ -110,8 +116,14 @@ class _HomePageState extends State<HomePage> {
 
     if (_role == 'pharmacist') {
       return [home, chat, const ChatbotView(), profile];
+    } else if (_role == 'admin') {
+      return [
+        home,
+        const AdminManageUserView(),
+        const ChatbotView(),
+        const AdminManageConfigView(),
+      ];
     }
-
     return [home, chat, const ChatbotView(), const PrescriptionPage(), profile];
   }
 
@@ -157,7 +169,26 @@ class _HomePageState extends State<HomePage> {
             unselectedItemColor: Colors.grey,
             type: BottomNavigationBarType.fixed,
             items:
-                _role == 'pharmacist'
+                _role == 'admin'
+                    ? [
+                      const BottomNavigationBarItem(
+                        icon: Icon(Icons.home),
+                        label: "Home",
+                      ),
+                      const BottomNavigationBarItem(
+                        icon: Icon(Icons.group_outlined),
+                        label: "Manage User",
+                      ),
+                      const BottomNavigationBarItem(
+                        icon: Icon(Icons.smart_toy, size: 30),
+                        label: "AI",
+                      ),
+                      const BottomNavigationBarItem(
+                        icon: Icon(Icons.settings_outlined),
+                        label: "Manage Config",
+                      ),
+                    ]
+                    : _role == 'pharmacist'
                     ? [
                       const BottomNavigationBarItem(
                         icon: Icon(Icons.home),
@@ -168,8 +199,8 @@ class _HomePageState extends State<HomePage> {
                         label: "Chat",
                       ),
                       const BottomNavigationBarItem(
-                        icon: Icon(Icons.smart_toy_outlined),
-                        label: "Chatbot",
+                        icon: Icon(Icons.smart_toy, size: 30),
+                        label: "AI",
                       ),
                       const BottomNavigationBarItem(
                         icon: Icon(Icons.person_outline),

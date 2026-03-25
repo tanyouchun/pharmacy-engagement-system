@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../viewmodels/pharmacist_profile_viewmodel.dart';
 import '../home_page.dart';
-import '../auth_wrapper.dart';
-import '../../services/auth_service.dart';
+// import '../auth_wrapper.dart';
+// import '../../services/auth_service.dart';
 
 class PharmacistProfileFormView extends StatefulWidget {
   const PharmacistProfileFormView({super.key});
@@ -15,22 +15,22 @@ class PharmacistProfileFormView extends StatefulWidget {
 class _PharmacistProfileFormViewState extends State<PharmacistProfileFormView> {
   final _formKey = GlobalKey<FormState>();
 
-  Future<void> _logout() async {
-    try {
-      await AuthService().signOut();
-      if (!mounted) return;
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const AuthWrapper()),
-        (route) => false,
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Logout failed: $e')),
-      );
-    }
-  }
+  // Future<void> _logout() async {
+  //   try {
+  //     await AuthService().signOut();
+  //     if (!mounted) return;
+  //     Navigator.pushAndRemoveUntil(
+  //       context,
+  //       MaterialPageRoute(builder: (_) => const AuthWrapper()),
+  //       (route) => false,
+  //     );
+  //   } catch (e) {
+  //     if (!mounted) return;
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Logout failed: $e')),
+  //     );
+  //   }
+  // }
 
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;

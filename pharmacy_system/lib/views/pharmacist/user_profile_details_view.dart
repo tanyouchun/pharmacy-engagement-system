@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../viewmodels/user_profile_viewmodel.dart';
+import '../../utils/report_helper.dart';
 
 class UserProfileDetailsView extends StatefulWidget {
   final String userId;
@@ -12,6 +16,7 @@ class UserProfileDetailsView extends StatefulWidget {
 
 class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
   bool isLoading = true;
+  bool isAdmin = false;
 
   @override
   void initState() {
@@ -23,6 +28,20 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
     final vm = Provider.of<UserProfileViewModel>(context, listen: false);
     await vm.loadUserProfile(widget.userId);
     await vm.loadUserPrescriptions(widget.userId);
+
+    final currentUser = FirebaseAuth.instance.currentUser;
+
+    if (currentUser != null) {
+      final doc =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(currentUser.uid)
+              .get();
+
+      final role = doc.data()?['role'];
+
+      isAdmin = role == 'admin';
+    }
 
     setState(() {
       isLoading = false;
@@ -38,14 +57,35 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
       appBar: AppBar(
+        title: const Text("User Profile"),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context); // 🔙 go back to chat
-          },
+          onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'report') {
+                final vm = Provider.of<UserProfileViewModel>(
+                  context,
+                  listen: false,
+                );
+
+                ReportHelper.showReportDialog(
+                  context: context,
+                  reportedUserId: widget.userId,
+                  reportedName: vm.name,
+                  reportedRole: "user",
+                );
+              }
+            },
+            itemBuilder:
+                (context) => [
+                  const PopupMenuItem(value: 'report', child: Text("Report")),
+                ],
+          ),
+        ],
       ),
       body: SafeArea(
         child: Column(
@@ -55,7 +95,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
             //TODO: replace with real profile picture
             CircleAvatar(
               radius: 50,
-              backgroundImage: NetworkImage("https://i.pravatar.cc/150?img=3"),
+              // backgroundImage: NetworkImage("https://i.pravatar.cc/150?img=3"),
             ),
 
             const SizedBox(height: 10),
@@ -134,21 +174,27 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                                     ),
                                   ),
 
-                                  IconButton(
-                                    icon: const Icon(Icons.edit),
-                                    onPressed: () {
-                                      _showEditPrescriptionDialog(p.id, p.name);
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete),
-                                    onPressed: () {
-                                      vm.deletePrescription(
-                                        widget.userId,
-                                        p.id,
-                                      );
-                                    },
-                                  ),
+                                  if (!isAdmin)
+                                    IconButton(
+                                      icon: const Icon(Icons.edit),
+                                      onPressed: () {
+                                        _showEditPrescriptionDialog(
+                                          p.id,
+                                          p.name,
+                                        );
+                                      },
+                                    ),
+
+                                  if (!isAdmin)
+                                    IconButton(
+                                      icon: const Icon(Icons.delete),
+                                      onPressed: () {
+                                        vm.deletePrescription(
+                                          widget.userId,
+                                          p.id,
+                                        );
+                                      },
+                                    ),
                                 ],
                               ),
                             ),
@@ -159,12 +205,15 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _showAddPrescriptionDialog();
-        },
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton:
+          isAdmin
+              ? null
+              : FloatingActionButton(
+                onPressed: () {
+                  _showAddPrescriptionDialog();
+                },
+                child: const Icon(Icons.add),
+              ),
     );
   }
 
