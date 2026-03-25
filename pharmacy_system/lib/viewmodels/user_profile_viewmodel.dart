@@ -5,6 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pharmacy_system/models/prescription.dart';
 
+import '../models/user_profile.dart';
+import '../models/prescription.dart';
+
 class UserProfileViewModel extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -59,15 +62,24 @@ class UserProfileViewModel extends ChangeNotifier {
       notifyListeners();
 
       final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        errorMessage = "User not logged in";
+        return false;
+      }
+      final profile = UserProfile(
+        id: user.uid,
+        name: nameController.text,
+        age: int.tryParse(ageController.text) ?? 0,
+        gender: genderController.text,
+        weight: weightController.text,
+        height: heightController.text,
+        allergies: allergiesController.text,
+      );
 
-      await _firestore.collection("user_profiles").doc(user!.uid).set({
-        "name": nameController.text,
-        "age": int.tryParse(ageController.text) ?? 0,
-        "gender": genderController.text,
-        "weight": weightController.text,
-        "height": heightController.text,
-        "allergies": allergiesController.text,
-      });
+      await _firestore
+          .collection("user_profiles")
+          .doc(user.uid)
+          .set(profile.toMap());
 
       hasProfile = true;
       isLoading = false;
@@ -92,14 +104,14 @@ class UserProfileViewModel extends ChangeNotifier {
           await _firestore.collection("user_profiles").doc(user.uid).get();
 
       if (doc.exists) {
-        final data = doc.data()!;
+        final profile = UserProfile.fromDoc(doc);
 
-        name = data["name"] ?? "";
-        age = data["age"].toString();
-        gender = data["gender"] ?? "";
-        weight = data["weight"] ?? "";
-        height = data["height"] ?? "";
-        allergies = data["allergies"] ?? "";
+        name = profile.name;
+        age = profile.age.toString();
+        gender = profile.gender;
+        weight = profile.weight;
+        height = profile.height;
+        allergies = profile.allergies;
 
         nameController.text = name;
         ageController.text = age;
@@ -145,16 +157,25 @@ class UserProfileViewModel extends ChangeNotifier {
       notifyListeners();
 
       final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        errorMessage = "User not logged in";
+        return false;
+      }
 
-      await _firestore.collection("user_profiles").doc(user!.uid).update({
-        "name": nameController.text,
-        "age": int.tryParse(ageController.text) ?? 0,
-        "gender": genderController.text,
-        "weight": weightController.text,
-        "height": heightController.text,
-        "allergies": allergiesController.text,
-        "updatedAt": FieldValue.serverTimestamp(),
-      });
+      final profile = UserProfile(
+        id: user.uid,
+        name: nameController.text,
+        age: int.tryParse(ageController.text) ?? 0,
+        gender: genderController.text,
+        weight: weightController.text,
+        height: heightController.text,
+        allergies: allergiesController.text,
+      );
+
+      await _firestore
+          .collection("user_profiles")
+          .doc(user.uid)
+          .update(profile.toMap());
 
       name = nameController.text;
       age = ageController.text;
@@ -215,9 +236,7 @@ class UserProfileViewModel extends ChangeNotifier {
       log("Prescriptions count: ${snapshot.docs.length}");
 
       prescriptions =
-          snapshot.docs
-              .map((doc) => Prescription.fromMap(doc.id, doc.data()))
-              .toList();
+          snapshot.docs.map((doc) => Prescription.fromDoc(doc)).toList();
 
       isLoadingPrescription = false;
       notifyListeners();
@@ -231,11 +250,30 @@ class UserProfileViewModel extends ChangeNotifier {
 
   //add: user_profiles/{userId}/prescriptions/{prescriptionId}
   Future<void> addPrescription(String userId, String name, String notes) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      errorMessage = "Pharmacist not logged in";
+      return;
+    }
+    final userDoc =
+        await _firestore.collection("pharmacist_profiles").doc(user.uid).get();
+
+    final userName = userDoc.data()?['name'] ?? "Unknown";
+    log("Prescription added by: $userName");
+
+    final prescription = Prescription(
+      id: '', // Firestore will generate this
+      name: name,
+      notes: notes,
+      addedBy: user.uid,
+      addedByName: userName,
+    );
+
     await _firestore
         .collection("user_profiles")
         .doc(userId)
         .collection("prescriptions")
-        .add({"name": name, "notes": notes, "date": DateTime.now().toString()});
+        .add(prescription.toMap());
 
     await loadUserPrescriptions(userId);
   }
@@ -247,13 +285,29 @@ class UserProfileViewModel extends ChangeNotifier {
     String name,
     String notes,
   ) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      errorMessage = "Pharmacist not logged in";
+      return;
+    }
+    final userDoc =
+        await _firestore.collection("pharmacist_profiles").doc(user.uid).get();
+
+    final userName = userDoc.data()?['name'] ?? "Unknown";
+    final updatedPrescription = Prescription(
+      id: id,
+      name: name,
+      notes: notes,
+      addedBy: user.uid,
+      addedByName: userName,
+    );
+
     await _firestore
         .collection("user_profiles")
         .doc(userId)
         .collection("prescriptions")
         .doc(id)
-        .update({"name": name, "notes": notes});
-
+        .update(updatedPrescription.toMap());
     await loadUserPrescriptions(userId);
   }
 

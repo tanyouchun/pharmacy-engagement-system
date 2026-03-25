@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -26,9 +28,8 @@ class PrescriptionViewModel extends ChangeNotifier {
             .get();
 
     prescriptions =
-        snapshot.docs
-            .map((doc) => Prescription.fromMap(doc.id, doc.data()))
-            .toList();
+        snapshot.docs.map((doc) => Prescription.fromDoc(doc)).toList();
+    log("Total presciptions: ${prescriptions.length}");
 
     isLoadingPrescription = false;
     notifyListeners();
@@ -38,11 +39,31 @@ class PrescriptionViewModel extends ChangeNotifier {
   Future<void> addPrescription(String name, String notes) async {
     final user = FirebaseAuth.instance.currentUser;
 
+    if (user == null) {
+      errorMessage = "User not logged in";
+      notifyListeners();
+      return;
+    }
+    final userDoc =
+        await _firestore.collection("user_profiles").doc(user.uid).get();
+
+    final userName = userDoc.data()?['name'] ?? "Unknown";
+
+    log("AddedBy: $userName");
+
+    final prescription = Prescription(
+      id: '',
+      name: name,
+      notes: notes,
+      addedBy: user.uid,
+      addedByName: userName,
+    );
+
     await _firestore
         .collection("user_profiles")
-        .doc(user!.uid)
+        .doc(user.uid)
         .collection("prescriptions")
-        .add({"name": name, "notes": notes, "date": DateTime.now()});
+        .add(prescription.toMap());
 
     await loadPrescriptions();
   }
@@ -51,12 +72,26 @@ class PrescriptionViewModel extends ChangeNotifier {
   Future<void> updatePrescription(String id, String name, String notes) async {
     final user = FirebaseAuth.instance.currentUser;
 
+    if (user == null) return;
+    final userDoc =
+        await _firestore.collection("user_profiles").doc(user.uid).get();
+
+    final userName = userDoc.data()?['name'] ?? "Unknown";
+
+    final updated = Prescription(
+      id: id,
+      name: name,
+      notes: notes,
+      addedBy: user.uid,
+      addedByName: userName,
+    );
+
     await _firestore
         .collection("user_profiles")
-        .doc(user!.uid)
+        .doc(user.uid)
         .collection("prescriptions")
         .doc(id)
-        .update({"name": name, "notes": notes});
+        .update(updated.toMap(isUpdate: true));
 
     await loadPrescriptions();
   }
@@ -64,10 +99,11 @@ class PrescriptionViewModel extends ChangeNotifier {
   //delete: user_profiles/{userId}/prescriptions/{prescriptionId}
   Future<void> deletePrescription(String id) async {
     final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
 
     await _firestore
         .collection("user_profiles")
-        .doc(user!.uid)
+        .doc(user.uid)
         .collection("prescriptions")
         .doc(id)
         .delete();

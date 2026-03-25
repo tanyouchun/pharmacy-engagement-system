@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../models/pharmacist_profile.dart';
+
 class PharmacistProfileViewModel extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -56,12 +58,12 @@ class PharmacistProfileViewModel extends ChangeNotifier {
               .get();
 
       if (doc.exists) {
-        final data = doc.data()!;
+        final profile = PharmacistProfile.fromDoc(doc);
 
-        name = data['name'] ?? '';
-        license = data['license'] ?? '';
-        pharmacyName = data['pharmacyName'] ?? '';
-        experience = data['experience'] ?? 0;
+        name = profile.name;
+        license = profile.license;
+        pharmacyName = profile.pharmacyName;
+        experience = profile.experience;
 
         nameController.text = name;
         licenseController.text = license;
@@ -88,14 +90,18 @@ class PharmacistProfileViewModel extends ChangeNotifier {
       isLoading = true;
       notifyListeners();
 
-      await _firestore.collection('pharmacist_profiles').doc(user.uid).set({
-        'id': user.uid,
-        'name': nameController.text.trim(),
-        'license': licenseController.text.trim(),
-        'pharmacyName': pharmacyNameController.text.trim(),
-        'experience': int.tryParse(experienceController.text.trim()) ?? 0,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+      final profile = PharmacistProfile(
+        id: user.uid,
+        name: nameController.text.trim(),
+        license: licenseController.text.trim(),
+        pharmacyName: pharmacyNameController.text.trim(),
+        experience: int.tryParse(experienceController.text.trim()) ?? 0,
+      );
+
+      await _firestore
+          .collection('pharmacist_profiles')
+          .doc(user.uid)
+          .set(profile.toMap());
 
       hasProfile = true;
       await loadProfile();
@@ -117,13 +123,18 @@ class PharmacistProfileViewModel extends ChangeNotifier {
       isLoading = true;
       notifyListeners();
 
-      await _firestore.collection('pharmacist_profiles').doc(user.uid).update({
-        'name': nameController.text.trim(),
-        'license': licenseController.text.trim(),
-        'pharmacyName': pharmacyNameController.text.trim(),
-        'experience': int.tryParse(experienceController.text.trim()) ?? 0,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+      final profile = PharmacistProfile(
+        id: user.uid,
+        name: nameController.text.trim(),
+        license: licenseController.text.trim(),
+        pharmacyName: pharmacyNameController.text.trim(),
+        experience: int.tryParse(experienceController.text.trim()) ?? 0,
+      );
+
+      await _firestore
+          .collection('pharmacist_profiles')
+          .doc(user.uid)
+          .update(profile.toMap());
 
       await loadProfile();
       return true;
@@ -177,15 +188,12 @@ class PharmacistProfileViewModel extends ChangeNotifier {
           await _firestore.collection('pharmacist_profiles').doc(userId).get();
 
       if (doc.exists) {
-        final data = doc.data() ?? {};
+        final profile = PharmacistProfile.fromDoc(doc);
 
-        name = (data['name'] ?? '').toString();
-        license = (data['license'] ?? '').toString();
-        pharmacyName = (data['pharmacyName'] ?? '').toString();
-        experience =
-            (data['experience'] is int)
-                ? data['experience'] as int
-                : int.tryParse((data['experience'] ?? '0').toString()) ?? 0;
+        name = profile.name;
+        license = profile.license;
+        pharmacyName = profile.pharmacyName;
+        experience = profile.experience;
 
         hasProfile = true;
       } else {

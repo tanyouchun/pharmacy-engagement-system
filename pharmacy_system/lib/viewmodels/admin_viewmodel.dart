@@ -2,13 +2,14 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import '../models/account_issue.dart';
 
 class AdminManageUserViewModel extends ChangeNotifier {
   final _usersRef = FirebaseFirestore.instance.collection('users');
 
   List<QueryDocumentSnapshot> _users = [];
-  List<QueryDocumentSnapshot> _reports = [];
-  List<QueryDocumentSnapshot> get reports => _reports;
+  List<AccountIssueReport> _reports = [];
+  List<AccountIssueReport> get reports => _reports;
 
   bool _isLoadingReports = true;
   bool get isLoadingReports => _isLoadingReports;
@@ -36,16 +37,18 @@ class AdminManageUserViewModel extends ChangeNotifier {
     }
 
     try {
-      await FirebaseFirestore.instance.collection('account_issues').add({
-        "reportedUserId": reportedUserId,
-        "reportedName": reportedName,
-        "reportedRole": reportedRole,
-        "reportedBy": reportedBy,
-        "reason": reason,
-        "status": "pending",
-        "createdAt": FieldValue.serverTimestamp(),
-      });
-
+      final data = AccountIssueReport(
+        reportedUserId: reportedUserId,
+        reportedName: reportedName,
+        reportedRole: reportedRole,
+        reportedBy: reportedBy,
+        reason: reason,
+        status: "pending",
+      );
+      await FirebaseFirestore.instance
+          .collection('account_issues')
+          .add(data.toMap());
+      log("Suspended user account: ${data.toMap()}");
       return true;
     } catch (e) {
       _reportError = e.toString();
@@ -76,7 +79,10 @@ class AdminManageUserViewModel extends ChangeNotifier {
         .snapshots()
         .listen(
           (snapshot) {
-            _reports = snapshot.docs;
+            _reports =
+                snapshot.docs
+                    .map((doc) => AccountIssueReport.fromDoc(doc))
+                    .toList();
             log("Loaded ${_reports.length} reports");
             _isLoadingReports = false;
             notifyListeners();

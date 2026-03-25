@@ -42,12 +42,11 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
         itemCount: vm.reports.length,
         itemBuilder: (context, index) {
           final report = vm.reports[index];
-          final data = report.data() as Map<String, dynamic>;
 
-          final name = data['reportedName'] ?? "";
-          final role = data['reportedRole'] ?? "";
-          final reason = data['reason'] ?? "";
-          final userId = data['reportedUserId'];
+          final name = report.reportedName;
+          final role = report.reportedRole;
+          final reason = report.reason;
+          final userId = report.reportedUserId;
 
           final userData = vm.getUserData(userId);
 
@@ -89,7 +88,7 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
                     },
                   ),
 
-                  /// 🔄 If blocked → show UNSUSPEND
+                  // show UNSUSPEND
                   if (isBlocked)
                     IconButton(
                       icon: const Icon(Icons.lock_open, color: Colors.green),
@@ -106,12 +105,11 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
                       },
                     )
                   else
-                    /// ⛔ If active → show SUSPEND
                     IconButton(
                       icon: const Icon(Icons.block, color: Colors.red),
                       tooltip: "Suspend User",
                       onPressed: () {
-                        _showSuspendDialog(vm, userId, report.id);
+                        _showSuspendDialog(vm, userId, report.id!);
                       },
                     ),
                 ],

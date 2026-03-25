@@ -42,7 +42,16 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
                       child: ListTile(
                         leading: const Icon(Icons.medication),
                         title: Text(p.name),
-                        subtitle: Text("Added: ${p.date}"),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Added: ${p.date != null ? "${p.date!.year}-${p.date!.month}-${p.date!.day}" : ""}",
+                            ),
+                            Text("Added By: ${p.addedByName}"),
+                          ],
+                        ),
+
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [

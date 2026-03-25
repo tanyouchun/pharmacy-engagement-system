@@ -4,32 +4,54 @@ class Prescription {
   final String id;
   final String name;
   final String notes;
-  final String date;
+  final String addedBy;
+  final String addedByName;
+  final DateTime? date;
 
   Prescription({
     required this.id,
     required this.name,
     required this.notes,
-    required this.date,
+    required this.addedBy,
+    required this.addedByName,
+    this.date,
   });
 
-  factory Prescription.fromMap(String id, Map<String, dynamic> data) {
-    final rawDate = data['date'] ?? '';
-
-    String formattedDate = "";
-
-    if (rawDate is Timestamp) {
-      final date = rawDate.toDate();
-      formattedDate = "${date.day}/${date.month}/${date.year}";
-    } else {
-      formattedDate = rawDate?.toString() ?? "";
-    }
+  factory Prescription.fromDoc(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
 
     return Prescription(
-      id: id,
+      id: doc.id,
       name: data['name'] ?? '',
       notes: data['notes'] ?? '',
-      date: formattedDate,
+      addedBy: data['addedBy'] ?? '',
+      addedByName: data['addedByName'] ?? '',
+      date: (data['date'] as Timestamp?)?.toDate(),
     );
+  }
+
+  // factory Prescription.fromMap(String id, Map<String, dynamic> data) {
+  //   return Prescription(
+  //     id: id,
+  //     name: data['name'] ?? '',
+  //     notes: data['notes'] ?? '',
+  //     addedBy: data['addedBy'] ?? '',
+      
+  //     date:
+  //         (data['date'] is Timestamp)
+  //             ? (data['date'] as Timestamp).toDate()
+  //             : data['date'] as DateTime?,
+  //   );
+  // }
+
+  Map<String, dynamic> toMap({bool isUpdate = false}) {
+    return {
+      "name": name,
+      "notes": notes,
+      "addedBy": addedBy,
+      "addedByName": addedByName,
+      if (!isUpdate) "date": FieldValue.serverTimestamp(),
+      if (isUpdate) "updatedAt": FieldValue.serverTimestamp(),
+    };
   }
 }

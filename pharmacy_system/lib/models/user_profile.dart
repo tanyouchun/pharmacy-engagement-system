@@ -1,4 +1,5 @@
 import 'profile.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserProfile extends Profile {
   final int age;
@@ -6,6 +7,7 @@ class UserProfile extends Profile {
   final String height;
   final String weight;
   final String allergies;
+  final DateTime? updatedAt;
 
   UserProfile({
     required super.id,
@@ -15,6 +17,7 @@ class UserProfile extends Profile {
     required this.height,
     required this.weight,
     required this.allergies,
+    this.updatedAt,
   });
 
   Map<String, dynamic> toMap() {
@@ -26,18 +29,42 @@ class UserProfile extends Profile {
       'height': height,
       'weight': weight,
       'allergies': allergies,
+      "updatedAt": FieldValue.serverTimestamp(),
     };
   }
 
-  factory UserProfile.fromMap(Map<String, dynamic> map) {
+  factory UserProfile.fromDoc(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+
     return UserProfile(
-      id: map['id'],
-      name: map['name'],
-      age: map['age'] ?? 0,
-      gender: map['gender'] ?? '',
-      height: map['height'] ?? '',
-      weight: map['weight'] ?? '',
-      allergies: map['allergies'] ?? '',
+      id: doc.id,
+      name: data["name"] ?? "",
+      age: data["age"] ?? 0,
+      gender: data["gender"] ?? "",
+      weight: data["weight"] ?? "",
+      height: data["height"] ?? "",
+      allergies: data["allergies"] ?? "",
+      updatedAt: (data["updatedAt"] as Timestamp?)?.toDate(),
+    );
+  }
+
+  UserProfile copyWith({
+    String? name,
+    int? age,
+    String? gender,
+    String? weight,
+    String? height,
+    String? allergies,
+  }) {
+    return UserProfile(
+      id: id,
+      name: name ?? this.name,
+      age: age ?? this.age,
+      gender: gender ?? this.gender,
+      weight: weight ?? this.weight,
+      height: height ?? this.height,
+      allergies: allergies ?? this.allergies,
+      updatedAt: updatedAt,
     );
   }
 }
