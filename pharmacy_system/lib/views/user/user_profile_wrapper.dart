@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../viewmodels/user_profile_viewmodel.dart';
 import 'user_profile_display_view.dart';
-import '../create_profile_view.dart';
+import 'user_create_profile_view.dart';
 
 class UserProfileWrapper extends StatelessWidget {
   const UserProfileWrapper({super.key});

@@ -119,7 +119,42 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 50),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Medical Conditions",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+
+                  vm.medicalConditions.isEmpty
+                      ? const Text(
+                        "No medical conditions",
+                        style: TextStyle(color: Colors.grey),
+                      )
+                      : Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children:
+                            vm.medicalConditions
+                                .split(',')
+                                .map(
+                                  (condition) => Chip(
+                                    label: Text(condition.trim()),
+                                    backgroundColor: Colors.blue.shade50,
+                                  ),
+                                )
+                                .toList(),
+                      ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 60),
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),

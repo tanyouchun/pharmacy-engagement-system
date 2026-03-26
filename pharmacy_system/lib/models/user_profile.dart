@@ -6,7 +6,8 @@ class UserProfile extends Profile {
   final String gender;
   final String height;
   final String weight;
-  final String allergies;
+  final List<String> allergies;
+  final List<String> medicalConditions;
   final DateTime? updatedAt;
 
   UserProfile({
@@ -17,6 +18,7 @@ class UserProfile extends Profile {
     required this.height,
     required this.weight,
     required this.allergies,
+    required this.medicalConditions,
     this.updatedAt,
   });
 
@@ -29,6 +31,7 @@ class UserProfile extends Profile {
       'height': height,
       'weight': weight,
       'allergies': allergies,
+      'medicalConditions': medicalConditions,
       "updatedAt": FieldValue.serverTimestamp(),
     };
   }
@@ -43,7 +46,8 @@ class UserProfile extends Profile {
       gender: data["gender"] ?? "",
       weight: data["weight"] ?? "",
       height: data["height"] ?? "",
-      allergies: data["allergies"] ?? "",
+      medicalConditions: List<String>.from(data["medicalConditions"] ?? []),
+      allergies: List<String>.from(data["allergies"] ?? []),
       updatedAt: (data["updatedAt"] as Timestamp?)?.toDate(),
     );
   }
@@ -54,7 +58,8 @@ class UserProfile extends Profile {
     String? gender,
     String? weight,
     String? height,
-    String? allergies,
+    List<String>? medicalConditions,
+    List<String>? allergies,
   }) {
     return UserProfile(
       id: id,
@@ -63,6 +68,7 @@ class UserProfile extends Profile {
       gender: gender ?? this.gender,
       weight: weight ?? this.weight,
       height: height ?? this.height,
+      medicalConditions: medicalConditions ?? this.medicalConditions,
       allergies: allergies ?? this.allergies,
       updatedAt: updatedAt,
     );

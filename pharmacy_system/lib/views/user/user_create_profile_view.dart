@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../viewmodels/user_profile_viewmodel.dart';
+import '../../viewmodels/user_profile_viewmodel.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
@@ -58,6 +58,13 @@ class ProfileView extends StatelessWidget {
                 TextField(
                   controller: vm.allergiesController,
                   decoration: const InputDecoration(labelText: "Allergies"),
+                ),
+
+                const SizedBox(height: 15),
+
+                TextField(
+                  controller: vm.medicalConditionsController,
+                  decoration: const InputDecoration(labelText: "Medical Conditions"),
                 ),
 
                 const SizedBox(height: 25),

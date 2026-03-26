@@ -23,7 +23,7 @@ class LoginViewModel extends ChangeNotifier {
         password: passwordController.text.trim(),
       );
       final uid = credential.user?.uid;
-
+      log("Current logged in user ID: ${credential.user?.uid}");
       if (uid != null) {
         await _checkUserStatus(uid);
       }

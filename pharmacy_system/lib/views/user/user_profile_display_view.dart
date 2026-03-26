@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../viewmodels/user_profile_viewmodel.dart';
-import '../edit_profile_view.dart';
+import 'user_edit_profile_view.dart';
 
 class UserProfileDisplayView extends StatefulWidget {
   const UserProfileDisplayView({super.key});
@@ -45,7 +45,7 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
             //TODO: replace with real profile picture
             CircleAvatar(
               radius: 50,
-              backgroundImage: NetworkImage("https://i.pravatar.cc/150?img=3"),
+              // backgroundImage: NetworkImage(""),
             ),
 
             const SizedBox(height: 10),
@@ -65,6 +65,43 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
                   _buildStat(Icons.cake, "Age", vm.age),
                   _buildStat(Icons.height, "Height", "${vm.height} cm"),
                   _buildStat(Icons.monitor_weight, "Weight", "${vm.weight} kg"),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 40),
+
+            // Medical Conditions Section
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Medical Conditions",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+
+                  vm.medicalConditions.isEmpty
+                      ? const Text(
+                        "No medical conditions",
+                        style: TextStyle(color: Colors.grey),
+                      )
+                      : Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children:
+                            vm.medicalConditions
+                                .split(',')
+                                .map(
+                                  (condition) => Chip(
+                                    label: Text(condition.trim()),
+                                    backgroundColor: Colors.blue.shade50,
+                                  ),
+                                )
+                                .toList(),
+                      ),
                 ],
               ),
             ),

@@ -30,6 +30,13 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
       body:
           vm.isLoadingPrescription
               ? const Center(child: CircularProgressIndicator())
+              : vm.prescriptions.isEmpty
+              ? const Center(
+                child: Text(
+                  "No prescriptions added",
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+              )
               : ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: vm.prescriptions.length,

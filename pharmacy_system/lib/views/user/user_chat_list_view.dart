@@ -58,7 +58,7 @@ class _ChatListViewState extends State<ChatListView> {
           final chats = snapshot.data!.docs;
 
           if (chats.isEmpty) {
-            return const Center(child: Text("No chats yet"));
+            return const Center(child: Text("No chats yet", style: TextStyle(fontSize: 16, color: Colors.grey)));
           }
 
           return ListView.builder(
