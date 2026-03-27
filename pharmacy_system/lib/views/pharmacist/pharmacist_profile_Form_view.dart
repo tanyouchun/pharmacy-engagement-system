@@ -34,14 +34,14 @@ class _PharmacistProfileFormViewState extends State<PharmacistProfileFormView> {
 
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
-    final vm = context.read<PharmacistProfileViewModel>();
+    final pharmacistProfileViewModel = context.read<PharmacistProfileViewModel>();
 
-    final ok = await vm.saveProfile();
+    final ok = await pharmacistProfileViewModel.saveProfile();
     if (!mounted) return;
 
     if (!ok) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(vm.errorMessage ?? 'Failed to save profile')),
+        SnackBar(content: Text(pharmacistProfileViewModel.errorMessage ?? 'Failed to save profile')),
       );
       return;
     }
@@ -55,7 +55,7 @@ class _PharmacistProfileFormViewState extends State<PharmacistProfileFormView> {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<PharmacistProfileViewModel>();
+    final pharmacistProfileViewModel = context.watch<PharmacistProfileViewModel>();
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -66,7 +66,7 @@ class _PharmacistProfileFormViewState extends State<PharmacistProfileFormView> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TextFormField(
-                  controller: vm.nameController,
+                  controller: pharmacistProfileViewModel.nameController,
                   decoration: const InputDecoration(
                     labelText: 'Full Name',
                   ),
@@ -75,7 +75,7 @@ class _PharmacistProfileFormViewState extends State<PharmacistProfileFormView> {
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  controller: vm.licenseController,
+                  controller: pharmacistProfileViewModel.licenseController,
                   decoration: const InputDecoration(
                     labelText: 'License Number',
                   ),
@@ -84,14 +84,14 @@ class _PharmacistProfileFormViewState extends State<PharmacistProfileFormView> {
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  controller: vm.pharmacyNameController,
+                  controller: pharmacistProfileViewModel.pharmacyNameController,
                   decoration: const InputDecoration(
                     labelText: 'Pharmacy Name',
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  controller: vm.experienceController,
+                  controller: pharmacistProfileViewModel.experienceController,
                   decoration: const InputDecoration(
                     labelText: 'Years of Experience',
                   ),
@@ -101,8 +101,8 @@ class _PharmacistProfileFormViewState extends State<PharmacistProfileFormView> {
                 SizedBox(
                   height: 48,
                   child: ElevatedButton(
-                    onPressed: vm.isLoading ? null : _saveProfile,
-                    child: vm.isLoading
+                    onPressed: pharmacistProfileViewModel.isLoading ? null : _saveProfile,
+                    child: pharmacistProfileViewModel.isLoading
                         ? const CircularProgressIndicator(
                             valueColor:
                                 AlwaysStoppedAnimation<Color>(Colors.white),

@@ -28,8 +28,8 @@ class _ChatViewState extends State<ChatView> {
 
     // Start listening via ViewModel
     Future.microtask(() {
-      final vm = Provider.of<ChatViewModel>(context, listen: false);
-      vm.listenMessages(widget.chatId);
+      final chatViewModel = Provider.of<ChatViewModel>(context, listen: false);
+      chatViewModel.listenMessages(widget.chatId);
     });
   }
 
@@ -94,10 +94,10 @@ class _ChatViewState extends State<ChatView> {
         children: [
           Expanded(
             child: Consumer<ChatViewModel>(
-              builder: (context, vm, _) {
+              builder: (context, chatViewModel, _) {
                 return ListView(
                   children:
-                      vm.messages.map((msg) {
+                      chatViewModel.messages.map((msg) {
                         final isMe = msg.senderId == user.uid;
 
                         return GestureDetector(
@@ -171,12 +171,12 @@ class _ChatViewState extends State<ChatView> {
                   onPressed: () async {
                     if (controller.text.isEmpty) return;
 
-                    final vm = Provider.of<ChatViewModel>(
+                    final chatViewModel = Provider.of<ChatViewModel>(
                       context,
                       listen: false,
                     );
 
-                    await vm.sendMessage(widget.chatId, controller.text);
+                    await chatViewModel.sendMessage(widget.chatId, controller.text);
 
                     controller.clear();
                   },
@@ -211,9 +211,9 @@ class _ChatViewState extends State<ChatView> {
               onTap: () async {
                 Navigator.pop(context);
 
-                final vm = Provider.of<ChatViewModel>(context, listen: false);
+                final chatViewModel = Provider.of<ChatViewModel>(context, listen: false);
 
-                await vm.deleteMessage(widget.chatId, messageId);
+                await chatViewModel.deleteMessage(widget.chatId, messageId);
               },
             ),
           ],
@@ -238,9 +238,9 @@ class _ChatViewState extends State<ChatView> {
             ),
             TextButton(
               onPressed: () async {
-                final vm = Provider.of<ChatViewModel>(context, listen: false);
+                final chatViewModel = Provider.of<ChatViewModel>(context, listen: false);
 
-                await vm.editMessage(
+                await chatViewModel.editMessage(
                   widget.chatId,
                   messageId,
                   editController.text,

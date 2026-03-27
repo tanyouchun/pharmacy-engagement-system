@@ -27,9 +27,9 @@ class _PharmacistProfileDetailsViewState
   }
 
   Future<void> _loadData() async {
-    final vm = Provider.of<PharmacistProfileViewModel>(context, listen: false);
+    final pharmacistProfileViewModel = Provider.of<PharmacistProfileViewModel>(context, listen: false);
 
-    await vm.loadPharmacistById(widget.pharmacistId);
+    await pharmacistProfileViewModel.loadPharmacistById(widget.pharmacistId);
 
     setState(() {
       isLoading = false;
@@ -38,13 +38,13 @@ class _PharmacistProfileDetailsViewState
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<PharmacistProfileViewModel>(context);
+    final pharmacistProfileViewModel = Provider.of<PharmacistProfileViewModel>(context);
 
     if (isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    if (!vm.hasProfile) {
+    if (!pharmacistProfileViewModel.hasProfile) {
       return const Scaffold(
         body: Center(child: Text("Pharmacist profile not found")),
       );
@@ -96,7 +96,7 @@ class _PharmacistProfileDetailsViewState
 
             // Name
             Text(
-              vm.name,
+              pharmacistProfileViewModel.name,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
 
@@ -108,9 +108,9 @@ class _PharmacistProfileDetailsViewState
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildStat(Icons.badge, "License", vm.license),
-                  _buildStat(Icons.local_pharmacy, "Pharmacy", vm.pharmacyName),
-                  _buildStat(Icons.work, "Experience", "${vm.experience} yrs"),
+                  _buildStat(Icons.badge, "License", pharmacistProfileViewModel.license),
+                  _buildStat(Icons.local_pharmacy, "Pharmacy", pharmacistProfileViewModel.pharmacyName),
+                  _buildStat(Icons.work, "Experience", "${pharmacistProfileViewModel.experience} yrs"),
                 ],
               ),
             ),
@@ -144,7 +144,7 @@ class _PharmacistProfileDetailsViewState
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Text(
-                    "${vm.name} is a licensed pharmacist working at ${vm.pharmacyName} with ${vm.experience} years of experience.",
+                    "${pharmacistProfileViewModel.name} is a licensed pharmacist working at ${pharmacistProfileViewModel.pharmacyName} with ${pharmacistProfileViewModel.experience} years of experience.",
                     style: const TextStyle(fontSize: 14),
                   ),
                 ),

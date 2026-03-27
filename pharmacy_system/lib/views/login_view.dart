@@ -12,7 +12,7 @@ class LoginView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<LoginViewModel>(context);
+    final loginViewModel = Provider.of<LoginViewModel>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -33,7 +33,7 @@ class LoginView extends StatelessWidget {
                 CustomTextField(
                   hint: "Enter your email",
                   icon: Icons.email_outlined,
-                  controller: vm.emailController,
+                  controller: loginViewModel.emailController,
                 ),
                 const SizedBox(height: 15),
 
@@ -42,7 +42,7 @@ class LoginView extends StatelessWidget {
                   hint: "Enter your password",
                   icon: Icons.lock_outline,
                   isPassword: true,
-                  controller: vm.passwordController,
+                  controller: loginViewModel.passwordController,
                 ),
 
                 const SizedBox(height: 10),
@@ -58,12 +58,12 @@ class LoginView extends StatelessWidget {
 
                 const SizedBox(height: 10),
 
-                if (vm.errorMessage != null)
+                if (loginViewModel.errorMessage != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10),
                     child: Center(
                       child: Text(
-                        vm.errorMessage!,
+                        loginViewModel.errorMessage!,
                         textAlign: TextAlign.center,
                         style: const TextStyle(color: Colors.red),
                       ),
@@ -71,14 +71,14 @@ class LoginView extends StatelessWidget {
                   ),
 
                 // Sign In butto
-                vm.isLoading
+                loginViewModel.isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : ElevatedButton(
                       onPressed:
-                          vm.isLoading
+                          loginViewModel.isLoading
                               ? null
                               : () async {
-                                await vm.login();
+                                await loginViewModel.login();
 
                                 if (FirebaseAuth.instance.currentUser != null) {
                                   Navigator.of(context).pushAndRemoveUntil(
@@ -151,7 +151,7 @@ class LoginView extends StatelessWidget {
                 _socialButton(
                   icon: "assets/images/google.png",
                   text: "Sign in with Google",
-                  onTap: vm.signInWithGoogle,
+                  onTap: loginViewModel.signInWithGoogle,
                 ),
 
                 const SizedBox(height: 15),

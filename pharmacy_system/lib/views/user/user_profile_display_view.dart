@@ -20,8 +20,8 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
   }
 
   Future<void> _loadData() async {
-    final vm = Provider.of<UserProfileViewModel>(context, listen: false);
-    await vm.loadProfile();
+    final userProfileViewModel = Provider.of<UserProfileViewModel>(context, listen: false);
+    await userProfileViewModel.loadProfile();
 
     setState(() {
       isLoading = false;
@@ -30,7 +30,7 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<UserProfileViewModel>(context);
+    final userProfileViewModel = Provider.of<UserProfileViewModel>(context);
 
     if (isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -51,7 +51,7 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
             const SizedBox(height: 10),
 
             Text(
-              vm.name,
+              userProfileViewModel.name,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
 
@@ -62,9 +62,9 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildStat(Icons.cake, "Age", vm.age),
-                  _buildStat(Icons.height, "Height", "${vm.height} cm"),
-                  _buildStat(Icons.monitor_weight, "Weight", "${vm.weight} kg"),
+                  _buildStat(Icons.cake, "Age", userProfileViewModel.age),
+                  _buildStat(Icons.height, "Height", "${userProfileViewModel.height} cm"),
+                  _buildStat(Icons.monitor_weight, "Weight", "${userProfileViewModel.weight} kg"),
                 ],
               ),
             ),
@@ -83,7 +83,7 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
                   ),
                   const SizedBox(height: 10),
 
-                  vm.medicalConditions.isEmpty
+                  userProfileViewModel.medicalConditions.isEmpty
                       ? const Text(
                         "No medical conditions",
                         style: TextStyle(color: Colors.grey),
@@ -92,7 +92,7 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
                         spacing: 8,
                         runSpacing: 8,
                         children:
-                            vm.medicalConditions
+                            userProfileViewModel.medicalConditions
                                 .split(',')
                                 .map(
                                   (condition) => Chip(

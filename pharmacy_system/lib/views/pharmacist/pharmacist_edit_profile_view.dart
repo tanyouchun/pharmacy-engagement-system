@@ -7,7 +7,7 @@ class PharmacistEditProfileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<PharmacistProfileViewModel>(context);
+    final pharmacistProfileViewModel = Provider.of<PharmacistProfileViewModel>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -27,14 +27,14 @@ class PharmacistEditProfileView extends StatelessWidget {
           child: Column(
             children: [
               TextField(
-                controller: vm.nameController,
+                controller: pharmacistProfileViewModel.nameController,
                 decoration: const InputDecoration(labelText: "Name"),
               ),
 
               const SizedBox(height: 15),
 
               TextField(
-                controller: vm.licenseController,
+                controller: pharmacistProfileViewModel.licenseController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: "License Number"),
               ),
@@ -42,14 +42,14 @@ class PharmacistEditProfileView extends StatelessWidget {
               const SizedBox(height: 15),
 
               TextField(
-                controller: vm.pharmacyNameController,
+                controller: pharmacistProfileViewModel.pharmacyNameController,
                 decoration: const InputDecoration(labelText: "Pharmacy Name"),
               ),
 
               const SizedBox(height: 15),
 
               TextField(
-                controller: vm.experienceController,
+                controller: pharmacistProfileViewModel.experienceController,
                 decoration: const InputDecoration(
                   labelText: "Experience (years)",
                 ),
@@ -57,17 +57,17 @@ class PharmacistEditProfileView extends StatelessWidget {
 
               const SizedBox(height: 25),
 
-              vm.isLoading
+              pharmacistProfileViewModel.isLoading
                   ? const CircularProgressIndicator()
                   : ElevatedButton(
                     onPressed: () async {
-                      bool success = await vm.updateProfile();
+                      bool success = await pharmacistProfileViewModel.updateProfile();
 
                       if (success) {
                         Navigator.pop(context); // back to profile
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(vm.errorMessage ?? "Error")),
+                          SnackBar(content: Text(pharmacistProfileViewModel.errorMessage ?? "Error")),
                         );
                       }
                     },
@@ -97,7 +97,7 @@ class PharmacistEditProfileView extends StatelessWidget {
 //TODO: force pharmacist to create new profile if they want to use the app again after deletion.
 void _showDeleteDialog(BuildContext context) {
   final parentContext = context;
-  final vm = Provider.of<PharmacistProfileViewModel>(context, listen: false);
+  final pharmacistProfileViewModel = Provider.of<PharmacistProfileViewModel>(context, listen: false);
 
   showDialog(
     context: context,
@@ -118,7 +118,7 @@ void _showDeleteDialog(BuildContext context) {
             onPressed: () async {
               Navigator.pop(dialogContext); // close dialog
 
-              bool success = await vm.deleteProfile();
+              bool success = await pharmacistProfileViewModel.deleteProfile();
 
               if (success) {
                 Navigator.of(parentContext).pushNamedAndRemoveUntil(
@@ -127,7 +127,7 @@ void _showDeleteDialog(BuildContext context) {
                 );
               } else {
                 ScaffoldMessenger.of(parentContext).showSnackBar(
-                  SnackBar(content: Text(vm.errorMessage ?? "Delete failed")),
+                  SnackBar(content: Text(pharmacistProfileViewModel.errorMessage ?? "Delete failed")),
                 );
               }
             },

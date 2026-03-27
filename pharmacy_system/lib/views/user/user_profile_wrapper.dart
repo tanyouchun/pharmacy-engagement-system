@@ -9,20 +9,20 @@ class UserProfileWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<UserProfileViewModel>(context);
+    final userProfileViewModel = Provider.of<UserProfileViewModel>(context);
 
     // first time load
-    if (!vm.hasProfile && !vm.isLoading) {
-      vm.checkProfileExists();
+    if (!userProfileViewModel.hasProfile && !userProfileViewModel.isLoading) {
+      userProfileViewModel.checkProfileExists();
     }
 
-    if (vm.isLoading) {
+    if (userProfileViewModel.isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
-    return vm.hasProfile
+    return userProfileViewModel.hasProfile
         ? const UserProfileDisplayView()
         : const ProfileView();
   }

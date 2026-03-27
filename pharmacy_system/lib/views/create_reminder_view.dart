@@ -59,7 +59,6 @@ class _CreateReminderViewState extends State<CreateReminderView> {
     );
 
     if (widget.reminder == null) {
-      /// CREATE
       await vm.createReminder(
         Reminder(
           reminderId: "",
@@ -71,7 +70,6 @@ class _CreateReminderViewState extends State<CreateReminderView> {
         ),
       );
     } else {
-      /// UPDATE
       await vm.updateReminder(
         widget.reminder!.copyWith(
           medicationName: medicationName,

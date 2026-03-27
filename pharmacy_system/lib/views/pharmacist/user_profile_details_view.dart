@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:pharmacy_system/models/prescription.dart';
+import 'package:pharmacy_system/viewmodels/prescription_viewmodel.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -25,9 +27,16 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
   }
 
   Future<void> _loadData() async {
-    final vm = Provider.of<UserProfileViewModel>(context, listen: false);
-    await vm.loadUserProfile(widget.userId);
-    await vm.loadUserPrescriptions(widget.userId);
+    final userProfileViewModel = Provider.of<UserProfileViewModel>(
+      context,
+      listen: false,
+    );
+    final prescriptionViewModel = Provider.of<PrescriptionViewModel>(
+      context,
+      listen: false,
+    );
+    await userProfileViewModel.loadUserProfile(widget.userId);
+    await prescriptionViewModel.loadUserPrescriptions(widget.userId);
 
     final currentUser = FirebaseAuth.instance.currentUser;
 
@@ -50,7 +59,8 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<UserProfileViewModel>(context);
+    final userProfileViewModel = Provider.of<UserProfileViewModel>(context);
+    final prescriptionViewModel = Provider.of<PrescriptionViewModel>(context);
 
     if (isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -67,7 +77,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'report') {
-                final vm = Provider.of<UserProfileViewModel>(
+                final userProfileViewModel = Provider.of<UserProfileViewModel>(
                   context,
                   listen: false,
                 );
@@ -75,7 +85,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                 ReportHelper.showReportDialog(
                   context: context,
                   reportedUserId: widget.userId,
-                  reportedName: vm.name,
+                  reportedName: userProfileViewModel.name,
                   reportedRole: "user",
                 );
               }
@@ -101,7 +111,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
             const SizedBox(height: 10),
 
             Text(
-              vm.name,
+              userProfileViewModel.name,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
 
@@ -112,9 +122,9 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildStat(Icons.cake, "Age", vm.age),
-                  _buildStat(Icons.height, "Height", "${vm.height} cm"),
-                  _buildStat(Icons.monitor_weight, "Weight", "${vm.weight} kg"),
+                  _buildStat(Icons.cake, "Age", userProfileViewModel.age),
+                  _buildStat(Icons.height, "Height", "${userProfileViewModel.height} cm"),
+                  _buildStat(Icons.monitor_weight, "Weight", "${userProfileViewModel.weight} kg"),
                 ],
               ),
             ),
@@ -132,7 +142,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                   ),
                   const SizedBox(height: 10),
 
-                  vm.medicalConditions.isEmpty
+                  userProfileViewModel.medicalConditions.isEmpty
                       ? const Text(
                         "No medical conditions",
                         style: TextStyle(color: Colors.grey),
@@ -141,7 +151,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                         spacing: 8,
                         runSpacing: 8,
                         children:
-                            vm.medicalConditions
+                            userProfileViewModel.medicalConditions
                                 .split(',')
                                 .map(
                                   (condition) => Chip(
@@ -171,7 +181,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
 
             Expanded(
               child:
-                  vm.prescriptions.isEmpty
+                  prescriptionViewModel.prescriptions.isEmpty
                       ? const Center(
                         child: Text(
                           "No prescriptions found.",
@@ -179,9 +189,9 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                         ),
                       )
                       : ListView.builder(
-                        itemCount: vm.prescriptions.length,
+                        itemCount: prescriptionViewModel.prescriptions.length,
                         itemBuilder: (context, index) {
-                          final p = vm.prescriptions[index];
+                          final p = prescriptionViewModel.prescriptions[index];
 
                           return Card(
                             margin: const EdgeInsets.symmetric(
@@ -215,7 +225,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                                       onPressed: () {
                                         _showEditPrescriptionDialog(
                                           p.prescriptionId,
-                                          p.medicineName,
+                                          p.medicineName, p
                                         );
                                       },
                                     ),
@@ -224,7 +234,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                                     IconButton(
                                       icon: const Icon(Icons.delete),
                                       onPressed: () {
-                                        vm.deletePrescription(
+                                        prescriptionViewModel.deleteUserPrescription(
                                           widget.userId,
                                           p.prescriptionId,
                                         );
@@ -286,12 +296,19 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
             ),
             TextButton(
               onPressed: () async {
-                final vm = Provider.of<UserProfileViewModel>(
-                  context,
-                  listen: false,
-                );
+                final prescriptionViewModel =
+                    Provider.of<PrescriptionViewModel>(context, listen: false);
 
-                await vm.addPrescription(widget.userId, controller.text, "");
+                await prescriptionViewModel.addUserPrescription(widget.userId,
+                  Prescription(
+                    prescriptionId: "",
+                    medicineName: controller.text,
+                    notes: "", 
+                    addedBy: "",
+                    addedByName: "", 
+                    issueDate: null,
+                  ),
+                );
 
                 Navigator.pop(context);
               },
@@ -303,7 +320,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
     );
   }
 
-  void _showEditPrescriptionDialog(String id, String oldName) {
+  void _showEditPrescriptionDialog(String id, String oldName, Prescription prescription) {
     final controller = TextEditingController(text: oldName);
 
     showDialog(
@@ -319,16 +336,17 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
             ),
             TextButton(
               onPressed: () async {
-                final vm = Provider.of<UserProfileViewModel>(
+                final prescriptionViewModel = Provider.of<PrescriptionViewModel>(
                   context,
                   listen: false,
                 );
 
-                await vm.updatePrescription(
+                await prescriptionViewModel.updateUserPrescription(
                   widget.userId,
-                  id,
-                  controller.text,
-                  "",
+                  prescription.copyWith(
+                    medicineName: controller.text,
+                    notes: "",
+                  ),
                 );
 
                 Navigator.pop(context);

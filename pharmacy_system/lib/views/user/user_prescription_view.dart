@@ -24,13 +24,13 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<PrescriptionViewModel>(context);
+    final prescriptionViewModel = Provider.of<PrescriptionViewModel>(context);
 
     return Scaffold(
       body:
-          vm.isLoadingPrescription
+          prescriptionViewModel.isLoadingPrescription
               ? const Center(child: CircularProgressIndicator())
-              : vm.prescriptions.isEmpty
+              : prescriptionViewModel.prescriptions.isEmpty
               ? const Center(
                 child: Text(
                   "No prescriptions added",
@@ -39,9 +39,9 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
               )
               : ListView.builder(
                 padding: const EdgeInsets.all(16),
-                itemCount: vm.prescriptions.length,
+                itemCount: prescriptionViewModel.prescriptions.length,
                 itemBuilder: (context, index) {
-                  final prescription = vm.prescriptions[index];
+                  final prescription = prescriptionViewModel.prescriptions[index];
 
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 5),
@@ -71,7 +71,7 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
                             IconButton(
                               icon: const Icon(Icons.delete),
                               onPressed: () {
-                                vm.deletePrescription(prescription.prescriptionId);
+                                prescriptionViewModel.deletePrescription(prescription.prescriptionId);
                               },
                             ),
                           ],
@@ -97,7 +97,7 @@ void _showAddDialog(BuildContext context) {
   final nameController = TextEditingController();
   final notesController = TextEditingController();
 
-  final vm = Provider.of<PrescriptionViewModel>(context, listen: false);
+  final prescriptionViewModel = Provider.of<PrescriptionViewModel>(context, listen: false);
 
   showDialog(
     context: context,
@@ -124,7 +124,7 @@ void _showAddDialog(BuildContext context) {
             ),
             TextButton(
               onPressed: () async {
-                await vm.addPrescription(
+                await prescriptionViewModel.addPrescription(
                   Prescription(
                     prescriptionId: "",
                     medicineName: nameController.text,

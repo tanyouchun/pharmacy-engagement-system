@@ -7,7 +7,7 @@ class EditProfileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<UserProfileViewModel>(context);
+    final userProfileViewModel = Provider.of<UserProfileViewModel>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -27,14 +27,14 @@ class EditProfileView extends StatelessWidget {
           child: Column(
             children: [
               TextField(
-                controller: vm.nameController,
+                controller: userProfileViewModel.nameController,
                 decoration: const InputDecoration(labelText: "Name"),
               ),
 
               const SizedBox(height: 15),
 
               TextField(
-                controller: vm.ageController,
+                controller: userProfileViewModel.ageController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: "Age"),
               ),
@@ -42,44 +42,44 @@ class EditProfileView extends StatelessWidget {
               const SizedBox(height: 15),
 
               TextField(
-                controller: vm.genderController,
+                controller: userProfileViewModel.genderController,
                 decoration: const InputDecoration(labelText: "Gender"),
               ),
 
               const SizedBox(height: 15),
 
               TextField(
-                controller: vm.weightController,
+                controller: userProfileViewModel.weightController,
                 decoration: const InputDecoration(labelText: "Weight"),
               ),
 
               const SizedBox(height: 15),
 
               TextField(
-                controller: vm.heightController,
+                controller: userProfileViewModel.heightController,
                 decoration: const InputDecoration(labelText: "Height"),
               ),
 
               const SizedBox(height: 15),
 
               TextField(
-                controller: vm.allergiesController,
+                controller: userProfileViewModel.allergiesController,
                 decoration: const InputDecoration(labelText: "Allergies"),
               ),
 
               const SizedBox(height: 25),
 
-              vm.isLoading
+              userProfileViewModel.isLoading
                   ? const CircularProgressIndicator()
                   : ElevatedButton(
                     onPressed: () async {
-                      bool success = await vm.updateProfile();
+                      bool success = await userProfileViewModel.updateProfile();
 
                       if (success) {
                         Navigator.pop(context); // back to profile
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(vm.errorMessage ?? "Error")),
+                          SnackBar(content: Text(userProfileViewModel.errorMessage ?? "Error")),
                         );
                       }
                     },
@@ -108,7 +108,7 @@ class EditProfileView extends StatelessWidget {
 
 void _showDeleteDialog(BuildContext context) {
   final parentContext = context;
-  final vm = Provider.of<UserProfileViewModel>(context, listen: false);
+  final userProfileViewModel = Provider.of<UserProfileViewModel>(context, listen: false);
 
   showDialog(
     context: context,
@@ -129,13 +129,13 @@ void _showDeleteDialog(BuildContext context) {
             onPressed: () async {
               Navigator.pop(dialogContext); // close dialog
 
-              bool success = await vm.deleteProfile();
+              bool success = await userProfileViewModel.deleteProfile();
 
               if (success) {
                 Navigator.pop(parentContext); // exit edit page
               } else {
                 ScaffoldMessenger.of(parentContext).showSnackBar(
-                  SnackBar(content: Text(vm.errorMessage ?? "Delete failed")),
+                  SnackBar(content: Text(userProfileViewModel.errorMessage ?? "Delete failed")),
                 );
               }
             },
