@@ -1,17 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Message {
-  final String id;
+  final String messageId;
   final String senderId;
-  final String text;
+  final String messageText;
   final bool isEdited;
   final bool isRead;
   final DateTime timestamp;
 
   Message({
-    required this.id,
+    required this.messageId,
     required this.senderId,
-    required this.text,
+    required this.messageText,
     required this.isEdited,
     this.isRead = false,
     required this.timestamp,
@@ -20,22 +20,24 @@ class Message {
   Map<String, dynamic> toMap() {
     return {
       'senderId': senderId,
-      'text': text,
+      'messageText': messageText,
       'edited': isEdited,
-      'isRead': isRead, 
+      'isRead': isRead,
       'timestamp': timestamp,
     };
   }
 
   factory Message.fromMap(String id, Map<String, dynamic> map) {
     return Message(
-      id: id,
+      messageId: id,
       senderId: map['senderId'] ?? '',
-      text: map['text'] ?? '',
+      messageText: map['messageText'] ?? '',
       isEdited: map['isEdited'] ?? false,
       isRead: map['isRead'] ?? false,
       timestamp:
-          (map['timestamp'] as Timestamp).toDate(),
+          map['timestamp'] != null
+              ? (map['timestamp'] as Timestamp).toDate()
+              : DateTime.now(),
     );
   }
 }

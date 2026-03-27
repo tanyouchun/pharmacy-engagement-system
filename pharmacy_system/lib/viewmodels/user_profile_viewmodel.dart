@@ -316,8 +316,8 @@ class UserProfileViewModel extends ChangeNotifier {
     log("Prescription added by: $userName");
 
     final prescription = Prescription(
-      id: '', // Firestore will generate this
-      name: name,
+      prescriptionId: '', // Firestore will generate this
+      medicineName: name,
       notes: notes,
       addedBy: user.uid,
       addedByName: userName,
@@ -349,8 +349,8 @@ class UserProfileViewModel extends ChangeNotifier {
 
     final userName = userDoc.data()?['name'] ?? "Unknown";
     final updatedPrescription = Prescription(
-      id: id,
-      name: name,
+      prescriptionId: id,
+      medicineName: name,
       notes: notes,
       addedBy: user.uid,
       addedByName: userName,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'login_view.dart';
 import 'signup_view.dart';
 
+//Show login and sign up button
 class StartScreen extends StatelessWidget {
   const StartScreen({super.key});
 
@@ -14,7 +15,6 @@ class StartScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // App Name
               const Text(
                 "PharmaCareAI",
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
@@ -30,7 +30,7 @@ class StartScreen extends StatelessWidget {
 
               const SizedBox(height: 50),
 
-              // Login Button
+              // login button
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -53,7 +53,7 @@ class StartScreen extends StatelessWidget {
 
               const SizedBox(height: 15),
 
-              // Sign Up Button
+              // sign up button
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -66,7 +66,7 @@ class StartScreen extends StatelessWidget {
                   },
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(
-                      color: Colors.blue, // outline color
+                      color: Colors.blue,
                       width: 1,
                     ),
                     shape: RoundedRectangleBorder(

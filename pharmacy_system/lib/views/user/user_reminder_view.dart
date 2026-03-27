@@ -242,10 +242,10 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                             title: Text(r.medicationName),
                             subtitle: Text(r.frequency),
                             trailing: Text(
-                              "${r.time.hour}:${r.time.minute.toString().padLeft(2, '0')}",
+                              "${r.scheduleTime.hour}:${r.scheduleTime.minute.toString().padLeft(2, '0')}",
                             ),
                             onTap: () => _showReminderDetails(context, r),
-                            onLongPress: () => _confirmDelete(context, r.id),
+                            onLongPress: () => _confirmDelete(context, r.reminderId),
                           ),
                         );
                       },
@@ -297,7 +297,7 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
 
               Text("Frequency: ${reminder.frequency}"),
               Text(
-                "Time: ${reminder.time.hour}:${reminder.time.minute.toString().padLeft(2, '0')}",
+                "Time: ${reminder.scheduleTime.hour}:${reminder.scheduleTime.minute.toString().padLeft(2, '0')}",
               ),
 
               const SizedBox(height: 20),

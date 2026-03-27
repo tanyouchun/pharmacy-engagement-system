@@ -36,7 +36,7 @@ class PrescriptionViewModel extends ChangeNotifier {
   }
 
   //add: user_profiles/{userId}/prescriptions
-  Future<void> addPrescription(String name, String notes) async {
+  Future<void> addPrescription(Prescription prescription) async {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
@@ -49,27 +49,23 @@ class PrescriptionViewModel extends ChangeNotifier {
 
     final userName = userDoc.data()?['name'] ?? "Unknown";
 
-    log("AddedBy: $userName");
-
-    final prescription = Prescription(
-      id: '',
-      name: name,
-      notes: notes,
+    final updatedPrescriptions = prescription.copyWith(
       addedBy: user.uid,
       addedByName: userName,
     );
+    log("Prescription added by: $userName, prescription details: ${updatedPrescriptions.toMap()}");
 
     await _firestore
         .collection("user_profiles")
         .doc(user.uid)
         .collection("prescriptions")
-        .add(prescription.toMap());
+        .add(updatedPrescriptions.toMap());
 
     await loadPrescriptions();
   }
 
   //update: user_profiles/{userId}/prescriptions/{prescriptionId}
-  Future<void> updatePrescription(String id, String name, String notes) async {
+  Future<void> updatePrescription(Prescription prescription) async {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) return;
@@ -78,21 +74,20 @@ class PrescriptionViewModel extends ChangeNotifier {
 
     final userName = userDoc.data()?['name'] ?? "Unknown";
 
-    final updated = Prescription(
-      id: id,
-      name: name,
-      notes: notes,
+    final updatedPrescription = prescription.copyWith(
       addedBy: user.uid,
       addedByName: userName,
     );
+    log("Updating prescription: ${updatedPrescription.toMap()}");
 
     await _firestore
         .collection("user_profiles")
         .doc(user.uid)
         .collection("prescriptions")
-        .doc(id)
-        .update(updated.toMap(isUpdate: true));
+        .doc(prescription.prescriptionId)
+        .update(updatedPrescription.toMap(isUpdate: true));
 
+    log("Prescriptions successfully updated");
     await loadPrescriptions();
   }
 
@@ -108,6 +103,7 @@ class PrescriptionViewModel extends ChangeNotifier {
         .doc(id)
         .delete();
 
+    log("Prescriptions deleted");
     await loadPrescriptions();
   }
 }

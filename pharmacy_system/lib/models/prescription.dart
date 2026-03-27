@@ -1,57 +1,59 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Prescription {
-  final String id;
-  final String name;
+  final String prescriptionId;
+  final String medicineName;
   final String notes;
   final String addedBy;
   final String addedByName;
-  final DateTime? date;
+  final DateTime? issueDate;
 
   Prescription({
-    required this.id,
-    required this.name,
+    required this.prescriptionId,
+    required this.medicineName,
     required this.notes,
     required this.addedBy,
     required this.addedByName,
-    this.date,
+    this.issueDate,
   });
 
   factory Prescription.fromDoc(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
 
     return Prescription(
-      id: doc.id,
-      name: data['name'] ?? '',
+      prescriptionId: doc.id,
+      medicineName: data['medicineName'] ?? '',
       notes: data['notes'] ?? '',
       addedBy: data['addedBy'] ?? '',
       addedByName: data['addedByName'] ?? '',
-      date: (data['date'] as Timestamp?)?.toDate(),
+      issueDate: (data['issueDate'] as Timestamp?)?.toDate(),
     );
   }
 
-  // factory Prescription.fromMap(String id, Map<String, dynamic> data) {
-  //   return Prescription(
-  //     id: id,
-  //     name: data['name'] ?? '',
-  //     notes: data['notes'] ?? '',
-  //     addedBy: data['addedBy'] ?? '',
-      
-  //     date:
-  //         (data['date'] is Timestamp)
-  //             ? (data['date'] as Timestamp).toDate()
-  //             : data['date'] as DateTime?,
-  //   );
-  // }
-
   Map<String, dynamic> toMap({bool isUpdate = false}) {
     return {
-      "name": name,
+      "medicineName": medicineName,
       "notes": notes,
       "addedBy": addedBy,
       "addedByName": addedByName,
-      if (!isUpdate) "date": FieldValue.serverTimestamp(),
+      if (!isUpdate) "issueDate": FieldValue.serverTimestamp(),
       if (isUpdate) "updatedAt": FieldValue.serverTimestamp(),
     };
+  }
+
+  Prescription copyWith({
+    String? medicineName,
+    String? notes,
+    String? addedBy,
+    String? addedByName,
+  }) {
+    return Prescription(
+      prescriptionId: prescriptionId,
+      medicineName: medicineName ?? this.medicineName,
+      notes: notes ?? this.notes,
+      addedBy: addedBy ?? this.addedBy,
+      addedByName: addedByName ?? this.addedByName,
+      issueDate: issueDate,
+    );
   }
 }

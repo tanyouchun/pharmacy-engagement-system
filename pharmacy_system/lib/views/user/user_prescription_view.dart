@@ -41,21 +41,21 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
                 padding: const EdgeInsets.all(16),
                 itemCount: vm.prescriptions.length,
                 itemBuilder: (context, index) {
-                  final p = vm.prescriptions[index];
+                  final prescription = vm.prescriptions[index];
 
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 5),
                     child: Card(
                       child: ListTile(
                         leading: const Icon(Icons.medication),
-                        title: Text(p.name),
+                        title: Text(prescription.medicineName),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Added: ${p.date != null ? "${p.date!.year}-${p.date!.month}-${p.date!.day}" : ""}",
+                              "Added: ${prescription.issueDate != null ? "${prescription.issueDate!.year}-${prescription.issueDate!.month}-${prescription.issueDate!.day}" : ""}",
                             ),
-                            Text("Added By: ${p.addedByName}"),
+                            Text("Added By: ${prescription.addedByName}"),
                           ],
                         ),
 
@@ -65,13 +65,13 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
                             IconButton(
                               icon: const Icon(Icons.edit),
                               onPressed: () {
-                                _showEditDialog(context, p);
+                                _showEditDialog(context, prescription);
                               },
                             ),
                             IconButton(
                               icon: const Icon(Icons.delete),
                               onPressed: () {
-                                vm.deletePrescription(p.id);
+                                vm.deletePrescription(prescription.prescriptionId);
                               },
                             ),
                           ],
@@ -125,8 +125,14 @@ void _showAddDialog(BuildContext context) {
             TextButton(
               onPressed: () async {
                 await vm.addPrescription(
-                  nameController.text,
-                  notesController.text,
+                  Prescription(
+                    prescriptionId: "",
+                    medicineName: nameController.text,
+                    notes: notesController.text,
+                    addedBy: "",
+                    addedByName: "",
+                    issueDate: DateTime.now(),
+                  ),
                 );
                 if (context.mounted) {
                   Navigator.pop(context);
@@ -139,9 +145,9 @@ void _showAddDialog(BuildContext context) {
   );
 }
 
-void _showEditDialog(BuildContext context, Prescription p) {
-  final nameController = TextEditingController(text: p.name);
-  final notesController = TextEditingController(text: p.notes);
+void _showEditDialog(BuildContext context, Prescription prescription) {
+  final nameController = TextEditingController(text: prescription.medicineName);
+  final notesController = TextEditingController(text: prescription.notes);
 
   showDialog(
     context: context,
@@ -168,9 +174,10 @@ void _showEditDialog(BuildContext context, Prescription p) {
             onPressed: () async {
               try {
                 await vm.updatePrescription(
-                  p.id,
-                  nameController.text,
-                  notesController.text,
+                  prescription.copyWith(
+                    medicineName: nameController.text,
+                    notes: notesController.text,
+                  ),
                 );
 
                 if (dialogContext.mounted) {

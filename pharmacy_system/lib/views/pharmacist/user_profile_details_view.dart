@@ -202,7 +202,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
 
                                   Expanded(
                                     child: Text(
-                                      p.name,
+                                      p.medicineName,
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -214,8 +214,8 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                                       icon: const Icon(Icons.edit),
                                       onPressed: () {
                                         _showEditPrescriptionDialog(
-                                          p.id,
-                                          p.name,
+                                          p.prescriptionId,
+                                          p.medicineName,
                                         );
                                       },
                                     ),
@@ -226,7 +226,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                                       onPressed: () {
                                         vm.deletePrescription(
                                           widget.userId,
-                                          p.id,
+                                          p.prescriptionId,
                                         );
                                       },
                                     ),

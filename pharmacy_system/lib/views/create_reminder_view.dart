@@ -25,8 +25,8 @@ class _CreateReminderViewState extends State<CreateReminderView> {
       frequency = widget.reminder!.frequency;
 
       selectedTime = TimeOfDay(
-        hour: widget.reminder!.time.hour,
-        minute: widget.reminder!.time.minute,
+        hour: widget.reminder!.scheduleTime.hour,
+        minute: widget.reminder!.scheduleTime.minute,
       );
     }
   }
@@ -62,11 +62,11 @@ class _CreateReminderViewState extends State<CreateReminderView> {
       /// CREATE
       await vm.createReminder(
         Reminder(
-          id: "",
+          reminderId: "",
           userId: vm.userId,
-          prescriptionId: "demo",
+          prescriptionId: "",
           medicationName: medicationName,
-          time: dateTime,
+          scheduleTime: dateTime,
           frequency: frequency,
         ),
       );

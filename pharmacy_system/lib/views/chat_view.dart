@@ -104,7 +104,7 @@ class _ChatViewState extends State<ChatView> {
                           onLongPress:
                               isMe
                                   ? () =>
-                                      _showOptions(context, msg.id, msg.text)
+                                      _showOptions(context, msg.messageId, msg.messageText)
                                   : null,
                           child: Align(
                             alignment:
@@ -122,7 +122,7 @@ class _ChatViewState extends State<ChatView> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    msg.text,
+                                    msg.messageText,
                                     style: TextStyle(
                                       color: isMe ? Colors.white : Colors.black,
                                     ),

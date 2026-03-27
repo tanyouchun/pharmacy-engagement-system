@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -20,25 +22,32 @@ class ChatViewModel extends ChangeNotifier {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) return;
+    log("Sending user message from: ${user.uid}");
 
-    final message = {
-      'senderId': user.uid,
-      'text': text,
-      'timestamp': FieldValue.serverTimestamp(),
-      'isEdited': false,
-      'isRead': false,
-    };
+    try {
+      final message = {
+        'senderId': user.uid,
+        'messageText': text,
+        'timestamp': FieldValue.serverTimestamp(),
+        'isEdited': false,
+        'isRead': false,
+      };
+      log("Message sent details: ${message.toString()}");
 
-    await _firestore
-        .collection('chats')
-        .doc(chatId)
-        .collection('messages')
-        .add(message);
+      await _firestore
+          .collection('chats')
+          .doc(chatId)
+          .collection('messages')
+          .add(message);
+      log("Successfully sent message");
 
-    await _firestore.collection('chats').doc(chatId).update({
-      'lastMessage': text,
-      'lastTimestamp': FieldValue.serverTimestamp(),
-    });
+      await _firestore.collection('chats').doc(chatId).update({
+        'lastMessage': text,
+        'lastTimestamp': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      log("Error during sending message/connecting to firestore: $e");
+    }
   }
 
   Future<void> editMessage(
@@ -61,7 +70,7 @@ class ChatViewModel extends ChangeNotifier {
     // 🔒 only allow editing own message
     if (doc['senderId'] != user.uid) return;
 
-    await messageRef.update({'text': newText, 'isEdited': true});
+    await messageRef.update({'messageText': newText, 'isEdited': true});
 
     // optional: update last message if needed
     await _firestore.collection('chats').doc(chatId).update({
@@ -88,7 +97,6 @@ class ChatViewModel extends ChangeNotifier {
     await messageRef.delete();
   }
 
-  // 🔥 Listen to messages (REAL-TIME)
   void listenMessages(String chatId) {
     _firestore
         .collection('chats')
