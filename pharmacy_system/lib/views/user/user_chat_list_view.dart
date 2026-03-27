@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../chat_view.dart';
+import 'pharmacist_list_view.dart';
 
 class ChatListView extends StatefulWidget {
   const ChatListView({super.key});
@@ -58,7 +59,12 @@ class _ChatListViewState extends State<ChatListView> {
           final chats = snapshot.data!.docs;
 
           if (chats.isEmpty) {
-            return const Center(child: Text("No chats yet", style: TextStyle(fontSize: 16, color: Colors.grey)));
+            return const Center(
+              child: Text(
+                "No chats yet",
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              ),
+            );
           }
 
           return ListView.builder(
@@ -130,7 +136,11 @@ class _ChatListViewState extends State<ChatListView> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => ChatView(chatId: chat.id, otherUserId: otherUserId,),
+                                builder:
+                                    (_) => ChatView(
+                                      chatId: chat.id,
+                                      otherUserId: otherUserId,
+                                    ),
                               ),
                             );
                           },
@@ -197,6 +207,16 @@ class _ChatListViewState extends State<ChatListView> {
                 },
               );
             },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        label: const Text("New Chat"),
+        icon: const Icon(Icons.chat),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const PharmacistListView()),
           );
         },
       ),

@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AccountIssueReport {
-  final String? id;
+  final String? issueId;
   final String reportedUserId;
   final String reportedName;
   final String reportedRole;
@@ -11,7 +11,7 @@ class AccountIssueReport {
   final DateTime? createdAt;
 
   AccountIssueReport({
-    this.id,
+    this.issueId,
     required this.reportedUserId,
     required this.reportedName,
     required this.reportedRole,
@@ -39,7 +39,7 @@ class AccountIssueReport {
     final data = doc.data() as Map<String, dynamic>;
 
     return AccountIssueReport(
-      id: doc.id,
+      issueId: doc.id,
       reportedUserId: data["reportedUserId"] ?? "",
       reportedName: data["reportedName"] ?? "",
       reportedRole: data["reportedRole"] ?? "",

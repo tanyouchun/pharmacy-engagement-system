@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../viewmodels/reminder_viewmodel.dart';
-import '../models/reminder.dart';
+import '../../viewmodels/reminder_viewmodel.dart';
+import '../../models/reminder.dart';
 
 class CreateReminderView extends StatefulWidget {
   final Reminder? reminder;
@@ -47,7 +47,7 @@ class _CreateReminderViewState extends State<CreateReminderView> {
   Future<void> _save() async {
     if (selectedTime == null || medicationName.isEmpty) return;
 
-    final vm = Provider.of<ReminderViewModel>(context, listen: false);
+    final reminderViewModel = Provider.of<ReminderViewModel>(context, listen: false);
 
     final now = DateTime.now();
     final dateTime = DateTime(
@@ -59,10 +59,10 @@ class _CreateReminderViewState extends State<CreateReminderView> {
     );
 
     if (widget.reminder == null) {
-      await vm.createReminder(
+      await reminderViewModel.createReminder(
         Reminder(
           reminderId: "",
-          userId: vm.userId,
+          userId: reminderViewModel.userId,
           prescriptionId: "",
           medicationName: medicationName,
           scheduleTime: dateTime,
@@ -70,7 +70,7 @@ class _CreateReminderViewState extends State<CreateReminderView> {
         ),
       );
     } else {
-      await vm.updateReminder(
+      await reminderViewModel.updateReminder(
         widget.reminder!.copyWith(
           medicationName: medicationName,
           time: dateTime,

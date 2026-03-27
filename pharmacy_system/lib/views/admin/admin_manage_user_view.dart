@@ -18,37 +18,37 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
     super.initState();
 
     Future.microtask(() {
-      final vm = Provider.of<AdminManageUserViewModel>(context, listen: false);
+      final adminManageUserViewModel = Provider.of<AdminManageUserViewModel>(context, listen: false);
 
-      vm.listenToUsers();
-      vm.listenToReports();
+      adminManageUserViewModel.listenToUsers();
+      adminManageUserViewModel.listenToReports();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<AdminManageUserViewModel>(context);
+    final adminManageUserViewModel = Provider.of<AdminManageUserViewModel>(context);
 
-    if (vm.isLoading) {
+    if (adminManageUserViewModel.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    if (vm.userError != null) {
-      return Scaffold(body: Center(child: Text("Error: ${vm.userError}")));
+    if (adminManageUserViewModel.userError != null) {
+      return Scaffold(body: Center(child: Text("Error: ${adminManageUserViewModel.userError}")));
     }
 
     return Scaffold(
       body: ListView.builder(
-        itemCount: vm.reports.length,
+        itemCount: adminManageUserViewModel.reports.length,
         itemBuilder: (context, index) {
-          final report = vm.reports[index];
+          final report = adminManageUserViewModel.reports[index];
 
           final name = report.reportedName;
           final role = report.reportedRole;
           final reason = report.reason;
           final userId = report.reportedUserId;
 
-          final userData = vm.getUserData(userId);
+          final userData = adminManageUserViewModel.getUserData(userId);
 
           final isBlocked = userData?['isBlocked'] ?? false;
           final suspendUntil = userData?['suspendUntil'];
@@ -101,7 +101,7 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
 
                         if (!confirm) return;
 
-                        await vm.unsuspendUser(userId);
+                        await adminManageUserViewModel.unsuspendUser(userId);
                       },
                     )
                   else
@@ -109,7 +109,7 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
                       icon: const Icon(Icons.block, color: Colors.red),
                       tooltip: "Suspend User",
                       onPressed: () {
-                        _showSuspendDialog(vm, userId, report.id!);
+                        _showSuspendDialog(adminManageUserViewModel, userId, report.issueId!);
                       },
                     ),
                 ],
