@@ -61,7 +61,7 @@ class _PharmacistProfileDetailsViewState
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'report') {
-                final vm = Provider.of<PharmacistProfileViewModel>(
+                final pharmacistProfileViewModel = Provider.of<PharmacistProfileViewModel>(
                   context,
                   listen: false,
                 );
@@ -69,7 +69,7 @@ class _PharmacistProfileDetailsViewState
                 ReportHelper.showReportDialog(
                   context: context,
                   reportedUserId: widget.pharmacistId,
-                  reportedName: vm.name,
+                  reportedName: pharmacistProfileViewModel.name,
                   reportedRole: "pharmacist",
                 );
               }

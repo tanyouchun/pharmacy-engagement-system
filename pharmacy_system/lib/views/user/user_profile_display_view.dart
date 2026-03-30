@@ -20,7 +20,10 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
   }
 
   Future<void> _loadData() async {
-    final userProfileViewModel = Provider.of<UserProfileViewModel>(context, listen: false);
+    final userProfileViewModel = Provider.of<UserProfileViewModel>(
+      context,
+      listen: false,
+    );
     await userProfileViewModel.loadProfile();
 
     setState(() {
@@ -63,8 +66,16 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _buildStat(Icons.cake, "Age", userProfileViewModel.age),
-                  _buildStat(Icons.height, "Height", "${userProfileViewModel.height} cm"),
-                  _buildStat(Icons.monitor_weight, "Weight", "${userProfileViewModel.weight} kg"),
+                  _buildStat(
+                    Icons.height,
+                    "Height",
+                    "${userProfileViewModel.height} cm",
+                  ),
+                  _buildStat(
+                    Icons.monitor_weight,
+                    "Weight",
+                    "${userProfileViewModel.weight} kg",
+                  ),
                 ],
               ),
             ),
@@ -116,6 +127,8 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
             MaterialPageRoute(builder: (_) => const EditProfileView()),
           );
         },
+        backgroundColor: const Color(0xFF4FC3CF),
+        foregroundColor: Colors.black,
         icon: const Icon(Icons.add),
         label: const Text("Edit Profile"),
       ),

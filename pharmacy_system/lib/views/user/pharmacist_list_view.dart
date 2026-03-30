@@ -36,12 +36,12 @@ class PharmacistListView extends StatelessWidget {
                 leading: const CircleAvatar(),
                 title: Text(name),
                 onTap: () async {
-                  final vm = Provider.of<ChatViewModel>(
+                  final chatViewModel = Provider.of<ChatViewModel>(
                     context,
                     listen: false,
                   );
 
-                  final chatId = await vm.startChat(pharmacistId);
+                  final chatId = await chatViewModel.startChat(pharmacistId);
 
                   if (context.mounted) {
                     Navigator.push(

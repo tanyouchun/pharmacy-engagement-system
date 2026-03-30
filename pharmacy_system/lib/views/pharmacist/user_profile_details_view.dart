@@ -191,7 +191,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                       : ListView.builder(
                         itemCount: prescriptionViewModel.prescriptions.length,
                         itemBuilder: (context, index) {
-                          final p = prescriptionViewModel.prescriptions[index];
+                          final prescription = prescriptionViewModel.prescriptions[index];
 
                           return Card(
                             margin: const EdgeInsets.symmetric(
@@ -212,7 +212,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
 
                                   Expanded(
                                     child: Text(
-                                      p.medicineName,
+                                      prescription.medicineName,
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -224,8 +224,8 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                                       icon: const Icon(Icons.edit),
                                       onPressed: () {
                                         _showEditPrescriptionDialog(
-                                          p.prescriptionId,
-                                          p.medicineName, p
+                                          prescription.prescriptionId,
+                                          prescription.medicineName, prescription
                                         );
                                       },
                                     ),
@@ -236,7 +236,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                                       onPressed: () {
                                         prescriptionViewModel.deleteUserPrescription(
                                           widget.userId,
-                                          p.prescriptionId,
+                                          prescription.prescriptionId,
                                         );
                                       },
                                     ),

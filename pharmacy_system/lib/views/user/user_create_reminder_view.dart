@@ -31,7 +31,7 @@ class _CreateReminderViewState extends State<CreateReminderView> {
     }
   }
 
-  final vm = ReminderViewModel();
+  // final vm = ReminderViewModel();
 
   Future<void> _pickTime() async {
     final time = await showTimePicker(

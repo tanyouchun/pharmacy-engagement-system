@@ -144,7 +144,7 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
   }
 
   void _showSuspendDialog(
-    AdminManageUserViewModel vm,
+    AdminManageUserViewModel adminManageUserViewModel,
     String userId,
     String reportId,
   ) {
@@ -168,11 +168,11 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
 
                     if (!confirm) return;
 
-                    await vm.suspendUser(
+                    await adminManageUserViewModel.suspendUser(
                       userId,
                       duration: const Duration(days: 1),
                     );
-                    await vm.resolveReport(reportId);
+                    await adminManageUserViewModel.resolveReport(reportId);
                   },
                 ),
 
@@ -188,11 +188,11 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
 
                     if (!confirm) return;
 
-                    await vm.suspendUser(
+                    await adminManageUserViewModel.suspendUser(
                       userId,
                       duration: const Duration(days: 7),
                     );
-                    await vm.resolveReport(reportId);
+                    await adminManageUserViewModel.resolveReport(reportId);
                   },
                 ),
 
@@ -208,8 +208,8 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
 
                     if (!confirm) return;
 
-                    await vm.suspendUser(userId, permanent: true);
-                    await vm.resolveReport(reportId);
+                    await adminManageUserViewModel.suspendUser(userId, permanent: true);
+                    await adminManageUserViewModel.resolveReport(reportId);
                   },
                 ),
               ],

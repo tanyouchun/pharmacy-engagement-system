@@ -67,6 +67,13 @@ class EditProfileView extends StatelessWidget {
                 decoration: const InputDecoration(labelText: "Allergies"),
               ),
 
+              const SizedBox(height: 15),
+
+              TextField(
+                controller: userProfileViewModel.medicalConditionsController,
+                decoration: const InputDecoration(labelText: "Medical Conditions"),
+              ),
+
               const SizedBox(height: 25),
 
               userProfileViewModel.isLoading
@@ -79,7 +86,11 @@ class EditProfileView extends StatelessWidget {
                         Navigator.pop(context); // back to profile
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(userProfileViewModel.errorMessage ?? "Error")),
+                          SnackBar(
+                            content: Text(
+                              userProfileViewModel.errorMessage ?? "Error",
+                            ),
+                          ),
                         );
                       }
                     },
@@ -108,7 +119,10 @@ class EditProfileView extends StatelessWidget {
 
 void _showDeleteDialog(BuildContext context) {
   final parentContext = context;
-  final userProfileViewModel = Provider.of<UserProfileViewModel>(context, listen: false);
+  final userProfileViewModel = Provider.of<UserProfileViewModel>(
+    context,
+    listen: false,
+  );
 
   showDialog(
     context: context,
@@ -135,7 +149,11 @@ void _showDeleteDialog(BuildContext context) {
                 Navigator.pop(parentContext); // exit edit page
               } else {
                 ScaffoldMessenger.of(parentContext).showSnackBar(
-                  SnackBar(content: Text(userProfileViewModel.errorMessage ?? "Delete failed")),
+                  SnackBar(
+                    content: Text(
+                      userProfileViewModel.errorMessage ?? "Delete failed",
+                    ),
+                  ),
                 );
               }
             },

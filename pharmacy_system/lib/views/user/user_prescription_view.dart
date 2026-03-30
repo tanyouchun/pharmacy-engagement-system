@@ -41,7 +41,8 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
                 padding: const EdgeInsets.all(16),
                 itemCount: prescriptionViewModel.prescriptions.length,
                 itemBuilder: (context, index) {
-                  final prescription = prescriptionViewModel.prescriptions[index];
+                  final prescription =
+                      prescriptionViewModel.prescriptions[index];
 
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 5),
@@ -71,7 +72,9 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
                             IconButton(
                               icon: const Icon(Icons.delete),
                               onPressed: () {
-                                prescriptionViewModel.deletePrescription(prescription.prescriptionId);
+                                prescriptionViewModel.deletePrescription(
+                                  prescription.prescriptionId,
+                                );
                               },
                             ),
                           ],
@@ -86,6 +89,8 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
         onPressed: () {
           _showAddDialog(context);
         },
+        backgroundColor: const Color(0xFF4FC3CF),
+        foregroundColor: Colors.black,
         label: const Text("Add new prescription"),
         icon: const Icon(Icons.add),
       ),
@@ -97,7 +102,10 @@ void _showAddDialog(BuildContext context) {
   final nameController = TextEditingController();
   final notesController = TextEditingController();
 
-  final prescriptionViewModel = Provider.of<PrescriptionViewModel>(context, listen: false);
+  final prescriptionViewModel = Provider.of<PrescriptionViewModel>(
+    context,
+    listen: false,
+  );
 
   showDialog(
     context: context,
@@ -152,7 +160,7 @@ void _showEditDialog(BuildContext context, Prescription prescription) {
   showDialog(
     context: context,
     builder: (dialogContext) {
-      final vm = Provider.of<PrescriptionViewModel>(
+      final prescriptionViewModel = Provider.of<PrescriptionViewModel>(
         dialogContext,
         listen: false,
       );
@@ -173,7 +181,7 @@ void _showEditDialog(BuildContext context, Prescription prescription) {
           TextButton(
             onPressed: () async {
               try {
-                await vm.updatePrescription(
+                await prescriptionViewModel.updatePrescription(
                   prescription.copyWith(
                     medicineName: nameController.text,
                     notes: notesController.text,

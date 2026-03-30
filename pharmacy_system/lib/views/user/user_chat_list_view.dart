@@ -211,14 +211,16 @@ class _ChatListViewState extends State<ChatListView> {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        label: const Text("New Chat"),
-        icon: const Icon(Icons.chat),
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const PharmacistListView()),
           );
         },
+        backgroundColor: const Color(0xFF4FC3CF),
+        foregroundColor: Colors.black,
+        label: const Text("New Chat"),
+        icon: const Icon(Icons.chat),
       ),
     );
   }
