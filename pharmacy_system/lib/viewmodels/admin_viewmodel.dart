@@ -96,7 +96,7 @@ class AdminManageUserViewModel extends ChangeNotifier {
         );
   }
 
-  Future<void> resolveReport(String reportId) async {
+  Future<void> setStatus(String reportId) async {
     try {
       await FirebaseFirestore.instance
           .collection('account_issues')
@@ -108,7 +108,7 @@ class AdminManageUserViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> suspendUser(
+  Future<void> blockAccount(
     String uid, {
     Duration? duration,
     bool permanent = false,
@@ -131,7 +131,7 @@ class AdminManageUserViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> unsuspendUser(String uid) async {
+  Future<void> unBlockAccount(String uid) async {
     try {
       await _usersRef.doc(uid).update({
         "isBlocked": false,

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../viewmodels/reminder_viewmodel.dart';
 import 'user_create_reminder_view.dart';
 import 'package:table_calendar/table_calendar.dart';
+import '../../models/reminder.dart';
 
 class ReminderHomeView extends StatefulWidget {
   final String? role;
@@ -279,7 +280,7 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
     );
   }
 
-  void _showReminderDetails(BuildContext context, reminder) {
+  void _showReminderDetails(BuildContext context, Reminder reminder) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -329,7 +330,8 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                     ),
                     onPressed: () {
                       Navigator.pop(context);
-                      _confirmDelete(context, reminder.id);
+                      //TODO need to check reminderId?
+                      _confirmDelete(context, reminder.reminderId);
                     },
                     icon: const Icon(Icons.delete),
                     label: const Text("Delete"),
@@ -343,8 +345,8 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
     );
   }
 
-  void _confirmDelete(BuildContext context, String id) {
-    final vm = Provider.of<ReminderViewModel>(context, listen: false);
+  void _confirmDelete(BuildContext context, String reminderId) {
+    final reminderViewModel = Provider.of<ReminderViewModel>(context, listen: false);
 
     showDialog(
       context: context,
@@ -361,7 +363,7 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
               ),
               TextButton(
                 onPressed: () async {
-                  await vm.deleteReminder(id);
+                  await reminderViewModel.deleteReminder(reminderId);
                   Navigator.pop(context);
                 },
                 child: const Text("Delete"),

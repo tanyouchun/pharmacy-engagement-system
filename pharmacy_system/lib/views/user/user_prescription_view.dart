@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:pharmacy_system/widgets/prescription_function.dart';
 import 'package:provider/provider.dart';
 import '../../viewmodels/prescription_viewmodel.dart';
 import '../../models/prescription.dart';
@@ -66,7 +67,7 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
                             IconButton(
                               icon: const Icon(Icons.edit),
                               onPressed: () {
-                                _showEditDialog(context, prescription);
+                                PrescriptionFunction.showEdit(context, prescription);
                               },
                             ),
                             IconButton(
@@ -132,7 +133,7 @@ void _showAddDialog(BuildContext context) {
             ),
             TextButton(
               onPressed: () async {
-                await prescriptionViewModel.addPrescription(
+                await prescriptionViewModel.storePrescription(
                   Prescription(
                     prescriptionId: "",
                     medicineName: nameController.text,
@@ -153,52 +154,52 @@ void _showAddDialog(BuildContext context) {
   );
 }
 
-void _showEditDialog(BuildContext context, Prescription prescription) {
-  final nameController = TextEditingController(text: prescription.medicineName);
-  final notesController = TextEditingController(text: prescription.notes);
+// void _showEditDialog(BuildContext context, Prescription prescription) {
+//   final nameController = TextEditingController(text: prescription.medicineName);
+//   final notesController = TextEditingController(text: prescription.notes);
 
-  showDialog(
-    context: context,
-    builder: (dialogContext) {
-      final prescriptionViewModel = Provider.of<PrescriptionViewModel>(
-        dialogContext,
-        listen: false,
-      );
-      return AlertDialog(
-        title: const Text("Edit Prescription"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(controller: nameController),
-            TextField(controller: notesController),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text("Cancel"),
-          ),
-          TextButton(
-            onPressed: () async {
-              try {
-                await prescriptionViewModel.updatePrescription(
-                  prescription.copyWith(
-                    medicineName: nameController.text,
-                    notes: notesController.text,
-                  ),
-                );
+//   showDialog(
+//     context: context,
+//     builder: (dialogContext) {
+//       final prescriptionViewModel = Provider.of<PrescriptionViewModel>(
+//         dialogContext,
+//         listen: false,
+//       );
+//       return AlertDialog(
+//         title: const Text("Edit Prescription"),
+//         content: Column(
+//           mainAxisSize: MainAxisSize.min,
+//           children: [
+//             TextField(controller: nameController),
+//             TextField(controller: notesController),
+//           ],
+//         ),
+//         actions: [
+//           TextButton(
+//             onPressed: () => Navigator.pop(dialogContext),
+//             child: const Text("Cancel"),
+//           ),
+//           TextButton(
+//             onPressed: () async {
+//               try {
+//                 await prescriptionViewModel.updatePrescription(
+//                   prescription.copyWith(
+//                     medicineName: nameController.text,
+//                     notes: notesController.text,
+//                   ),
+//                 );
 
-                if (dialogContext.mounted) {
-                  Navigator.pop(dialogContext);
-                }
-              } catch (e) {
-                log("Update error: $e");
-              }
-            },
-            child: const Text("Update"),
-          ),
-        ],
-      );
-    },
-  );
-}
+//                 if (dialogContext.mounted) {
+//                   Navigator.pop(dialogContext);
+//                 }
+//               } catch (e) {
+//                 log("Update error: $e");
+//               }
+//             },
+//             child: const Text("Update"),
+//           ),
+//         ],
+//       );
+//     },
+//   );
+// }

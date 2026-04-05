@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pharmacy_system/models/prescription.dart';
 import 'package:pharmacy_system/viewmodels/prescription_viewmodel.dart';
+import 'package:pharmacy_system/widgets/prescription_function.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -73,6 +74,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
+        // allow pharmacist to report user to Admin
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) {
@@ -82,7 +84,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                   listen: false,
                 );
 
-                ReportHelper.showReportDialog(
+                ReportHelper.reportAccount(
                   context: context,
                   reportedUserId: widget.userId,
                   reportedName: userProfileViewModel.name,
@@ -123,8 +125,16 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _buildStat(Icons.cake, "Age", userProfileViewModel.age),
-                  _buildStat(Icons.height, "Height", "${userProfileViewModel.height} cm"),
-                  _buildStat(Icons.monitor_weight, "Weight", "${userProfileViewModel.weight} kg"),
+                  _buildStat(
+                    Icons.height,
+                    "Height",
+                    "${userProfileViewModel.height} cm",
+                  ),
+                  _buildStat(
+                    Icons.monitor_weight,
+                    "Weight",
+                    "${userProfileViewModel.weight} kg",
+                  ),
                 ],
               ),
             ),
@@ -191,57 +201,55 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                       : ListView.builder(
                         itemCount: prescriptionViewModel.prescriptions.length,
                         itemBuilder: (context, index) {
-                          final prescription = prescriptionViewModel.prescriptions[index];
+                          final prescription =
+                              prescriptionViewModel.prescriptions[index];
 
                           return Card(
                             margin: const EdgeInsets.symmetric(
                               horizontal: 20,
                               vertical: 6,
                             ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 3,
-                            child: Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Row(
+                            child: ListTile(
+                              leading: const Icon(Icons.medication),
+                              title: Text(prescription.medicineName),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Icon(Icons.medication, size: 40),
-
-                                  const SizedBox(width: 10),
-
-                                  Expanded(
-                                    child: Text(
-                                      prescription.medicineName,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
+                                  Text(
+                                    "Added: ${prescription.issueDate != null ? "${prescription.issueDate!.year}-${prescription.issueDate!.month}-${prescription.issueDate!.day}" : ""}",
                                   ),
-
-                                  if (!isAdmin)
-                                    IconButton(
-                                      icon: const Icon(Icons.edit),
-                                      onPressed: () {
-                                        _showEditPrescriptionDialog(
-                                          prescription.prescriptionId,
-                                          prescription.medicineName, prescription
-                                        );
-                                      },
-                                    ),
-
-                                  if (!isAdmin)
-                                    IconButton(
-                                      icon: const Icon(Icons.delete),
-                                      onPressed: () {
-                                        prescriptionViewModel.deleteUserPrescription(
-                                          widget.userId,
-                                          prescription.prescriptionId,
-                                        );
-                                      },
-                                    ),
+                                  Text("Added By: ${prescription.addedByName}"),
                                 ],
                               ),
+                              trailing:
+                                  !isAdmin
+                                      ? Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(Icons.edit),
+                                            onPressed: () {
+                                              PrescriptionFunction.showEdit(
+                                                context,
+                                                prescription,
+                                                userId:
+                                                    widget.userId, // important
+                                              );
+                                            },
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.delete),
+                                            onPressed: () {
+                                              prescriptionViewModel
+                                                  .deleteUserPrescription(
+                                                    widget.userId,
+                                                    prescription.prescriptionId,
+                                                  );
+                                            },
+                                          ),
+                                        ],
+                                      )
+                                      : null,
                             ),
                           );
                         },
@@ -253,11 +261,14 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
       floatingActionButton:
           isAdmin
               ? null
-              : FloatingActionButton(
+              : FloatingActionButton.extended(
                 onPressed: () {
                   _showAddPrescriptionDialog();
                 },
-                child: const Icon(Icons.add),
+                backgroundColor: const Color(0xFF4FC3CF),
+                foregroundColor: Colors.black,
+                label: const Text("Add new prescription"),
+                icon: const Icon(Icons.add),
               ),
     );
   }
@@ -280,6 +291,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
     );
   }
 
+  //TODO function can include in one file for user_prescription_view
   void _showAddPrescriptionDialog() {
     final controller = TextEditingController();
 
@@ -299,13 +311,14 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                 final prescriptionViewModel =
                     Provider.of<PrescriptionViewModel>(context, listen: false);
 
-                await prescriptionViewModel.addUserPrescription(widget.userId,
+                await prescriptionViewModel.storeUserPrescription(
+                  widget.userId,
                   Prescription(
                     prescriptionId: "",
                     medicineName: controller.text,
-                    notes: "", 
+                    notes: "",
                     addedBy: "",
-                    addedByName: "", 
+                    addedByName: "",
                     issueDate: null,
                   ),
                 );
@@ -320,42 +333,44 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
     );
   }
 
-  void _showEditPrescriptionDialog(String id, String oldName, Prescription prescription) {
-    final controller = TextEditingController(text: oldName);
+  // void _showEditPrescriptionDialog(
+  //   String id,
+  //   String oldName,
+  //   Prescription prescription,
+  // ) {
+  //   final controller = TextEditingController(text: oldName);
 
-    showDialog(
-      context: context,
-      builder: (_) {
-        return AlertDialog(
-          title: const Text("Edit Prescription"),
-          content: TextField(controller: controller),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () async {
-                final prescriptionViewModel = Provider.of<PrescriptionViewModel>(
-                  context,
-                  listen: false,
-                );
+  //   showDialog(
+  //     context: context,
+  //     builder: (_) {
+  //       return AlertDialog(
+  //         title: const Text("Edit Prescription"),
+  //         content: TextField(controller: controller),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () => Navigator.pop(context),
+  //             child: const Text("Cancel"),
+  //           ),
+  //           TextButton(
+  //             onPressed: () async {
+  //               final prescriptionViewModel =
+  //                   Provider.of<PrescriptionViewModel>(context, listen: false);
 
-                await prescriptionViewModel.updateUserPrescription(
-                  widget.userId,
-                  prescription.copyWith(
-                    medicineName: controller.text,
-                    notes: "",
-                  ),
-                );
+  //               await prescriptionViewModel.updateUserPrescription(
+  //                 widget.userId,
+  //                 prescription.copyWith(
+  //                   medicineName: controller.text,
+  //                   notes: "",
+  //                 ),
+  //               );
 
-                Navigator.pop(context);
-              },
-              child: const Text("Save"),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  //               Navigator.pop(context);
+  //             },
+  //             child: const Text("Save"),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 }

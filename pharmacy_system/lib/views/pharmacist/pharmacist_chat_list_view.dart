@@ -16,7 +16,7 @@ class _PharmacistChatListViewState extends State<PharmacistChatListView> {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser!;
+    final pharmacist = FirebaseAuth.instance.currentUser!;
 
     return Scaffold(
       appBar: AppBar(
@@ -49,7 +49,7 @@ class _PharmacistChatListViewState extends State<PharmacistChatListView> {
         stream:
             FirebaseFirestore.instance
                 .collection('chats')
-                .where('participants', arrayContains: user.uid)
+                .where('participants', arrayContains: pharmacist.uid)
                 .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
@@ -71,7 +71,7 @@ class _PharmacistChatListViewState extends State<PharmacistChatListView> {
               final participants = List<String>.from(data['participants']);
 
               final otherUserId = participants.firstWhere(
-                (id) => id != user.uid,
+                (id) => id != pharmacist.uid,
               );
 
               return FutureBuilder<DocumentSnapshot>(

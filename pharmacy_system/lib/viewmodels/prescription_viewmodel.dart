@@ -65,7 +65,7 @@ class PrescriptionViewModel extends ChangeNotifier {
   }
 
   //add: user_profiles/{userId}/prescriptions
-  Future<void> addPrescription(Prescription prescription) async {
+  Future<void> storePrescription(Prescription prescription) async {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
@@ -96,7 +96,7 @@ class PrescriptionViewModel extends ChangeNotifier {
   }
 
   //add: user_profiles/{userId}/prescriptions/{prescriptionId}
-  Future<void> addUserPrescription(
+  Future<void> storeUserPrescription(
     String userId,
     Prescription prescription,
   ) async {

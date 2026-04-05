@@ -27,7 +27,10 @@ class _PharmacistProfileDetailsViewState
   }
 
   Future<void> _loadData() async {
-    final pharmacistProfileViewModel = Provider.of<PharmacistProfileViewModel>(context, listen: false);
+    final pharmacistProfileViewModel = Provider.of<PharmacistProfileViewModel>(
+      context,
+      listen: false,
+    );
 
     await pharmacistProfileViewModel.loadPharmacistById(widget.pharmacistId);
 
@@ -38,7 +41,9 @@ class _PharmacistProfileDetailsViewState
 
   @override
   Widget build(BuildContext context) {
-    final pharmacistProfileViewModel = Provider.of<PharmacistProfileViewModel>(context);
+    final pharmacistProfileViewModel = Provider.of<PharmacistProfileViewModel>(
+      context,
+    );
 
     if (isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -57,16 +62,18 @@ class _PharmacistProfileDetailsViewState
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
+        // allow user to report Pharmacist to Admin
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'report') {
-                final pharmacistProfileViewModel = Provider.of<PharmacistProfileViewModel>(
-                  context,
-                  listen: false,
-                );
+                final pharmacistProfileViewModel =
+                    Provider.of<PharmacistProfileViewModel>(
+                      context,
+                      listen: false,
+                    );
 
-                ReportHelper.showReportDialog(
+                ReportHelper.reportAccount(
                   context: context,
                   reportedUserId: widget.pharmacistId,
                   reportedName: pharmacistProfileViewModel.name,
@@ -108,9 +115,21 @@ class _PharmacistProfileDetailsViewState
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildStat(Icons.badge, "License", pharmacistProfileViewModel.license),
-                  _buildStat(Icons.local_pharmacy, "Pharmacy", pharmacistProfileViewModel.pharmacyName),
-                  _buildStat(Icons.work, "Experience", "${pharmacistProfileViewModel.experience} yrs"),
+                  _buildStat(
+                    Icons.badge,
+                    "License",
+                    pharmacistProfileViewModel.license,
+                  ),
+                  _buildStat(
+                    Icons.local_pharmacy,
+                    "Pharmacy",
+                    pharmacistProfileViewModel.pharmacyName,
+                  ),
+                  _buildStat(
+                    Icons.work,
+                    "Experience",
+                    "${pharmacistProfileViewModel.experience} yrs",
+                  ),
                 ],
               ),
             ),
@@ -174,5 +193,4 @@ class _PharmacistProfileDetailsViewState
       ],
     );
   }
-
 }

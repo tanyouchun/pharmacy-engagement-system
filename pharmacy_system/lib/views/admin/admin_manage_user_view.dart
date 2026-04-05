@@ -84,7 +84,7 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
                   IconButton(
                     icon: const Icon(Icons.visibility),
                     onPressed: () {
-                      _viewProfile(userId, role);
+                      _checkAccount(userId, role);
                     },
                   ),
 
@@ -101,7 +101,7 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
 
                         if (!confirm) return;
 
-                        await adminManageUserViewModel.unsuspendUser(userId);
+                        await adminManageUserViewModel.unBlockAccount(userId);
                       },
                     )
                   else
@@ -121,7 +121,7 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
     );
   }
 
-  void _viewProfile(String userId, String role) {
+  void _checkAccount(String userId, String role) {
     if (role == 'pharmacist') {
       Navigator.push(
         context,
@@ -168,11 +168,11 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
 
                     if (!confirm) return;
 
-                    await adminManageUserViewModel.suspendUser(
+                    await adminManageUserViewModel.blockAccount(
                       userId,
                       duration: const Duration(days: 1),
                     );
-                    await adminManageUserViewModel.resolveReport(reportId);
+                    await adminManageUserViewModel.setStatus(reportId);
                   },
                 ),
 
@@ -188,11 +188,11 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
 
                     if (!confirm) return;
 
-                    await adminManageUserViewModel.suspendUser(
+                    await adminManageUserViewModel.blockAccount(
                       userId,
                       duration: const Duration(days: 7),
                     );
-                    await adminManageUserViewModel.resolveReport(reportId);
+                    await adminManageUserViewModel.setStatus(reportId);
                   },
                 ),
 
@@ -208,8 +208,8 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
 
                     if (!confirm) return;
 
-                    await adminManageUserViewModel.suspendUser(userId, permanent: true);
-                    await adminManageUserViewModel.resolveReport(reportId);
+                    await adminManageUserViewModel.blockAccount(userId, permanent: true);
+                    await adminManageUserViewModel.setStatus(reportId);
                   },
                 ),
               ],
