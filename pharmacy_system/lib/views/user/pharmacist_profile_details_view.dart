@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../viewmodels/pharmacist_profile_viewmodel.dart';
-import '../../utils/report_helper.dart';
+import '../../utils/report_client.dart';
 
 class PharmacistProfileDetailsView extends StatefulWidget {
   final String pharmacistId;
@@ -73,7 +73,7 @@ class _PharmacistProfileDetailsViewState
                       listen: false,
                     );
 
-                ReportHelper.reportAccount(
+                ReportClient.reportAccount(
                   context: context,
                   reportedUserId: widget.pharmacistId,
                   reportedName: pharmacistProfileViewModel.name,

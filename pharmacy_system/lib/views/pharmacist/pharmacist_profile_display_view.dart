@@ -125,7 +125,6 @@ class _PharmacistProfileDisplayViewState
     );
   }
 
-  // SAME STYLE as UserProfile
   Widget _buildStat(IconData icon, String title, String value) {
     return Column(
       children: [

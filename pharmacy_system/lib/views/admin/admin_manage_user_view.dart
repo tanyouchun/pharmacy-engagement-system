@@ -18,7 +18,10 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
     super.initState();
 
     Future.microtask(() {
-      final adminManageUserViewModel = Provider.of<AdminManageUserViewModel>(context, listen: false);
+      final adminManageUserViewModel = Provider.of<AdminManageUserViewModel>(
+        context,
+        listen: false,
+      );
 
       adminManageUserViewModel.listenToUsers();
       adminManageUserViewModel.listenToReports();
@@ -27,14 +30,20 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
 
   @override
   Widget build(BuildContext context) {
-    final adminManageUserViewModel = Provider.of<AdminManageUserViewModel>(context);
+    final adminManageUserViewModel = Provider.of<AdminManageUserViewModel>(
+      context,
+    );
 
     if (adminManageUserViewModel.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (adminManageUserViewModel.userError != null) {
-      return Scaffold(body: Center(child: Text("Error: ${adminManageUserViewModel.userError}")));
+      return Scaffold(
+        body: Center(
+          child: Text("Error: ${adminManageUserViewModel.userError}"),
+        ),
+      );
     }
 
     return Scaffold(
@@ -109,7 +118,11 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
                       icon: const Icon(Icons.block, color: Colors.red),
                       tooltip: "Suspend User",
                       onPressed: () {
-                        _showSuspendDialog(adminManageUserViewModel, userId, report.issueId!);
+                        _showSuspendDialog(
+                          adminManageUserViewModel,
+                          userId,
+                          report.issueId!,
+                        );
                       },
                     ),
                 ],
@@ -208,7 +221,10 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
 
                     if (!confirm) return;
 
-                    await adminManageUserViewModel.blockAccount(userId, permanent: true);
+                    await adminManageUserViewModel.blockAccount(
+                      userId,
+                      permanent: true,
+                    );
                     await adminManageUserViewModel.setStatus(reportId);
                   },
                 ),

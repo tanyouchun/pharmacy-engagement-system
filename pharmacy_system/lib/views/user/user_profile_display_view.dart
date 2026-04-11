@@ -86,12 +86,18 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Text(
-                    "Medical Conditions",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  const Center(
+                    child: Text(
+                      "Medical Conditions",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
+
                   const SizedBox(height: 10),
 
                   userProfileViewModel.medicalConditions.isEmpty
@@ -100,6 +106,7 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
                         style: TextStyle(color: Colors.grey),
                       )
                       : Wrap(
+                        alignment: WrapAlignment.center,
                         spacing: 8,
                         runSpacing: 8,
                         children:

@@ -1,10 +1,7 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
-import 'package:pharmacy_system/widgets/prescription_function.dart';
+import 'package:pharmacy_system/utils/prescription_client.dart';
 import 'package:provider/provider.dart';
 import '../../viewmodels/prescription_viewmodel.dart';
-import '../../models/prescription.dart';
 
 class PrescriptionPage extends StatefulWidget {
   const PrescriptionPage({super.key});
@@ -67,7 +64,10 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
                             IconButton(
                               icon: const Icon(Icons.edit),
                               onPressed: () {
-                                PrescriptionFunction.showEdit(context, prescription);
+                                PrescriptionClient.showEditPrescription(
+                                  context,
+                                  prescription,
+                                );
                               },
                             ),
                             IconButton(
@@ -88,7 +88,7 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
 
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          _showAddDialog(context);
+          PrescriptionClient.showAddPrescription(context: context);
         },
         backgroundColor: const Color(0xFF4FC3CF),
         foregroundColor: Colors.black,
@@ -98,108 +98,3 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
     );
   }
 }
-
-void _showAddDialog(BuildContext context) {
-  final nameController = TextEditingController();
-  final notesController = TextEditingController();
-
-  final prescriptionViewModel = Provider.of<PrescriptionViewModel>(
-    context,
-    listen: false,
-  );
-
-  showDialog(
-    context: context,
-    builder:
-        (_) => AlertDialog(
-          title: const Text("Add Prescription"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: "Name"),
-              ),
-              TextField(
-                controller: notesController,
-                decoration: const InputDecoration(labelText: "Notes"),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () async {
-                await prescriptionViewModel.storePrescription(
-                  Prescription(
-                    prescriptionId: "",
-                    medicineName: nameController.text,
-                    notes: notesController.text,
-                    addedBy: "",
-                    addedByName: "",
-                    issueDate: DateTime.now(),
-                  ),
-                );
-                if (context.mounted) {
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text("Save"),
-            ),
-          ],
-        ),
-  );
-}
-
-// void _showEditDialog(BuildContext context, Prescription prescription) {
-//   final nameController = TextEditingController(text: prescription.medicineName);
-//   final notesController = TextEditingController(text: prescription.notes);
-
-//   showDialog(
-//     context: context,
-//     builder: (dialogContext) {
-//       final prescriptionViewModel = Provider.of<PrescriptionViewModel>(
-//         dialogContext,
-//         listen: false,
-//       );
-//       return AlertDialog(
-//         title: const Text("Edit Prescription"),
-//         content: Column(
-//           mainAxisSize: MainAxisSize.min,
-//           children: [
-//             TextField(controller: nameController),
-//             TextField(controller: notesController),
-//           ],
-//         ),
-//         actions: [
-//           TextButton(
-//             onPressed: () => Navigator.pop(dialogContext),
-//             child: const Text("Cancel"),
-//           ),
-//           TextButton(
-//             onPressed: () async {
-//               try {
-//                 await prescriptionViewModel.updatePrescription(
-//                   prescription.copyWith(
-//                     medicineName: nameController.text,
-//                     notes: notesController.text,
-//                   ),
-//                 );
-
-//                 if (dialogContext.mounted) {
-//                   Navigator.pop(dialogContext);
-//                 }
-//               } catch (e) {
-//                 log("Update error: $e");
-//               }
-//             },
-//             child: const Text("Update"),
-//           ),
-//         ],
-//       );
-//     },
-//   );
-// }

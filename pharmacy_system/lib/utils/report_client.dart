@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../viewmodels/admin_viewmodel.dart';
 
-class ReportHelper {
+class ReportClient {
   static void reportAccount({
     required BuildContext context,
     required String reportedUserId,

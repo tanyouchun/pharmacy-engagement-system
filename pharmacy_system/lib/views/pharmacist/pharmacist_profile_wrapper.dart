@@ -13,14 +13,14 @@ class PharmacistProfileWrapper extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => PharmacistProfileViewModel()..checkProfileExists(),
       child: Consumer<PharmacistProfileViewModel>(
-        builder: (context, vm, _) {
-          if (vm.isLoading) {
+        builder: (context, pharmacistProfileViewModel, _) {
+          if (pharmacistProfileViewModel.isLoading) {
             return const Scaffold(
               body: Center(child: CircularProgressIndicator()),
             );
           }
 
-          return vm.hasProfile
+          return pharmacistProfileViewModel.hasProfile
               ? const PharmacistProfileDisplayView()
               : const PharmacistProfileFormView();
         },
