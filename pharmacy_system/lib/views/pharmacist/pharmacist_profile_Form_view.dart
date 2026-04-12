@@ -33,32 +33,6 @@ class _PharmacistProfileFormViewState extends State<PharmacistProfileFormView> {
   //   }
   // }
 
-  Future<void> _saveProfile() async {
-    if (!_formKey.currentState!.validate()) return;
-    final pharmacistProfileViewModel =
-        context.read<PharmacistProfileViewModel>();
-
-    final ok = await pharmacistProfileViewModel.saveProfile();
-    if (!mounted) return;
-
-    if (!ok) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            pharmacistProfileViewModel.errorMessage ?? 'Failed to save profile',
-          ),
-        ),
-      );
-      return;
-    }
-
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const HomePage()),
-      (route) => false,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final pharmacistProfileViewModel =
@@ -123,6 +97,32 @@ class _PharmacistProfileFormViewState extends State<PharmacistProfileFormView> {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> _saveProfile() async {
+    if (!_formKey.currentState!.validate()) return;
+    final pharmacistProfileViewModel =
+        context.read<PharmacistProfileViewModel>();
+
+    final ok = await pharmacistProfileViewModel.saveProfile();
+    if (!mounted) return;
+
+    if (!ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            pharmacistProfileViewModel.errorMessage ?? 'Failed to save profile',
+          ),
+        ),
+      );
+      return;
+    }
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const HomePage()),
+      (route) => false,
     );
   }
 }

@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../constants/error_message.dart';
+
 class LoginViewModel extends ChangeNotifier {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -28,8 +30,8 @@ class LoginViewModel extends ChangeNotifier {
         await _checkUserStatus(uid);
       }
     } on FirebaseAuthException catch (e) {
-      log("Login error: $e");
-      errorMessage = "Incorrect email or password";
+      log("${ErrorMessage.LOGIN_ERROR}: $e");
+      errorMessage = ErrorMessage.LOGIN_ERROR;
       notifyListeners();
     } catch (e) {
       errorMessage = e.toString().replaceAll("Exception: ", "");

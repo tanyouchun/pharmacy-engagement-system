@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../views/auth_wrapper.dart';
 
 import '../viewmodels/login_viewmodel.dart';
-import '../widgets/custom_textfield.dart';
+import '../utils/custom_textfield.dart';
 import 'signup_view.dart';
 
 class LoginView extends StatelessWidget {

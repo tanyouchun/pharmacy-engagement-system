@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../chat_view.dart';
+import '../../utils/format_time.dart';
 
 class PharmacistChatListView extends StatefulWidget {
   const PharmacistChatListView({super.key});
@@ -180,7 +181,7 @@ class _PharmacistChatListViewState extends State<PharmacistChatListView> {
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Text(
-                                      _formatTime(lastTimestamp),
+                                      FormatTime.formatTime(lastTimestamp),
                                       style: const TextStyle(
                                         fontSize: 12,
                                         color: Colors.black,
@@ -202,18 +203,5 @@ class _PharmacistChatListViewState extends State<PharmacistChatListView> {
         },
       ),
     );
-  }
-
-  String _formatTime(Timestamp? timestamp) {
-    if (timestamp == null) return "";
-
-    final date = timestamp.toDate();
-    final now = DateTime.now();
-
-    if (now.difference(date).inDays == 0) {
-      return "${date.hour}:${date.minute.toString().padLeft(2, '0')}";
-    } else {
-      return "${date.day}/${date.month}";
-    }
   }
 }

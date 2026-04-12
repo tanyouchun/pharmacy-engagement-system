@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../models/prescription.dart';
+import '../constants/error_message.dart';
 
 class PrescriptionViewModel extends ChangeNotifier {
   final _firestore = FirebaseFirestore.instance;
@@ -12,27 +13,36 @@ class PrescriptionViewModel extends ChangeNotifier {
   List<Prescription> prescriptions = [];
   bool isLoadingPrescription = false;
   String? errorMessage;
+  User? get _currentUser => FirebaseAuth.instance.currentUser;
+  String? get _uid => _currentUser?.uid;
 
   //load prescriptions for current user: user_profiles/{userId}/prescriptions
   Future<void> loadPrescriptions() async {
-    isLoadingPrescription = true;
-    notifyListeners();
+    try {
+      _requireAuth();
 
-    final user = FirebaseAuth.instance.currentUser;
+      isLoadingPrescription = true;
+      notifyListeners();
 
-    final snapshot =
-        await _firestore
-            .collection("user_profiles")
-            .doc(user!.uid)
-            .collection("prescriptions")
-            .get();
+      final snapshot =
+          await _firestore
+              .collection("user_profiles")
+              .doc(_uid)
+              .collection("prescriptions")
+              .get();
 
-    prescriptions =
-        snapshot.docs.map((doc) => Prescription.fromDoc(doc)).toList();
-    log("Total presciptions: ${prescriptions.length}");
+      prescriptions =
+          snapshot.docs.map((doc) => Prescription.fromDoc(doc)).toList();
+      log("Total presciptions: ${prescriptions.length}");
 
-    isLoadingPrescription = false;
-    notifyListeners();
+      isLoadingPrescription = false;
+      notifyListeners();
+    } catch (e) {
+      log("${ErrorMessage.LOAD_PRESCRIPTION_ERROR}: $e");
+      errorMessage = ErrorMessage.LOAD_PRESCRIPTION_ERROR;
+      isLoadingPrescription = false;
+      notifyListeners();
+    }
   }
 
   //load prescriptions for current user: user_profiles/{userId}/prescriptions
@@ -57,8 +67,8 @@ class PrescriptionViewModel extends ChangeNotifier {
       isLoadingPrescription = false;
       notifyListeners();
     } catch (e) {
-      log("ERROR: $e");
-      errorMessage = "Failed to load prescriptions";
+      log("${ErrorMessage.LOAD_PRESCRIPTION_ERROR}: $e");
+      errorMessage = ErrorMessage.LOAD_PRESCRIPTION_ERROR;
       isLoadingPrescription = false;
       notifyListeners();
     }
@@ -66,33 +76,33 @@ class PrescriptionViewModel extends ChangeNotifier {
 
   //add: user_profiles/{userId}/prescriptions
   Future<void> storePrescription(Prescription prescription) async {
-    final user = FirebaseAuth.instance.currentUser;
+    try {
+      _requireAuth();
+      final userDoc =
+          await _firestore.collection("user_profiles").doc(_uid).get();
 
-    if (user == null) {
-      errorMessage = "User not logged in";
+      final userName = userDoc.data()?['name'] ?? "Unknown";
+
+      final updatedPrescriptions = prescription.copyWith(
+        addedBy: _uid,
+        addedByName: userName,
+      );
+      log(
+        "Prescription added by: $userName, prescription details: ${updatedPrescriptions.toMap()}",
+      );
+
+      await _firestore
+          .collection("user_profiles")
+          .doc(_uid)
+          .collection("prescriptions")
+          .add(updatedPrescriptions.toMap());
+
+      await loadPrescriptions();
+    } catch (e) {
+      log("${ErrorMessage.STORE_PRESCRIPTION_ERROR}: $e");
+      errorMessage = ErrorMessage.STORE_PRESCRIPTION_ERROR;
       notifyListeners();
-      return;
     }
-    final userDoc =
-        await _firestore.collection("user_profiles").doc(user.uid).get();
-
-    final userName = userDoc.data()?['name'] ?? "Unknown";
-
-    final updatedPrescriptions = prescription.copyWith(
-      addedBy: user.uid,
-      addedByName: userName,
-    );
-    log(
-      "Prescription added by: $userName, prescription details: ${updatedPrescriptions.toMap()}",
-    );
-
-    await _firestore
-        .collection("user_profiles")
-        .doc(user.uid)
-        .collection("prescriptions")
-        .add(updatedPrescriptions.toMap());
-
-    await loadPrescriptions();
   }
 
   //add: user_profiles/{userId}/prescriptions/{prescriptionId}
@@ -100,58 +110,64 @@ class PrescriptionViewModel extends ChangeNotifier {
     String userId,
     Prescription prescription,
   ) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      errorMessage = "Pharmacist not logged in";
-      return;
+    try {
+      _requireAuth();
+      final userDoc =
+          await _firestore.collection("pharmacist_profiles").doc(_uid).get();
+
+      final userName = userDoc.data()?['name'] ?? "Unknown";
+
+      final updatedPrescriptions = prescription.copyWith(
+        addedBy: _uid,
+        addedByName: userName,
+      );
+      log(
+        "Prescription added by: $userName, prescription details: ${updatedPrescriptions.toMap()}",
+      );
+
+      await _firestore
+          .collection("user_profiles")
+          .doc(userId)
+          .collection("prescriptions")
+          .add(updatedPrescriptions.toMap());
+
+      await loadUserPrescriptions(userId);
+    } catch (e) {
+      log("${ErrorMessage.STORE_PRESCRIPTION_ERROR}: $e");
+      errorMessage = ErrorMessage.STORE_PRESCRIPTION_ERROR;
+      notifyListeners();
     }
-    final userDoc =
-        await _firestore.collection("pharmacist_profiles").doc(user.uid).get();
-
-    final userName = userDoc.data()?['name'] ?? "Unknown";
-
-    final updatedPrescriptions = prescription.copyWith(
-      addedBy: user.uid,
-      addedByName: userName,
-    );
-    log(
-      "Prescription added by: $userName, prescription details: ${updatedPrescriptions.toMap()}",
-    );
-
-    await _firestore
-        .collection("user_profiles")
-        .doc(userId)
-        .collection("prescriptions")
-        .add(updatedPrescriptions.toMap());
-
-    await loadUserPrescriptions(userId);
   }
 
   //update: user_profiles/{userId}/prescriptions/{prescriptionId}
   Future<void> updatePrescription(Prescription prescription) async {
-    final user = FirebaseAuth.instance.currentUser;
+    try {
+      _requireAuth();
+      final userDoc =
+          await _firestore.collection("user_profiles").doc(_uid).get();
 
-    if (user == null) return;
-    final userDoc =
-        await _firestore.collection("user_profiles").doc(user.uid).get();
+      final userName = userDoc.data()?['name'] ?? "Unknown";
 
-    final userName = userDoc.data()?['name'] ?? "Unknown";
+      final updatedPrescription = prescription.copyWith(
+        addedBy: _uid,
+        addedByName: userName,
+      );
+      log("Updating prescription: ${updatedPrescription.toMap()}");
 
-    final updatedPrescription = prescription.copyWith(
-      addedBy: user.uid,
-      addedByName: userName,
-    );
-    log("Updating prescription: ${updatedPrescription.toMap()}");
+      await _firestore
+          .collection("user_profiles")
+          .doc(_uid)
+          .collection("prescriptions")
+          .doc(prescription.prescriptionId)
+          .update(updatedPrescription.toMap(isUpdate: true));
 
-    await _firestore
-        .collection("user_profiles")
-        .doc(user.uid)
-        .collection("prescriptions")
-        .doc(prescription.prescriptionId)
-        .update(updatedPrescription.toMap(isUpdate: true));
-
-    log("Prescriptions successfully updated");
-    await loadPrescriptions();
+      log("Prescriptions successfully updated");
+      await loadPrescriptions();
+    } catch (e) {
+      log("${ErrorMessage.UPDATE_PRESCRIPTION_ERROR}: $e");
+      errorMessage = ErrorMessage.UPDATE_PRESCRIPTION_ERROR;
+      notifyListeners();
+    }
   }
 
   //update: user_profiles/{userId}/prescriptions/{prescriptionId}
@@ -159,55 +175,79 @@ class PrescriptionViewModel extends ChangeNotifier {
     String userId,
     Prescription prescription,
   ) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      errorMessage = "Pharmacist not logged in";
-      return;
+    try {
+      _requireAuth();
+      final userDoc =
+          await _firestore.collection("pharmacist_profiles").doc(_uid).get();
+
+      final userName = userDoc.data()?['name'] ?? "Unknown";
+      final updatedPrescription = prescription.copyWith(
+        addedBy: _uid,
+        addedByName: userName,
+      );
+      log("Updating prescription: ${updatedPrescription.toMap()}");
+
+      await _firestore
+          .collection("user_profiles")
+          .doc(userId)
+          .collection("prescriptions")
+          .doc(prescription.prescriptionId)
+          .update(updatedPrescription.toMap());
+      await loadUserPrescriptions(userId);
+    } catch (e) {
+      log("${ErrorMessage.UPDATE_PRESCRIPTION_ERROR}: $e");
+      errorMessage = ErrorMessage.UPDATE_PRESCRIPTION_ERROR;
+      notifyListeners();
     }
-    final userDoc =
-        await _firestore.collection("pharmacist_profiles").doc(user.uid).get();
-
-    final userName = userDoc.data()?['name'] ?? "Unknown";
-    final updatedPrescription = prescription.copyWith(
-      addedBy: user.uid,
-      addedByName: userName,
-    );
-    log("Updating prescription: ${updatedPrescription.toMap()}");
-
-    await _firestore
-        .collection("user_profiles")
-        .doc(userId)
-        .collection("prescriptions")
-        .doc(prescription.prescriptionId)
-        .update(updatedPrescription.toMap());
-    await loadUserPrescriptions(userId);
   }
 
   //delete: user_profiles/{userId}/prescriptions/{prescriptionId}
   Future<void> deletePrescription(String id) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+    try {
+      _requireAuth();
 
-    await _firestore
-        .collection("user_profiles")
-        .doc(user.uid)
-        .collection("prescriptions")
-        .doc(id)
-        .delete();
+      await _firestore
+          .collection("user_profiles")
+          .doc(_uid)
+          .collection("prescriptions")
+          .doc(id)
+          .delete();
 
-    log("Prescriptions deleted");
-    await loadPrescriptions();
+      log("Prescriptions deleted");
+      await loadPrescriptions();
+    } catch (e) {
+      log("${ErrorMessage.DELETE_PRESCRIPTION_ERROR}: $e");
+      errorMessage = ErrorMessage.DELETE_PRESCRIPTION_ERROR;
+      notifyListeners();
+    }
   }
 
   //delete: user_profiles/{userId}/prescriptions/{prescriptionId}
   Future<void> deleteUserPrescription(String userId, String id) async {
-    await _firestore
-        .collection("user_profiles")
-        .doc(userId)
-        .collection("prescriptions")
-        .doc(id)
-        .delete();
+    try {
+      await _firestore
+          .collection("user_profiles")
+          .doc(userId)
+          .collection("prescriptions")
+          .doc(id)
+          .delete();
 
-    await loadUserPrescriptions(userId);
+      await loadUserPrescriptions(userId);
+    } catch (e) {
+      log("${ErrorMessage.DELETE_PRESCRIPTION_ERROR}: $e");
+      errorMessage = ErrorMessage.DELETE_PRESCRIPTION_ERROR;
+      notifyListeners();
+    }
+  }
+
+  void _requireAuth() {
+    if (_uid == null) {
+      log("Prescription operations error: ${ErrorMessage.AUTH_ERROR}");
+      errorMessage =
+          ("Prescription operations error: ${ErrorMessage.AUTH_ERROR}");
+      return;
+    } else {
+      log("Authenticated user ID for prescription view: $_uid");
+    }
   }
 }

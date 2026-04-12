@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../constants/error_message.dart';
+
 class SignupViewModel extends ChangeNotifier {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -52,9 +54,8 @@ class SignupViewModel extends ChangeNotifier {
         });
       }
 
-      //   Navigate:
-      //   - Pharmacist  → pharmacist profile form
-      //   - Regular user → just pop back (AuthWrapper will take them to HomePage)
+      // Pharmacist  → pharmacist profile form
+      // Regular user → just pop back (AuthWrapper will take them to HomePage)
       if (isPharmacist) {
         Navigator.pushReplacementNamed(context, '/pharmacistProfile');
       } else {
@@ -62,7 +63,7 @@ class SignupViewModel extends ChangeNotifier {
       }
     } on FirebaseAuthException catch (e) {
       error = e.message;
-      log(error.toString());
+      log("${ErrorMessage.SIGNUP_ERROR}: $error");
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(error ?? 'Signup failed')));

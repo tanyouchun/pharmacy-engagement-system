@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../models/pharmacist_profile.dart';
+import '../constants/error_message.dart';
 
 class PharmacistProfileViewModel extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -40,6 +41,9 @@ class PharmacistProfileViewModel extends ChangeNotifier {
               .doc(user.uid)
               .get();
       hasProfile = doc.exists;
+    } catch (e) {
+      log("${ErrorMessage.LOAD_PROFILE_ERROR}: $e");
+      errorMessage = ErrorMessage.LOAD_PROFILE_ERROR;
     } finally {
       isLoading = false;
     }
@@ -77,7 +81,8 @@ class PharmacistProfileViewModel extends ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      errorMessage = 'Failed to load profile';
+      log("${ErrorMessage.LOAD_PROFILE_ERROR}: $e");
+      errorMessage = ErrorMessage.LOAD_PROFILE_ERROR;
       notifyListeners();
     }
   }
@@ -107,7 +112,8 @@ class PharmacistProfileViewModel extends ChangeNotifier {
       await loadProfile();
       return true;
     } catch (e) {
-      errorMessage = 'Failed to save profile: $e';
+      log("${ErrorMessage.SAVE_PROFILE_ERROR}: $e");
+      errorMessage = ErrorMessage.SAVE_PROFILE_ERROR;
       return false;
     } finally {
       isLoading = false;
@@ -139,7 +145,8 @@ class PharmacistProfileViewModel extends ChangeNotifier {
       await loadProfile();
       return true;
     } catch (e) {
-      errorMessage = 'Failed to update profile: $e';
+      log("${ErrorMessage.UPDATE_PROFILE_ERROR}: $e");
+      errorMessage = ErrorMessage.UPDATE_PROFILE_ERROR;
       return false;
     } finally {
       isLoading = false;
@@ -171,7 +178,8 @@ class PharmacistProfileViewModel extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      errorMessage = 'Failed to delete profile: $e';
+      log("${ErrorMessage.DELETE_PROFILE_ERROR}: $e");
+      errorMessage = ErrorMessage.DELETE_PROFILE_ERROR;
       return false;
     } finally {
       isLoading = false;
@@ -200,8 +208,8 @@ class PharmacistProfileViewModel extends ChangeNotifier {
         hasProfile = false;
       }
     } catch (e) {
-      log("Error loading pharmacist profile: $e");
-      errorMessage = 'Failed to load pharmacist: $e';
+      log("${ErrorMessage.LOAD_PROFILE_ERROR}: $e");
+      errorMessage = ErrorMessage.LOAD_PROFILE_ERROR;
     } finally {
       isLoading = false;
       notifyListeners();

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/signup_viewmodel.dart';
-import '../widgets/custom_textfield.dart';
+import '../utils/custom_textfield.dart';
 import 'login_view.dart';
 
 class SignupView extends StatefulWidget {
