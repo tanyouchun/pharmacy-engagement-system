@@ -38,6 +38,7 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
     final reminderViewModel = Provider.of<ReminderViewModel>(context);
     final isPharmacist = widget.role == 'pharmacist';
     final isAdmin = widget.role == 'admin';
+    final today = DateTime.now();
 
     return Scaffold(
       body: Column(
@@ -175,12 +176,11 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
             ),
           ),
           const SizedBox(height: 20),
-          Text(
-            "Today: ${_selectedDay!.day}/${_selectedDay!.month}/${_selectedDay!.year}",
-          ),
+
+          Text("Today: ${today.day}/${today.month}/${today.year}"),
           const SizedBox(height: 20),
 
-          //pharmacist no medication reminders, just AI banner
+          // pharmacist no medication reminders, just AI banner
           isPharmacist
               ? const Text(
                 "Pharmacist Home Page",
@@ -272,7 +272,7 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                     ),
                   );
                 },
-                backgroundColor: const Color(0xFF4FC3CF), 
+                backgroundColor: const Color(0xFF4FC3CF),
                 foregroundColor: Colors.black,
                 label: const Text("Add new reminder"),
                 icon: const Icon(Icons.add),
@@ -346,7 +346,10 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
   }
 
   void _confirmDelete(BuildContext context, String reminderId) {
-    final reminderViewModel = Provider.of<ReminderViewModel>(context, listen: false);
+    final reminderViewModel = Provider.of<ReminderViewModel>(
+      context,
+      listen: false,
+    );
 
     showDialog(
       context: context,

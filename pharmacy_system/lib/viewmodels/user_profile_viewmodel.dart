@@ -4,8 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pharmacy_system/models/prescription.dart';
+// import 'package:pharmacy_system/viewmodels/chat_viewmodel.dart';
 
 import '../models/user_profile.dart';
+import '../constants/error_message.dart';
 
 class UserProfileViewModel extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -31,6 +33,8 @@ class UserProfileViewModel extends ChangeNotifier {
   bool hasProfile = false;
   List<Prescription> prescriptions = [];
   bool isLoadingPrescription = false;
+  User? get _currentUser => FirebaseAuth.instance.currentUser;
+  String? get _uid => _currentUser?.uid;
 
   void clearControllers() {
     nameController.clear();
@@ -42,34 +46,31 @@ class UserProfileViewModel extends ChangeNotifier {
     medicalConditionsController.clear();
   }
 
-  Future<void> logout() async {
-    await FirebaseAuth.instance.signOut();
-    clearControllers();
+  //TODO unuse logout method?
+  // Future<void> logout(ChatViewModel chatViewModel) async {
+  //   log("Logging out user: ${_uid}");
+  //   chatViewModel.disposeListener();
+  //   await FirebaseAuth.instance.signOut();
+  //   clearControllers();
 
-    name = "";
-    age = "";
-    gender = "";
-    weight = "";
-    height = "";
-    allergies = "";
-    medicalConditions = "";
+  //   name = "";
+  //   age = "";
+  //   gender = "";
+  //   weight = "";
+  //   height = "";
+  //   allergies = "";
+  //   medicalConditions = "";
 
-    hasProfile = false;
+  //   hasProfile = false;
 
-    notifyListeners();
-  }
+  //   notifyListeners();
+  // }
 
   Future<void> checkProfileExists() async {
-    final user = FirebaseAuth.instance.currentUser;
+    log("Checking user profile existence for UID: ${_uid}");
+    _requireAuth();
 
-    if (user == null) {
-      hasProfile = false;
-      notifyListeners();
-      return;
-    }
-
-    final doc =
-        await _firestore.collection("user_profiles").doc(user.uid).get();
+    final doc = await _firestore.collection("user_profiles").doc(_uid).get();
 
     hasProfile = doc.exists;
     notifyListeners();
@@ -77,16 +78,14 @@ class UserProfileViewModel extends ChangeNotifier {
 
   Future<void> loadProfile() async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
+      log("Loading user profile for UID: ${_uid}");
+      _requireAuth();
 
-      if (user == null) return;
-
-      final doc =
-          await _firestore.collection("user_profiles").doc(user.uid).get();
-      log("Loading profile for UID: ${user.uid}");
+      final doc = await _firestore.collection("user_profiles").doc(_uid).get();
+      log("Loading profile for UID: ${_uid}");
 
       if (doc.exists) {
-        log("user profile exist for user ID: ${user.uid}");
+        log("user profile exist for user ID: ${_uid}");
         final profile = UserProfile.fromDoc(doc);
 
         name = profile.name;
@@ -105,9 +104,9 @@ class UserProfileViewModel extends ChangeNotifier {
         allergiesController.text = allergies;
         medicalConditionsController.text = medicalConditions;
 
-        notifyListeners();
+        // notifyListeners();
       } else {
-        log("No profile found for user ID: ${user.uid}, creating profile.");
+        log("No profile found for user ID: ${_uid}, creating profile.");
 
         clearControllers();
 
@@ -124,7 +123,8 @@ class UserProfileViewModel extends ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      errorMessage = "Failed to load profile.";
+      log("${ErrorMessage.LOAD_USER_PROFILE_ERROR}: $e");
+      errorMessage = ErrorMessage.LOAD_USER_PROFILE_ERROR;
       notifyListeners();
     }
   }
@@ -148,7 +148,8 @@ class UserProfileViewModel extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      errorMessage = "Failed to load profile.";
+      log("${ErrorMessage.LOAD_USER_PROFILE_ERROR}: $e");
+      errorMessage = ErrorMessage.LOAD_USER_PROFILE_ERROR;
       notifyListeners();
     }
   }
@@ -157,15 +158,11 @@ class UserProfileViewModel extends ChangeNotifier {
     try {
       isLoading = true;
       notifyListeners();
+      _requireAuth();
 
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        errorMessage = "User not logged in";
-        return false;
-      }
-      log("Creating user profile for user: ${user.uid}");
+      log("Creating user profile for user: ${_uid}");
       final profile = UserProfile(
-        id: user.uid,
+        id: _uid!,
         name: nameController.text,
         age: int.tryParse(ageController.text) ?? 0,
         gender: genderController.text,
@@ -182,7 +179,7 @@ class UserProfileViewModel extends ChangeNotifier {
 
       await _firestore
           .collection("user_profiles")
-          .doc(user.uid)
+          .doc(_uid)
           .set(profile.toMap());
 
       hasProfile = true;
@@ -192,7 +189,8 @@ class UserProfileViewModel extends ChangeNotifier {
       return true;
     } catch (e) {
       isLoading = false;
-      errorMessage = e.toString();
+      log("${ErrorMessage.SAVE_USER_PROFILE_ERROR}: $e");
+      errorMessage = ErrorMessage.SAVE_USER_PROFILE_ERROR;
       notifyListeners();
       return false;
     }
@@ -202,15 +200,10 @@ class UserProfileViewModel extends ChangeNotifier {
     try {
       isLoading = true;
       notifyListeners();
-
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        errorMessage = "User not logged in";
-        return false;
-      }
+      _requireAuth();
 
       final profile = UserProfile(
-        id: user.uid,
+        id: _uid!,
         name: nameController.text,
         age: int.tryParse(ageController.text) ?? 0,
         gender: genderController.text,
@@ -227,7 +220,7 @@ class UserProfileViewModel extends ChangeNotifier {
 
       await _firestore
           .collection("user_profiles")
-          .doc(user.uid)
+          .doc(_uid)
           .update(profile.toMap());
 
       name = nameController.text;
@@ -244,7 +237,8 @@ class UserProfileViewModel extends ChangeNotifier {
       return true;
     } catch (e) {
       isLoading = false;
-      errorMessage = "Server timeout / update failed";
+      log("${ErrorMessage.UPDATE_USER_PROFILE_ERROR}: $e");
+      errorMessage = ErrorMessage.UPDATE_USER_PROFILE_ERROR;
       notifyListeners();
       return false;
     }
@@ -255,9 +249,9 @@ class UserProfileViewModel extends ChangeNotifier {
       isLoading = true;
       notifyListeners();
 
-      final user = FirebaseAuth.instance.currentUser;
+      _requireAuth();
 
-      await _firestore.collection("user_profiles").doc(user!.uid).delete();
+      await _firestore.collection("user_profiles").doc(_uid).delete();
 
       clearControllers();
 
@@ -268,9 +262,20 @@ class UserProfileViewModel extends ChangeNotifier {
       return true;
     } catch (e) {
       isLoading = false;
-      errorMessage = e.toString();
+      log("${ErrorMessage.DELETE_USER_PROFILE_ERROR}: $e");
+      errorMessage = ErrorMessage.DELETE_USER_PROFILE_ERROR;
       notifyListeners();
       return false;
+    }
+  }
+
+  void _requireAuth() {
+    if (_uid == null) {
+      hasProfile = false;
+      errorMessage = ("User Profile error: ${ErrorMessage.AUTH_ERROR}");
+      throw Exception("User Profile error: ${ErrorMessage.AUTH_ERROR}");
+    } else {
+      log("Authenticated user ID for user profile view: $_uid");
     }
   }
 }

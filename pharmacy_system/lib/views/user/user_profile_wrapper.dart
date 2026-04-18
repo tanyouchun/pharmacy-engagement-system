@@ -4,22 +4,29 @@ import '../../viewmodels/user_profile_viewmodel.dart';
 import 'user_profile_display_view.dart';
 import 'user_create_profile_view.dart';
 
-class UserProfileWrapper extends StatelessWidget {
+class UserProfileWrapper extends StatefulWidget {
   const UserProfileWrapper({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final userProfileViewModel = Provider.of<UserProfileViewModel>(context);
+  State<UserProfileWrapper> createState() => _UserProfileWrapperState();
+}
 
-    // first time load
-    if (!userProfileViewModel.hasProfile && !userProfileViewModel.isLoading) {
-      userProfileViewModel.checkProfileExists();
-    }
+class _UserProfileWrapperState extends State<UserProfileWrapper> {
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      context.read<UserProfileViewModel>().checkProfileExists();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final userProfileViewModel = context.watch<UserProfileViewModel>();
 
     if (userProfileViewModel.isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return userProfileViewModel.hasProfile

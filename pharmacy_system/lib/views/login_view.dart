@@ -79,15 +79,21 @@ class LoginView extends StatelessWidget {
                               ? null
                               : () async {
                                 await loginViewModel.login();
-
-                                if (FirebaseAuth.instance.currentUser != null) {
-                                  Navigator.of(context).pushAndRemoveUntil(
-                                    MaterialPageRoute(
-                                      builder: (_) => const AuthWrapper(),
-                                    ),
-                                    (route) => false,
-                                  );
+                                if (context.mounted &&
+                                    loginViewModel.errorMessage == null) {
+                                  Navigator.of(
+                                    context,
+                                  ).popUntil((route) => route.isFirst);
                                 }
+
+                                // if (FirebaseAuth.instance.currentUser != null) {
+                                //   Navigator.of(context).pushAndRemoveUntil(
+                                //     MaterialPageRoute(
+                                //       builder: (_) => const AuthWrapper(),
+                                //     ),
+                                //     (route) => false,
+                                //   );
+                                // }
                               },
 
                       style: ElevatedButton.styleFrom(
@@ -151,7 +157,12 @@ class LoginView extends StatelessWidget {
                 _socialButton(
                   icon: "assets/images/google.png",
                   text: "Sign in with Google",
-                  onTap: loginViewModel.signInWithGoogle,
+                  onTap: () async {
+                    await loginViewModel.signInWithGoogle();
+                    if (context.mounted) {
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                    }
+                  },
                 ),
 
                 const SizedBox(height: 15),

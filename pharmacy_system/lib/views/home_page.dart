@@ -3,6 +3,9 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+
+import 'package:pharmacy_system/viewmodels/chat_viewmodel.dart';
 import 'package:pharmacy_system/views/admin/admin_manage_config_view.dart';
 import 'package:pharmacy_system/views/admin/admin_manage_user_view.dart';
 import 'package:pharmacy_system/views/user/user_prescription_view.dart';
@@ -67,6 +70,9 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _logout() async {
     try {
+      final chatViewModel = context.read<ChatViewModel>();
+      chatViewModel.disposeListener();
+      
       await AuthService().signOut();
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(

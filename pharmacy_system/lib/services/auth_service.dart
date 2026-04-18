@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -7,45 +9,59 @@ class AuthService {
   // Sign up with email & password
   Future<UserCredential?> signUpWithEmail(String email, String password) async {
     try {
+      log("Attempting to sign up with email: $email");
       UserCredential userCredential = await _firebaseAuth
           .createUserWithEmailAndPassword(
             email: email.trim(),
             password: password,
           );
+      log("User created successfully with email: $email");
       return userCredential;
     } on FirebaseAuthException catch (e) {
+      log("Sign-up failed: ${e.message}");
       throw e.message ?? 'Signup failed';
     } catch (e) {
+      log("An unknown error occurred: $e");
       throw 'An unknown error occurred';
     }
   }
 
   // Sign in with email & password
-  Future<UserCredential?> signInWithEmail(String email, String password) async {
+  Future<UserCredential> signInWithEmail(String email, String password) async {
     try {
+      log("Attempting to sign in with email: $email");
       UserCredential userCredential = await _firebaseAuth
           .signInWithEmailAndPassword(email: email.trim(), password: password);
       return userCredential;
     } on FirebaseAuthException catch (e) {
-      throw e.message ?? 'Login failed';
+      log("Sign-in failed: ${e.message}");
+      throw Exception(e.message ?? 'Login failed');
     } catch (e) {
-      throw 'An unknown error occurred';
+      log("An unknown error occurred: $e");
+      throw Exception('An unknown error occurred');
     }
   }
 
-  signInWithGoogle() async {
-    final GoogleSignInAccount? gUser = await GoogleSignIn().signIn();
+  Future<UserCredential?> signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? gUser = await GoogleSignIn().signIn();
 
-    if (gUser == null) return;
+      if (gUser == null) {
+        return null;
+      }
 
-    final GoogleSignInAuthentication gAuth = await gUser.authentication;
+      final GoogleSignInAuthentication gAuth = await gUser.authentication;
 
-    final credential = GoogleAuthProvider.credential(
-      accessToken: gAuth.accessToken,
-      idToken: gAuth.idToken,
-    );
+      final credential = GoogleAuthProvider.credential(
+        accessToken: gAuth.accessToken,
+        idToken: gAuth.idToken,
+      );
 
-    return await _firebaseAuth.signInWithCredential(credential);
+      return await _firebaseAuth.signInWithCredential(credential);
+    } catch (e) {
+      log("Google Sign-In failed: $e");
+      throw Exception('Google Sign-In failed');
+    }
   }
 
   Future<void> sendPasswordResetEmail(String email) async {
@@ -57,10 +73,11 @@ class AuthService {
     await _firebaseAuth.signOut();
   }
 
-  Future<void> logout() async {
-    final AuthService auth = AuthService();
-    await auth.signOut();
-  }
+  //TODO unuse logout function?
+  // Future<void> logout() async {
+  //   final AuthService auth = AuthService();
+  //   await auth.signOut();
+  // }
 
   String? get userId {
     return _firebaseAuth.currentUser?.uid;

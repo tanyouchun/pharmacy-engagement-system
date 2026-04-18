@@ -242,10 +242,11 @@ class PrescriptionViewModel extends ChangeNotifier {
 
   void _requireAuth() {
     if (_uid == null) {
-      log("Prescription operations error: ${ErrorMessage.AUTH_ERROR}");
       errorMessage =
           ("Prescription operations error: ${ErrorMessage.AUTH_ERROR}");
-      return;
+      throw Exception(
+        "Prescription operations error: ${ErrorMessage.AUTH_ERROR}",
+      );
     } else {
       log("Authenticated user ID for prescription view: $_uid");
     }

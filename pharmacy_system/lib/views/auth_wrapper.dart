@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -12,20 +14,20 @@ class AuthWrapper extends StatelessWidget {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-
-        // Loading state
+        log(
+          "AuthWrapper rebuilt -> ConnectionState: ${snapshot.connectionState}, HasData: ${snapshot.hasData}, User: ${snapshot.data?.email}",
+        );
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
-        // ✅ User logged in → go to HomePage
-        if (snapshot.hasData) {
+        if (snapshot.hasData && snapshot.data != null) {
+          log("User is authenticated: ${snapshot.data?.email}");
           return const HomePage();
         }
-
-        // ❌ Not logged in → go to Start/Login screen
+        log("No authenticated user found");
         return const StartScreen();
       },
     );

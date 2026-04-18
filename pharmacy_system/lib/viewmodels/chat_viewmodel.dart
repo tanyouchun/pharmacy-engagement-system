@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,6 +14,7 @@ class ChatViewModel extends ChangeNotifier {
 
   List<Message> messages = [];
   String? errorMessage;
+  StreamSubscription? _messageSubscription;
 
   final ChatService _chatService = ChatService();
 
@@ -115,7 +117,9 @@ class ChatViewModel extends ChangeNotifier {
 
   void listenMessages(String chatId) {
     try {
-      _firestore
+      _messageSubscription?.cancel();
+
+      _messageSubscription = _firestore
           .collection('chats')
           .doc(chatId)
           .collection('messages')
@@ -134,5 +138,11 @@ class ChatViewModel extends ChangeNotifier {
       errorMessage = ErrorMessage.LISTEN_MESSAGES_ERROR;
       notifyListeners();
     }
+  }
+
+  void disposeListener() {
+    log("Disposing chat listener");
+    _messageSubscription?.cancel();
+    _messageSubscription = null;
   }
 }
