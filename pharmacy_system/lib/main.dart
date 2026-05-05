@@ -11,6 +11,8 @@ import 'viewmodels/prescription_viewmodel.dart';
 import 'viewmodels/chat_viewmodel.dart';
 import 'viewmodels/reminder_viewmodel.dart';
 import 'viewmodels/pharmacist_profile_viewmodel.dart';
+import 'viewmodels/chatbot_viewmodel.dart';
+
 import 'views/auth_wrapper.dart';
 import 'views/pharmacist/pharmacist_profile_Form_view.dart';
 
@@ -36,6 +38,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ReminderViewModel()),
         ChangeNotifierProvider(create: (_) => PharmacistProfileViewModel()),
         ChangeNotifierProvider(create: (_) => AdminManageUserViewModel()),
+        ChangeNotifierProvider(create: (_) => ChatBotViewModel()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
