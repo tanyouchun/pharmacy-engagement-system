@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Chat {
-  final String id;
+  final String chatId;
   final List<String> participants;
   final String lastMessage;
-  final DateTime lastTimestamp;
+  final DateTime? lastTimestamp;
 
   Chat({
-    required this.id,
+    required this.chatId,
     required this.participants,
     required this.lastMessage,
     required this.lastTimestamp,
@@ -17,17 +17,33 @@ class Chat {
     return {
       'participants': participants,
       'lastMessage': lastMessage,
-      'lastTimestamp': Timestamp.fromDate(lastTimestamp),
+      'lastTimestamp': lastTimestamp != null
+          ? Timestamp.fromDate(lastTimestamp!)
+          : null,
     };
   }
 
   factory Chat.fromMap(String id, Map<String, dynamic> map) {
     return Chat(
-      id: id,
+      chatId: id,
       participants: List<String>.from(map['participants'] ?? []),
       lastMessage: map['lastMessage'] ?? '',
-      lastTimestamp:
-          (map['lastTimestamp'] as Timestamp).toDate(),
+      lastTimestamp: map['lastTimestamp'] != null
+          ? (map['lastTimestamp'] as Timestamp).toDate()
+          : null,
+    );
+  }
+
+  Chat copyWith({
+    List<String>? participants,
+    String? lastMessage,
+    DateTime? lastTimestamp,
+  }) {
+    return Chat(
+      chatId: chatId,
+      participants: participants ?? this.participants,
+      lastMessage: lastMessage ?? this.lastMessage,
+      lastTimestamp: lastTimestamp ?? this.lastTimestamp,
     );
   }
 }

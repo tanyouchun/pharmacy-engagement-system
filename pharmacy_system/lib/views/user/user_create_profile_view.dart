@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../viewmodels/user_profile_viewmodel.dart';
+import '../../viewmodels/user_profile_viewmodel.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<UserProfileViewModel>(context);
+    final userProfileViewModel = Provider.of<UserProfileViewModel>(context);
 
     return Scaffold(
       appBar: AppBar(title: const Text("Create Profile"), centerTitle: true),
@@ -20,14 +20,14 @@ class ProfileView extends StatelessWidget {
             child: Column(
               children: [
                 TextField(
-                  controller: vm.nameController,
+                  controller: userProfileViewModel.nameController,
                   decoration: const InputDecoration(labelText: "Name"),
                 ),
 
                 const SizedBox(height: 15),
 
                 TextField(
-                  controller: vm.ageController,
+                  controller: userProfileViewModel.ageController,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(labelText: "Age"),
                 ),
@@ -35,46 +35,53 @@ class ProfileView extends StatelessWidget {
                 const SizedBox(height: 15),
 
                 TextField(
-                  controller: vm.genderController,
+                  controller: userProfileViewModel.genderController,
                   decoration: const InputDecoration(labelText: "Gender"),
                 ),
 
                 const SizedBox(height: 15),
 
                 TextField(
-                  controller: vm.weightController,
+                  controller: userProfileViewModel.weightController,
                   decoration: const InputDecoration(labelText: "Weight"),
                 ),
 
                 const SizedBox(height: 15),
 
                 TextField(
-                  controller: vm.heightController,
+                  controller: userProfileViewModel.heightController,
                   decoration: const InputDecoration(labelText: "Height"),
                 ),
 
                 const SizedBox(height: 15),
 
                 TextField(
-                  controller: vm.allergiesController,
+                  controller: userProfileViewModel.allergiesController,
                   decoration: const InputDecoration(labelText: "Allergies"),
+                ),
+
+                const SizedBox(height: 15),
+
+                TextField(
+                  controller: userProfileViewModel.medicalConditionsController,
+                  decoration: const InputDecoration(labelText: "Medical Conditions"),
                 ),
 
                 const SizedBox(height: 25),
 
-                vm.isLoading
+                userProfileViewModel.isLoading
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
                       onPressed: () async {
                         FocusScope.of(context).unfocus();
 
-                        bool success = await vm.saveProfile();
+                        bool success = await userProfileViewModel.saveProfile();
 
                         if (!success) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                vm.errorMessage ?? "Error occurred",
+                                userProfileViewModel.errorMessage ?? "Error occurred",
                               ),
                             ),
                           );

@@ -4,6 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../models/pharmacist_profile.dart';
+import '../constants/error_message.dart';
+
 class PharmacistProfileViewModel extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -20,6 +23,9 @@ class PharmacistProfileViewModel extends ChangeNotifier {
   String license = '';
   String pharmacyName = '';
   int experience = 0;
+
+  // User? get _currentUser => FirebaseAuth.instance.currentUser;
+  // String? get _uid => _currentUser?.uid;
 
   Future<void> checkProfileExists() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -38,6 +44,9 @@ class PharmacistProfileViewModel extends ChangeNotifier {
               .doc(user.uid)
               .get();
       hasProfile = doc.exists;
+    } catch (e) {
+      log("${ErrorMessage.LOAD_PROFILE_ERROR}: $e");
+      errorMessage = ErrorMessage.LOAD_PROFILE_ERROR;
     } finally {
       isLoading = false;
     }
@@ -56,12 +65,12 @@ class PharmacistProfileViewModel extends ChangeNotifier {
               .get();
 
       if (doc.exists) {
-        final data = doc.data()!;
+        final profile = PharmacistProfile.fromDoc(doc);
 
-        name = data['name'] ?? '';
-        license = data['license'] ?? '';
-        pharmacyName = data['pharmacyName'] ?? '';
-        experience = data['experience'] ?? 0;
+        name = profile.name;
+        license = profile.license;
+        pharmacyName = profile.pharmacyName;
+        experience = profile.experience;
 
         nameController.text = name;
         licenseController.text = license;
@@ -75,7 +84,8 @@ class PharmacistProfileViewModel extends ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      errorMessage = 'Failed to load profile';
+      log("${ErrorMessage.LOAD_PROFILE_ERROR}: $e");
+      errorMessage = ErrorMessage.LOAD_PROFILE_ERROR;
       notifyListeners();
     }
   }
@@ -88,20 +98,25 @@ class PharmacistProfileViewModel extends ChangeNotifier {
       isLoading = true;
       notifyListeners();
 
-      await _firestore.collection('pharmacist_profiles').doc(user.uid).set({
-        'id': user.uid,
-        'name': nameController.text.trim(),
-        'license': licenseController.text.trim(),
-        'pharmacyName': pharmacyNameController.text.trim(),
-        'experience': int.tryParse(experienceController.text.trim()) ?? 0,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+      final profile = PharmacistProfile(
+        id: user.uid,
+        name: nameController.text.trim(),
+        license: licenseController.text.trim(),
+        pharmacyName: pharmacyNameController.text.trim(),
+        experience: int.tryParse(experienceController.text.trim()) ?? 0,
+      );
+
+      await _firestore
+          .collection('pharmacist_profiles')
+          .doc(user.uid)
+          .set(profile.toMap());
 
       hasProfile = true;
       await loadProfile();
       return true;
     } catch (e) {
-      errorMessage = 'Failed to save profile: $e';
+      log("${ErrorMessage.SAVE_PROFILE_ERROR}: $e");
+      errorMessage = ErrorMessage.SAVE_PROFILE_ERROR;
       return false;
     } finally {
       isLoading = false;
@@ -117,18 +132,24 @@ class PharmacistProfileViewModel extends ChangeNotifier {
       isLoading = true;
       notifyListeners();
 
-      await _firestore.collection('pharmacist_profiles').doc(user.uid).update({
-        'name': nameController.text.trim(),
-        'license': licenseController.text.trim(),
-        'pharmacyName': pharmacyNameController.text.trim(),
-        'experience': int.tryParse(experienceController.text.trim()) ?? 0,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+      final profile = PharmacistProfile(
+        id: user.uid,
+        name: nameController.text.trim(),
+        license: licenseController.text.trim(),
+        pharmacyName: pharmacyNameController.text.trim(),
+        experience: int.tryParse(experienceController.text.trim()) ?? 0,
+      );
+
+      await _firestore
+          .collection('pharmacist_profiles')
+          .doc(user.uid)
+          .update(profile.toMap());
 
       await loadProfile();
       return true;
     } catch (e) {
-      errorMessage = 'Failed to update profile: $e';
+      log("${ErrorMessage.UPDATE_PROFILE_ERROR}: $e");
+      errorMessage = ErrorMessage.UPDATE_PROFILE_ERROR;
       return false;
     } finally {
       isLoading = false;
@@ -160,7 +181,8 @@ class PharmacistProfileViewModel extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      errorMessage = 'Failed to delete profile: $e';
+      log("${ErrorMessage.DELETE_PROFILE_ERROR}: $e");
+      errorMessage = ErrorMessage.DELETE_PROFILE_ERROR;
       return false;
     } finally {
       isLoading = false;
@@ -177,23 +199,20 @@ class PharmacistProfileViewModel extends ChangeNotifier {
           await _firestore.collection('pharmacist_profiles').doc(userId).get();
 
       if (doc.exists) {
-        final data = doc.data() ?? {};
+        final profile = PharmacistProfile.fromDoc(doc);
 
-        name = (data['name'] ?? '').toString();
-        license = (data['license'] ?? '').toString();
-        pharmacyName = (data['pharmacyName'] ?? '').toString();
-        experience =
-            (data['experience'] is int)
-                ? data['experience'] as int
-                : int.tryParse((data['experience'] ?? '0').toString()) ?? 0;
+        name = profile.name;
+        license = profile.license;
+        pharmacyName = profile.pharmacyName;
+        experience = profile.experience;
 
         hasProfile = true;
       } else {
         hasProfile = false;
       }
     } catch (e) {
-      log("Error loading pharmacist profile: $e");
-      errorMessage = 'Failed to load pharmacist: $e';
+      log("${ErrorMessage.LOAD_PROFILE_ERROR}: $e");
+      errorMessage = ErrorMessage.LOAD_PROFILE_ERROR;
     } finally {
       isLoading = false;
       notifyListeners();
@@ -208,4 +227,13 @@ class PharmacistProfileViewModel extends ChangeNotifier {
     experienceController.dispose();
     super.dispose();
   }
+
+  //   void _requireAuth() {
+  //   if (_uid == null) {
+  //     errorMessage = ("Pharmacist Profile error: ${ErrorMessage.AUTH_ERROR}");
+  //     throw Exception("Pharmacist Profile error: ${ErrorMessage.AUTH_ERROR}");
+  //   } else {
+  //     log("Authenticated user ID for pharmacist profile view: $_uid");
+  //   }
+  // }
 }

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../views/auth_wrapper.dart';
 
 import '../viewmodels/login_viewmodel.dart';
-import '../widgets/custom_textfield.dart';
+import '../utils/custom_textfield.dart';
 import 'signup_view.dart';
 
 class LoginView extends StatelessWidget {
@@ -12,7 +10,7 @@ class LoginView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<LoginViewModel>(context);
+    final loginViewModel = Provider.of<LoginViewModel>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -33,7 +31,7 @@ class LoginView extends StatelessWidget {
                 CustomTextField(
                   hint: "Enter your email",
                   icon: Icons.email_outlined,
-                  controller: vm.emailController,
+                  controller: loginViewModel.emailController,
                 ),
                 const SizedBox(height: 15),
 
@@ -42,7 +40,7 @@ class LoginView extends StatelessWidget {
                   hint: "Enter your password",
                   icon: Icons.lock_outline,
                   isPassword: true,
-                  controller: vm.passwordController,
+                  controller: loginViewModel.passwordController,
                 ),
 
                 const SizedBox(height: 10),
@@ -58,12 +56,12 @@ class LoginView extends StatelessWidget {
 
                 const SizedBox(height: 10),
 
-                if (vm.errorMessage != null)
+                if (loginViewModel.errorMessage != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10),
                     child: Center(
                       child: Text(
-                        vm.errorMessage!,
+                        loginViewModel.errorMessage!,
                         textAlign: TextAlign.center,
                         style: const TextStyle(color: Colors.red),
                       ),
@@ -71,23 +69,29 @@ class LoginView extends StatelessWidget {
                   ),
 
                 // Sign In butto
-                vm.isLoading
+                loginViewModel.isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : ElevatedButton(
                       onPressed:
-                          vm.isLoading
+                          loginViewModel.isLoading
                               ? null
                               : () async {
-                                await vm.login();
-
-                                if (FirebaseAuth.instance.currentUser != null) {
-                                  Navigator.of(context).pushAndRemoveUntil(
-                                    MaterialPageRoute(
-                                      builder: (_) => const AuthWrapper(),
-                                    ),
-                                    (route) => false,
-                                  );
+                                await loginViewModel.login();
+                                if (context.mounted &&
+                                    loginViewModel.errorMessage == null) {
+                                  Navigator.of(
+                                    context,
+                                  ).popUntil((route) => route.isFirst);
                                 }
+
+                                // if (FirebaseAuth.instance.currentUser != null) {
+                                //   Navigator.of(context).pushAndRemoveUntil(
+                                //     MaterialPageRoute(
+                                //       builder: (_) => const AuthWrapper(),
+                                //     ),
+                                //     (route) => false,
+                                //   );
+                                // }
                               },
 
                       style: ElevatedButton.styleFrom(
@@ -151,7 +155,12 @@ class LoginView extends StatelessWidget {
                 _socialButton(
                   icon: "assets/images/google.png",
                   text: "Sign in with Google",
-                  onTap: vm.signInWithGoogle,
+                  onTap: () async {
+                    await loginViewModel.signInWithGoogle();
+                    if (context.mounted) {
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                    }
+                  },
                 ),
 
                 const SizedBox(height: 15),

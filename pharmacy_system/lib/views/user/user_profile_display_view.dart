@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../viewmodels/user_profile_viewmodel.dart';
-import '../edit_profile_view.dart';
+import 'user_edit_profile_view.dart';
 
 class UserProfileDisplayView extends StatefulWidget {
   const UserProfileDisplayView({super.key});
@@ -20,8 +20,11 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
   }
 
   Future<void> _loadData() async {
-    final vm = Provider.of<UserProfileViewModel>(context, listen: false);
-    await vm.loadProfile();
+    final userProfileViewModel = Provider.of<UserProfileViewModel>(
+      context,
+      listen: false,
+    );
+    await userProfileViewModel.loadProfile();
 
     setState(() {
       isLoading = false;
@@ -30,7 +33,7 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<UserProfileViewModel>(context);
+    final userProfileViewModel = Provider.of<UserProfileViewModel>(context);
 
     if (isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -45,13 +48,13 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
             //TODO: replace with real profile picture
             CircleAvatar(
               radius: 50,
-              backgroundImage: NetworkImage("https://i.pravatar.cc/150?img=3"),
+              // backgroundImage: NetworkImage(""),
             ),
 
             const SizedBox(height: 10),
 
             Text(
-              vm.name,
+              userProfileViewModel.name,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
 
@@ -62,9 +65,61 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildStat(Icons.cake, "Age", vm.age),
-                  _buildStat(Icons.height, "Height", "${vm.height} cm"),
-                  _buildStat(Icons.monitor_weight, "Weight", "${vm.weight} kg"),
+                  _buildStat(Icons.cake, "Age", userProfileViewModel.age),
+                  _buildStat(
+                    Icons.height,
+                    "Height",
+                    "${userProfileViewModel.height} cm",
+                  ),
+                  _buildStat(
+                    Icons.monitor_weight,
+                    "Weight",
+                    "${userProfileViewModel.weight} kg",
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 40),
+
+            // Medical Conditions Section
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Center(
+                    child: Text(
+                      "Medical Conditions",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  userProfileViewModel.medicalConditions.isEmpty
+                      ? const Text(
+                        "No medical conditions",
+                        style: TextStyle(color: Colors.grey),
+                      )
+                      : Wrap(
+                        alignment: WrapAlignment.center,
+                        spacing: 8,
+                        runSpacing: 8,
+                        children:
+                            userProfileViewModel.medicalConditions
+                                .split(',')
+                                .map(
+                                  (condition) => Chip(
+                                    label: Text(condition.trim()),
+                                    backgroundColor: Colors.blue.shade50,
+                                  ),
+                                )
+                                .toList(),
+                      ),
                 ],
               ),
             ),
@@ -79,6 +134,8 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
             MaterialPageRoute(builder: (_) => const EditProfileView()),
           );
         },
+        backgroundColor: const Color(0xFF4FC3CF),
+        foregroundColor: Colors.black,
         icon: const Icon(Icons.add),
         label: const Text("Edit Profile"),
       ),

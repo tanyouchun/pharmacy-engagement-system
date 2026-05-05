@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../viewmodels/reminder_viewmodel.dart';
-import '../create_reminder_view.dart';
+import 'user_create_reminder_view.dart';
 import 'package:table_calendar/table_calendar.dart';
+import '../../models/reminder.dart';
 
 class ReminderHomeView extends StatefulWidget {
   final String? role;
@@ -34,9 +35,10 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<ReminderViewModel>(context);
+    final reminderViewModel = Provider.of<ReminderViewModel>(context);
     final isPharmacist = widget.role == 'pharmacist';
     final isAdmin = widget.role == 'admin';
+    final today = DateTime.now();
 
     return Scaffold(
       body: Column(
@@ -123,13 +125,13 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                         ),
                       ),
 
-                      //TODO insert avatar here if needed
+                      //TODO insert avatar here
                       /// USER AVATAR
                       // const CircleAvatar(
                       //   radius: 20,
                       //   backgroundImage: AssetImage(
                       //     "assets/avatar.png",
-                      //   ), // replace if needed
+                      //   ),
                       // ),
                     ],
                   ),
@@ -174,12 +176,11 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
             ),
           ),
           const SizedBox(height: 20),
-          Text(
-            "Today: ${_selectedDay!.day}/${_selectedDay!.month}/${_selectedDay!.year}",
-          ),
+
+          Text("Today: ${today.day}/${today.month}/${today.year}"),
           const SizedBox(height: 20),
 
-          //pharmacist no medication reminders, just AI banner
+          // pharmacist no medication reminders, just AI banner
           isPharmacist
               ? const Text(
                 "Pharmacist Home Page",
@@ -226,12 +227,12 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                       ),
                     )
                     // regular user view (medication reminders)
-                    : vm.reminders.isEmpty
+                    : reminderViewModel.reminders.isEmpty
                     ? const Center(child: Text("No reminders yet"))
                     : ListView.builder(
-                      itemCount: vm.reminders.length,
+                      itemCount: reminderViewModel.reminders.length,
                       itemBuilder: (context, index) {
-                        final r = vm.reminders[index];
+                        final reminder = reminderViewModel.reminders[index];
 
                         return Card(
                           margin: const EdgeInsets.symmetric(
@@ -239,13 +240,18 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                             vertical: 8,
                           ),
                           child: ListTile(
-                            title: Text(r.medicationName),
-                            subtitle: Text(r.frequency),
+                            title: Text(reminder.medicationName),
+                            subtitle: Text(reminder.frequency),
                             trailing: Text(
-                              "${r.time.hour}:${r.time.minute.toString().padLeft(2, '0')}",
+                              "${reminder.scheduleTime.hour}:${reminder.scheduleTime.minute.toString().padLeft(2, '0')}",
                             ),
-                            onTap: () => _showReminderDetails(context, r),
-                            onLongPress: () => _confirmDelete(context, r.id),
+                            onTap:
+                                () => _showReminderDetails(context, reminder),
+                            onLongPress:
+                                () => _confirmDelete(
+                                  context,
+                                  reminder.reminderId,
+                                ),
                           ),
                         );
                       },
@@ -266,13 +272,15 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                     ),
                   );
                 },
+                backgroundColor: const Color(0xFF4FC3CF),
+                foregroundColor: Colors.black,
                 label: const Text("Add new reminder"),
                 icon: const Icon(Icons.add),
               ),
     );
   }
 
-  void _showReminderDetails(BuildContext context, reminder) {
+  void _showReminderDetails(BuildContext context, Reminder reminder) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -297,7 +305,7 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
 
               Text("Frequency: ${reminder.frequency}"),
               Text(
-                "Time: ${reminder.time.hour}:${reminder.time.minute.toString().padLeft(2, '0')}",
+                "Time: ${reminder.scheduleTime.hour}:${reminder.scheduleTime.minute.toString().padLeft(2, '0')}",
               ),
 
               const SizedBox(height: 20),
@@ -322,7 +330,8 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                     ),
                     onPressed: () {
                       Navigator.pop(context);
-                      _confirmDelete(context, reminder.id);
+                      //TODO need to check reminderId?
+                      _confirmDelete(context, reminder.reminderId);
                     },
                     icon: const Icon(Icons.delete),
                     label: const Text("Delete"),
@@ -336,8 +345,11 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
     );
   }
 
-  void _confirmDelete(BuildContext context, String id) {
-    final vm = Provider.of<ReminderViewModel>(context, listen: false);
+  void _confirmDelete(BuildContext context, String reminderId) {
+    final reminderViewModel = Provider.of<ReminderViewModel>(
+      context,
+      listen: false,
+    );
 
     showDialog(
       context: context,
@@ -354,7 +366,7 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
               ),
               TextButton(
                 onPressed: () async {
-                  await vm.deleteReminder(id);
+                  await reminderViewModel.deleteReminder(reminderId);
                   Navigator.pop(context);
                 },
                 child: const Text("Delete"),

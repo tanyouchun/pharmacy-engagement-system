@@ -9,7 +9,8 @@ class PharmacistProfileFormView extends StatefulWidget {
   const PharmacistProfileFormView({super.key});
 
   @override
-  State<PharmacistProfileFormView> createState() => _PharmacistProfileFormViewState();
+  State<PharmacistProfileFormView> createState() =>
+      _PharmacistProfileFormViewState();
 }
 
 class _PharmacistProfileFormViewState extends State<PharmacistProfileFormView> {
@@ -32,30 +33,10 @@ class _PharmacistProfileFormViewState extends State<PharmacistProfileFormView> {
   //   }
   // }
 
-  Future<void> _saveProfile() async {
-    if (!_formKey.currentState!.validate()) return;
-    final vm = context.read<PharmacistProfileViewModel>();
-
-    final ok = await vm.saveProfile();
-    if (!mounted) return;
-
-    if (!ok) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(vm.errorMessage ?? 'Failed to save profile')),
-      );
-      return;
-    }
-
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const HomePage()),
-      (route) => false,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<PharmacistProfileViewModel>();
+    final pharmacistProfileViewModel =
+        context.watch<PharmacistProfileViewModel>();
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -66,32 +47,28 @@ class _PharmacistProfileFormViewState extends State<PharmacistProfileFormView> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TextFormField(
-                  controller: vm.nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Full Name',
-                  ),
-                  validator: (val) =>
-                      (val == null || val.isEmpty) ? 'Required' : null,
+                  controller: pharmacistProfileViewModel.nameController,
+                  decoration: const InputDecoration(labelText: 'Full Name'),
+                  validator:
+                      (val) => (val == null || val.isEmpty) ? 'Required' : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  controller: vm.licenseController,
+                  controller: pharmacistProfileViewModel.licenseController,
                   decoration: const InputDecoration(
                     labelText: 'License Number',
                   ),
-                  validator: (val) =>
-                      (val == null || val.isEmpty) ? 'Required' : null,
+                  validator:
+                      (val) => (val == null || val.isEmpty) ? 'Required' : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  controller: vm.pharmacyNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Pharmacy Name',
-                  ),
+                  controller: pharmacistProfileViewModel.pharmacyNameController,
+                  decoration: const InputDecoration(labelText: 'Pharmacy Name'),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  controller: vm.experienceController,
+                  controller: pharmacistProfileViewModel.experienceController,
                   decoration: const InputDecoration(
                     labelText: 'Years of Experience',
                   ),
@@ -101,13 +78,18 @@ class _PharmacistProfileFormViewState extends State<PharmacistProfileFormView> {
                 SizedBox(
                   height: 48,
                   child: ElevatedButton(
-                    onPressed: vm.isLoading ? null : _saveProfile,
-                    child: vm.isLoading
-                        ? const CircularProgressIndicator(
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
-                          )
-                        : const Text('Save & Continue'),
+                    onPressed:
+                        pharmacistProfileViewModel.isLoading
+                            ? null
+                            : _saveProfile,
+                    child:
+                        pharmacistProfileViewModel.isLoading
+                            ? const CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            )
+                            : const Text('Save & Continue'),
                   ),
                 ),
               ],
@@ -117,5 +99,30 @@ class _PharmacistProfileFormViewState extends State<PharmacistProfileFormView> {
       ),
     );
   }
-}
 
+  Future<void> _saveProfile() async {
+    if (!_formKey.currentState!.validate()) return;
+    final pharmacistProfileViewModel =
+        context.read<PharmacistProfileViewModel>();
+
+    final ok = await pharmacistProfileViewModel.saveProfile();
+    if (!mounted) return;
+
+    if (!ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            pharmacistProfileViewModel.errorMessage ?? 'Failed to save profile',
+          ),
+        ),
+      );
+      return;
+    }
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const HomePage()),
+      (route) => false,
+    );
+  }
+}

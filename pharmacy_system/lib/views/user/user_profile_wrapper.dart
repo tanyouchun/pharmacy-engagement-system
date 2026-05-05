@@ -2,27 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../viewmodels/user_profile_viewmodel.dart';
 import 'user_profile_display_view.dart';
-import '../create_profile_view.dart';
+import 'user_create_profile_view.dart';
 
-class UserProfileWrapper extends StatelessWidget {
+class UserProfileWrapper extends StatefulWidget {
   const UserProfileWrapper({super.key});
 
   @override
+  State<UserProfileWrapper> createState() => _UserProfileWrapperState();
+}
+
+class _UserProfileWrapperState extends State<UserProfileWrapper> {
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      context.read<UserProfileViewModel>().checkProfileExists();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<UserProfileViewModel>(context);
+    final userProfileViewModel = context.watch<UserProfileViewModel>();
 
-    // first time load
-    if (!vm.hasProfile && !vm.isLoading) {
-      vm.checkProfileExists();
+    if (userProfileViewModel.isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    if (vm.isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    return vm.hasProfile
+    return userProfileViewModel.hasProfile
         ? const UserProfileDisplayView()
         : const ProfileView();
   }

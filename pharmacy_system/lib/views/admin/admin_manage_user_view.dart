@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
+
 import '../../viewmodels/admin_viewmodel.dart';
 import '../user/pharmacist_profile_details_view.dart';
 import '../pharmacist/user_profile_details_view.dart';
@@ -13,43 +15,44 @@ class AdminManageUserView extends StatefulWidget {
 }
 
 class _AdminManageUserViewState extends State<AdminManageUserView> {
+
   @override
   void initState() {
     super.initState();
 
-    Future.microtask(() {
-      final vm = Provider.of<AdminManageUserViewModel>(context, listen: false);
-
-      vm.listenToUsers();
-      vm.listenToReports();
-    });
+    context.read<AdminManageUserViewModel>().initAuthListener();
   }
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<AdminManageUserViewModel>(context);
+    final adminManageUserViewModel = Provider.of<AdminManageUserViewModel>(
+      context,
+    );
 
-    if (vm.isLoading) {
+    if (adminManageUserViewModel.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    if (vm.userError != null) {
-      return Scaffold(body: Center(child: Text("Error: ${vm.userError}")));
+    if (adminManageUserViewModel.userError != null) {
+      return Scaffold(
+        body: Center(
+          child: Text("Error: ${adminManageUserViewModel.userError}"),
+        ),
+      );
     }
 
     return Scaffold(
       body: ListView.builder(
-        itemCount: vm.reports.length,
+        itemCount: adminManageUserViewModel.reports.length,
         itemBuilder: (context, index) {
-          final report = vm.reports[index];
-          final data = report.data() as Map<String, dynamic>;
+          final report = adminManageUserViewModel.reports[index];
 
-          final name = data['reportedName'] ?? "";
-          final role = data['reportedRole'] ?? "";
-          final reason = data['reason'] ?? "";
-          final userId = data['reportedUserId'];
+          final name = report.reportedName;
+          final role = report.reportedRole;
+          final reason = report.reason;
+          final userId = report.reportedUserId;
 
-          final userData = vm.getUserData(userId);
+          final userData = adminManageUserViewModel.getUserData(userId);
 
           final isBlocked = userData?['isBlocked'] ?? false;
           final suspendUntil = userData?['suspendUntil'];
@@ -85,11 +88,11 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
                   IconButton(
                     icon: const Icon(Icons.visibility),
                     onPressed: () {
-                      _viewProfile(userId, role);
+                      _checkAccount(userId, role);
                     },
                   ),
 
-                  /// 🔄 If blocked → show UNSUSPEND
+                  // show UNSUSPEND
                   if (isBlocked)
                     IconButton(
                       icon: const Icon(Icons.lock_open, color: Colors.green),
@@ -102,16 +105,19 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
 
                         if (!confirm) return;
 
-                        await vm.unsuspendUser(userId);
+                        await adminManageUserViewModel.unBlockAccount(userId);
                       },
                     )
                   else
-                    /// ⛔ If active → show SUSPEND
                     IconButton(
                       icon: const Icon(Icons.block, color: Colors.red),
                       tooltip: "Suspend User",
                       onPressed: () {
-                        _showSuspendDialog(vm, userId, report.id);
+                        _showSuspendDialog(
+                          adminManageUserViewModel,
+                          userId,
+                          report.issueId!,
+                        );
                       },
                     ),
                 ],
@@ -123,7 +129,7 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
     );
   }
 
-  void _viewProfile(String userId, String role) {
+  void _checkAccount(String userId, String role) {
     if (role == 'pharmacist') {
       Navigator.push(
         context,
@@ -146,7 +152,7 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
   }
 
   void _showSuspendDialog(
-    AdminManageUserViewModel vm,
+    AdminManageUserViewModel adminManageUserViewModel,
     String userId,
     String reportId,
   ) {
@@ -170,11 +176,11 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
 
                     if (!confirm) return;
 
-                    await vm.suspendUser(
+                    await adminManageUserViewModel.blockAccount(
                       userId,
                       duration: const Duration(days: 1),
                     );
-                    await vm.resolveReport(reportId);
+                    await adminManageUserViewModel.setStatus(reportId);
                   },
                 ),
 
@@ -190,11 +196,11 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
 
                     if (!confirm) return;
 
-                    await vm.suspendUser(
+                    await adminManageUserViewModel.blockAccount(
                       userId,
                       duration: const Duration(days: 7),
                     );
-                    await vm.resolveReport(reportId);
+                    await adminManageUserViewModel.setStatus(reportId);
                   },
                 ),
 
@@ -210,8 +216,11 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
 
                     if (!confirm) return;
 
-                    await vm.suspendUser(userId, permanent: true);
-                    await vm.resolveReport(reportId);
+                    await adminManageUserViewModel.blockAccount(
+                      userId,
+                      permanent: true,
+                    );
+                    await adminManageUserViewModel.setStatus(reportId);
                   },
                 ),
               ],

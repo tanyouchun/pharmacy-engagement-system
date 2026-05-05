@@ -1,35 +1,59 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Prescription {
-  final String id;
-  final String name;
+  final String prescriptionId;
+  final String medicineName;
   final String notes;
-  final String date;
+  final String addedBy;
+  final String addedByName;
+  final DateTime? issueDate;
 
   Prescription({
-    required this.id,
-    required this.name,
+    required this.prescriptionId,
+    required this.medicineName,
     required this.notes,
-    required this.date,
+    required this.addedBy,
+    required this.addedByName,
+    this.issueDate,
   });
 
-  factory Prescription.fromMap(String id, Map<String, dynamic> data) {
-    final rawDate = data['date'] ?? '';
-
-    String formattedDate = "";
-
-    if (rawDate is Timestamp) {
-      final date = rawDate.toDate();
-      formattedDate = "${date.day}/${date.month}/${date.year}";
-    } else {
-      formattedDate = rawDate?.toString() ?? "";
-    }
+  factory Prescription.fromDoc(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
 
     return Prescription(
-      id: id,
-      name: data['name'] ?? '',
+      prescriptionId: doc.id,
+      medicineName: data['medicineName'] ?? '',
       notes: data['notes'] ?? '',
-      date: formattedDate,
+      addedBy: data['addedBy'] ?? '',
+      addedByName: data['addedByName'] ?? '',
+      issueDate: (data['issueDate'] as Timestamp?)?.toDate(),
+    );
+  }
+
+  Map<String, dynamic> toMap({bool isUpdate = false}) {
+    return {
+      "medicineName": medicineName,
+      "notes": notes,
+      "addedBy": addedBy,
+      "addedByName": addedByName,
+      if (!isUpdate) "issueDate": FieldValue.serverTimestamp(),
+      if (isUpdate) "updatedAt": FieldValue.serverTimestamp(),
+    };
+  }
+
+  Prescription copyWith({
+    String? medicineName,
+    String? notes,
+    String? addedBy,
+    String? addedByName,
+  }) {
+    return Prescription(
+      prescriptionId: prescriptionId,
+      medicineName: medicineName ?? this.medicineName,
+      notes: notes ?? this.notes,
+      addedBy: addedBy ?? this.addedBy,
+      addedByName: addedByName ?? this.addedByName,
+      issueDate: issueDate,
     );
   }
 }

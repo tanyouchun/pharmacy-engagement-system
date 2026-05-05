@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../viewmodels/reminder_viewmodel.dart';
-import '../models/reminder.dart';
+import '../../viewmodels/reminder_viewmodel.dart';
+import '../../models/reminder.dart';
 
 class CreateReminderView extends StatefulWidget {
   final Reminder? reminder;
@@ -25,13 +25,13 @@ class _CreateReminderViewState extends State<CreateReminderView> {
       frequency = widget.reminder!.frequency;
 
       selectedTime = TimeOfDay(
-        hour: widget.reminder!.time.hour,
-        minute: widget.reminder!.time.minute,
+        hour: widget.reminder!.scheduleTime.hour,
+        minute: widget.reminder!.scheduleTime.minute,
       );
     }
   }
 
-  final vm = ReminderViewModel();
+  // final vm = ReminderViewModel();
 
   Future<void> _pickTime() async {
     final time = await showTimePicker(
@@ -47,7 +47,7 @@ class _CreateReminderViewState extends State<CreateReminderView> {
   Future<void> _save() async {
     if (selectedTime == null || medicationName.isEmpty) return;
 
-    final vm = Provider.of<ReminderViewModel>(context, listen: false);
+    final reminderViewModel = Provider.of<ReminderViewModel>(context, listen: false);
 
     final now = DateTime.now();
     final dateTime = DateTime(
@@ -59,20 +59,18 @@ class _CreateReminderViewState extends State<CreateReminderView> {
     );
 
     if (widget.reminder == null) {
-      /// CREATE
-      await vm.createReminder(
+      await reminderViewModel.createReminder(
         Reminder(
-          id: "",
-          userId: vm.userId,
-          prescriptionId: "demo",
+          reminderId: "",
+          userId: reminderViewModel.userId,
+          prescriptionId: "",
           medicationName: medicationName,
-          time: dateTime,
+          scheduleTime: dateTime,
           frequency: frequency,
         ),
       );
     } else {
-      /// UPDATE
-      await vm.updateReminder(
+      await reminderViewModel.updateReminder(
         widget.reminder!.copyWith(
           medicationName: medicationName,
           time: dateTime,

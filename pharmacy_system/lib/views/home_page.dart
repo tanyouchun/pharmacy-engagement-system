@@ -3,6 +3,9 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+
+import 'package:pharmacy_system/viewmodels/chat_viewmodel.dart';
 import 'package:pharmacy_system/views/admin/admin_manage_config_view.dart';
 import 'package:pharmacy_system/views/admin/admin_manage_user_view.dart';
 import 'package:pharmacy_system/views/user/user_prescription_view.dart';
@@ -26,6 +29,7 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   String? _role;
   bool _isLoadingRole = true;
+  final AuthService _authService = AuthService();
 
   @override
   void initState() {
@@ -67,7 +71,10 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _logout() async {
     try {
-      await AuthService().signOut();
+      final chatViewModel = context.read<ChatViewModel>();
+      chatViewModel.disposeListener();
+      
+      _authService.logout();
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import '../chat_view.dart';
+import 'pharmacist_list_view.dart';
+import '../../utils/format_time.dart';
 
 class ChatListView extends StatefulWidget {
   const ChatListView({super.key});
@@ -58,7 +61,12 @@ class _ChatListViewState extends State<ChatListView> {
           final chats = snapshot.data!.docs;
 
           if (chats.isEmpty) {
-            return const Center(child: Text("No chats yet"));
+            return const Center(
+              child: Text(
+                "No chats yet",
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              ),
+            );
           }
 
           return ListView.builder(
@@ -130,7 +138,11 @@ class _ChatListViewState extends State<ChatListView> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => ChatView(chatId: chat.id, otherUserId: otherUserId,),
+                                builder:
+                                    (_) => ChatView(
+                                      chatId: chat.id,
+                                      otherUserId: otherUserId,
+                                    ),
                               ),
                             );
                           },
@@ -179,7 +191,7 @@ class _ChatListViewState extends State<ChatListView> {
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Text(
-                                      _formatTime(lastTimestamp),
+                                      FormatTime.formatTime(lastTimestamp),
                                       style: const TextStyle(
                                         fontSize: 12,
                                         color: Colors.black54,
@@ -200,19 +212,18 @@ class _ChatListViewState extends State<ChatListView> {
           );
         },
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const PharmacistListView()),
+          );
+        },
+        backgroundColor: const Color(0xFF4FC3CF),
+        foregroundColor: Colors.black,
+        label: const Text("New Chat"),
+        icon: const Icon(Icons.chat),
+      ),
     );
-  }
-
-  String _formatTime(Timestamp? timestamp) {
-    if (timestamp == null) return "";
-
-    final date = timestamp.toDate();
-    final now = DateTime.now();
-
-    if (now.difference(date).inDays == 0) {
-      return "${date.hour}:${date.minute.toString().padLeft(2, '0')}";
-    } else {
-      return "${date.day}/${date.month}";
-    }
   }
 }

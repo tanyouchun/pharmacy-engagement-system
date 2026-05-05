@@ -4,8 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../viewmodels/admin_viewmodel.dart';
 
-class ReportHelper {
-  static void showReportDialog({
+class ReportClient {
+  static void reportAccount({
     required BuildContext context,
     required String reportedUserId,
     required String reportedName,
@@ -60,14 +60,14 @@ class ReportHelper {
     required String reportedRole,
     required String reason,
   }) async {
-    final adminVM = Provider.of<AdminManageUserViewModel>(
+    final adminManageUserViewModel = Provider.of<AdminManageUserViewModel>(
       context,
       listen: false,
     );
 
     final currentUser = FirebaseAuth.instance.currentUser;
 
-    final success = await adminVM.submitReport(
+    final success = await adminManageUserViewModel.submitReport(
       reportedUserId: reportedUserId,
       reportedName: reportedName,
       reportedRole: reportedRole,
@@ -77,7 +77,7 @@ class ReportHelper {
 
     if (!success && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(adminVM.reportError ?? "Failed")),
+        SnackBar(content: Text(adminManageUserViewModel.reportError ?? "Failed")),
       );
     }
   }

@@ -33,13 +33,15 @@ class _PharmacistProfileDisplayViewState
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<PharmacistProfileViewModel>(context);
+    final pharmacistProfileViewModel = Provider.of<PharmacistProfileViewModel>(
+      context,
+    );
 
-    if (vm.isLoading) {
+    if (pharmacistProfileViewModel.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    if (!vm.hasProfile) {
+    if (!pharmacistProfileViewModel.hasProfile) {
       Future.microtask(() {
         Navigator.pushReplacementNamed(context, '/pharmacistProfile');
       });
@@ -64,7 +66,9 @@ class _PharmacistProfileDisplayViewState
 
             /// 👤 Name
             Text(
-              vm.name.isEmpty ? 'Pharmacist' : vm.name,
+              pharmacistProfileViewModel.name.isEmpty
+                  ? 'Pharmacist'
+                  : pharmacistProfileViewModel.name,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
 
@@ -76,12 +80,22 @@ class _PharmacistProfileDisplayViewState
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildStat(Icons.badge, "License", vm.license),
-                  _buildStat(Icons.local_pharmacy, "Pharmacy", vm.pharmacyName),
+                  _buildStat(
+                    Icons.badge,
+                    "License",
+                    pharmacistProfileViewModel.license,
+                  ),
+                  _buildStat(
+                    Icons.local_pharmacy,
+                    "Pharmacy",
+                    pharmacistProfileViewModel.pharmacyName,
+                  ),
                   _buildStat(
                     Icons.work,
                     "Experience",
-                    vm.experience == 0 ? "-" : "${vm.experience} yrs",
+                    pharmacistProfileViewModel.experience == 0
+                        ? "-"
+                        : "${pharmacistProfileViewModel.experience} yrs",
                   ),
                 ],
               ),
@@ -97,19 +111,20 @@ class _PharmacistProfileDisplayViewState
             MaterialPageRoute(
               builder:
                   (_) => ChangeNotifierProvider.value(
-                    value: vm,
+                    value: pharmacistProfileViewModel,
                     child: const PharmacistEditProfileView(),
                   ),
             ),
           );
         },
+        backgroundColor: const Color(0xFF4FC3CF),
+        foregroundColor: Colors.black,
         icon: const Icon(Icons.edit),
         label: const Text("Edit Profile"),
       ),
     );
   }
 
-  /// 🔹 SAME STYLE as UserProfile
   Widget _buildStat(IconData icon, String title, String value) {
     return Column(
       children: [

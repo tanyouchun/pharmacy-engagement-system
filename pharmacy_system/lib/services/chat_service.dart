@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../models/chat.dart';
+
 class ChatService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -8,9 +10,8 @@ class ChatService {
     final user = FirebaseAuth.instance.currentUser!;
     final chats = _firestore.collection('chats');
 
-    final query = await chats
-        .where('participants', arrayContains: user.uid)
-        .get();
+    final query =
+        await chats.where('participants', arrayContains: user.uid).get();
 
     for (var doc in query.docs) {
       List participants = doc['participants'];
@@ -19,12 +20,14 @@ class ChatService {
       }
     }
 
-    // create new chat
-    final newChat = await chats.add({
-      'participants': [user.uid, pharmacistId],
-      'lastMessage': '',
-      'lastTimestamp': Timestamp.now(),
-    });
+    final chat = Chat(
+      chatId: '',
+      participants: [user.uid, pharmacistId],
+      lastMessage: '',
+      lastTimestamp: DateTime.now(),
+    );
+
+    final newChat = await chats.add(chat.toMap());
 
     return newChat.id;
   }

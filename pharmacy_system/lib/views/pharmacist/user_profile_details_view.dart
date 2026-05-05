@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:pharmacy_system/viewmodels/prescription_viewmodel.dart';
+import 'package:pharmacy_system/utils/prescription_client.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../viewmodels/user_profile_viewmodel.dart';
-import '../../utils/report_helper.dart';
+import '../../utils/report_client.dart';
 
 class UserProfileDetailsView extends StatefulWidget {
   final String userId;
@@ -25,9 +27,16 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
   }
 
   Future<void> _loadData() async {
-    final vm = Provider.of<UserProfileViewModel>(context, listen: false);
-    await vm.loadUserProfile(widget.userId);
-    await vm.loadUserPrescriptions(widget.userId);
+    final userProfileViewModel = Provider.of<UserProfileViewModel>(
+      context,
+      listen: false,
+    );
+    final prescriptionViewModel = Provider.of<PrescriptionViewModel>(
+      context,
+      listen: false,
+    );
+    await userProfileViewModel.loadUserProfile(widget.userId);
+    await prescriptionViewModel.loadUserPrescriptions(widget.userId);
 
     final currentUser = FirebaseAuth.instance.currentUser;
 
@@ -50,7 +59,8 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<UserProfileViewModel>(context);
+    final userProfileViewModel = Provider.of<UserProfileViewModel>(context);
+    final prescriptionViewModel = Provider.of<PrescriptionViewModel>(context);
 
     if (isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -63,19 +73,20 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
+        // allow pharmacist to report user to Admin
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'report') {
-                final vm = Provider.of<UserProfileViewModel>(
+                final userProfileViewModel = Provider.of<UserProfileViewModel>(
                   context,
                   listen: false,
                 );
 
-                ReportHelper.showReportDialog(
+                ReportClient.reportAccount(
                   context: context,
                   reportedUserId: widget.userId,
-                  reportedName: vm.name,
+                  reportedName: userProfileViewModel.name,
                   reportedRole: "user",
                 );
               }
@@ -88,131 +99,194 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
         ],
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
 
-            //TODO: replace with real profile picture
-            CircleAvatar(
-              radius: 50,
-              // backgroundImage: NetworkImage("https://i.pravatar.cc/150?img=3"),
-            ),
-
-            const SizedBox(height: 10),
-
-            Text(
-              vm.name,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-
-            const SizedBox(height: 20),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildStat(Icons.cake, "Age", vm.age),
-                  _buildStat(Icons.height, "Height", "${vm.height} cm"),
-                  _buildStat(Icons.monitor_weight, "Weight", "${vm.weight} kg"),
-                ],
+              //TODO: replace with real profile picture
+              CircleAvatar(
+                radius: 50,
+                // backgroundImage: NetworkImage("https://i.pravatar.cc/150?img=3"),
               ),
-            ),
 
-            const SizedBox(height: 20),
+              const SizedBox(height: 10),
 
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Prescription history:",
-                  style: TextStyle(fontWeight: FontWeight.bold),
+              Text(
+                userProfileViewModel.name,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            ),
 
-            const SizedBox(height: 10),
+              const SizedBox(height: 20),
 
-            Expanded(
-              child:
-                  vm.prescriptions.isEmpty
-                      ? const Center(
-                        child: Text(
-                          "No prescriptions found.",
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      )
-                      : ListView.builder(
-                        itemCount: vm.prescriptions.length,
-                        itemBuilder: (context, index) {
-                          final p = vm.prescriptions[index];
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildStat(Icons.cake, "Age", userProfileViewModel.age),
+                    _buildStat(
+                      Icons.height,
+                      "Height",
+                      "${userProfileViewModel.height} cm",
+                    ),
+                    _buildStat(
+                      Icons.monitor_weight,
+                      "Weight",
+                      "${userProfileViewModel.weight} kg",
+                    ),
+                  ],
+                ),
+              ),
 
-                          return Card(
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 6,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 3,
-                            child: Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.medication, size: 40),
+              const SizedBox(height: 50),
 
-                                  const SizedBox(width: 10),
-
-                                  Expanded(
-                                    child: Text(
-                                      p.name,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-
-                                  if (!isAdmin)
-                                    IconButton(
-                                      icon: const Icon(Icons.edit),
-                                      onPressed: () {
-                                        _showEditPrescriptionDialog(
-                                          p.id,
-                                          p.name,
-                                        );
-                                      },
-                                    ),
-
-                                  if (!isAdmin)
-                                    IconButton(
-                                      icon: const Icon(Icons.delete),
-                                      onPressed: () {
-                                        vm.deletePrescription(
-                                          widget.userId,
-                                          p.id,
-                                        );
-                                      },
-                                    ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Medical Conditions",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
-            ),
-          ],
+                    ),
+                    const SizedBox(height: 10),
+
+                    userProfileViewModel.medicalConditions.isEmpty
+                        ? const Text(
+                          "No medical conditions",
+                          style: TextStyle(color: Colors.grey),
+                        )
+                        : Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children:
+                              userProfileViewModel.medicalConditions
+                                  .split(',')
+                                  .map(
+                                    (condition) => Chip(
+                                      label: Text(condition.trim()),
+                                      backgroundColor: Colors.blue.shade50,
+                                    ),
+                                  )
+                                  .toList(),
+                        ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 30),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Prescription history:",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.4,
+                child:
+                    prescriptionViewModel.prescriptions.isEmpty
+                        ? const Center(
+                          child: Text(
+                            "No prescriptions found.",
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        )
+                        : ListView.builder(
+                          padding: const EdgeInsets.only(bottom: 100),
+                          itemCount: prescriptionViewModel.prescriptions.length,
+                          itemBuilder: (context, index) {
+                            final prescription =
+                                prescriptionViewModel.prescriptions[index];
+
+                            return Card(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 6,
+                              ),
+                              child: ListTile(
+                                leading: const Icon(Icons.medication),
+                                title: Text(prescription.medicineName),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Added: ${prescription.issueDate != null ? "${prescription.issueDate!.year}-${prescription.issueDate!.month}-${prescription.issueDate!.day}" : ""}",
+                                    ),
+                                    Text(
+                                      "Added By: ${prescription.addedByName}",
+                                    ),
+                                  ],
+                                ),
+                                trailing:
+                                    !isAdmin
+                                        ? Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(Icons.edit),
+                                              onPressed: () {
+                                                PrescriptionClient.showEditPrescription(
+                                                  context,
+                                                  prescription,
+                                                  userId:
+                                                      widget
+                                                          .userId, // important
+                                                );
+                                              },
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(Icons.delete),
+                                              onPressed: () {
+                                                prescriptionViewModel
+                                                    .deleteUserPrescription(
+                                                      widget.userId,
+                                                      prescription
+                                                          .prescriptionId,
+                                                    );
+                                              },
+                                            ),
+                                          ],
+                                        )
+                                        : null,
+                              ),
+                            );
+                          },
+                        ),
+              ),
+            ],
+          ),
         ),
       ),
+
+      // floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton:
           isAdmin
               ? null
-              : FloatingActionButton(
+              : FloatingActionButton.extended(
                 onPressed: () {
-                  _showAddPrescriptionDialog();
+                  PrescriptionClient.showAddPrescription(
+                    context: context,
+                    userId: widget.userId,
+                  );
                 },
-                child: const Icon(Icons.add),
+                backgroundColor: const Color(0xFF4FC3CF),
+                foregroundColor: Colors.black,
+                label: const Text("Add new prescription"),
+                icon: const Icon(Icons.add),
               ),
     );
   }
@@ -235,74 +309,4 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
     );
   }
 
-  void _showAddPrescriptionDialog() {
-    final controller = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (_) {
-        return AlertDialog(
-          title: const Text("Add Prescription"),
-          content: TextField(controller: controller),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () async {
-                final vm = Provider.of<UserProfileViewModel>(
-                  context,
-                  listen: false,
-                );
-
-                await vm.addPrescription(widget.userId, controller.text, "");
-
-                Navigator.pop(context);
-              },
-              child: const Text("Add"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showEditPrescriptionDialog(String id, String oldName) {
-    final controller = TextEditingController(text: oldName);
-
-    showDialog(
-      context: context,
-      builder: (_) {
-        return AlertDialog(
-          title: const Text("Edit Prescription"),
-          content: TextField(controller: controller),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () async {
-                final vm = Provider.of<UserProfileViewModel>(
-                  context,
-                  listen: false,
-                );
-
-                await vm.updatePrescription(
-                  widget.userId,
-                  id,
-                  controller.text,
-                  "",
-                );
-
-                Navigator.pop(context);
-              },
-              child: const Text("Save"),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }

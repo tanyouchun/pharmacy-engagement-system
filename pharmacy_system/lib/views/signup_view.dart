@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/signup_viewmodel.dart';
-import '../widgets/custom_textfield.dart';
+import '../utils/custom_textfield.dart';
 import 'login_view.dart';
 
 class SignupView extends StatefulWidget {
@@ -15,7 +15,7 @@ class _SignupViewState extends State<SignupView> {
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<SignupViewModel>(context);
+    final signupViewModel = Provider.of<SignupViewModel>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -36,7 +36,7 @@ class _SignupViewState extends State<SignupView> {
               CustomTextField(
                 hint: "Enter your email",
                 icon: Icons.email,
-                controller: vm.emailController,
+                controller: signupViewModel.emailController,
               ),
 
               const SizedBox(height: 15),
@@ -45,7 +45,7 @@ class _SignupViewState extends State<SignupView> {
                 hint: "Enter your password",
                 icon: Icons.lock,
                 isPassword: true,
-                controller: vm.passwordController,
+                controller: signupViewModel.passwordController,
               ),
 
               const SizedBox(height: 15),
@@ -54,12 +54,12 @@ class _SignupViewState extends State<SignupView> {
                 hint: "Confirm your password",
                 icon: Icons.lock_outline,
                 isPassword: true,
-                controller: vm.confirmPasswordController,
+                controller: signupViewModel.confirmPasswordController,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return "Please confirm your password";
                   }
-                  if (value != vm.passwordController.text) {
+                  if (value != signupViewModel.passwordController.text) {
                     return "Passwords do not match";
                   }
                   return null;
@@ -74,20 +74,20 @@ class _SignupViewState extends State<SignupView> {
                   const Text("Are you a pharmacist?"),
                   const SizedBox(width: 16),
                   Switch(
-                    value: vm.isPharmacist,
+                    value: signupViewModel.isPharmacist,
                     onChanged: (val) {
-                      vm.isPharmacist = val;
-                      vm.notifyListeners();
+                      signupViewModel.isPharmacist = val;
+                      signupViewModel.notifyListeners();
                     },
                   ),
                   const SizedBox(width: 8),
-                  Text(vm.isPharmacist ? "Pharmacist" : "Regular user"),
+                  Text(signupViewModel.isPharmacist ? "Pharmacist" : "Regular user"),
                 ],
               ),
 
               const Spacer(),
 
-              vm.isLoading
+              signupViewModel.isLoading
                   ? const CircularProgressIndicator()
                   : SizedBox(
                     width: double.infinity,
@@ -98,7 +98,7 @@ class _SignupViewState extends State<SignupView> {
                       ),
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
-                          vm.signup(context);
+                          signupViewModel.signup(context);
                         }
                       },
                       child: const Text(

@@ -3,7 +3,9 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import '../models/reminder.dart';
+import '../constants/error_message.dart';
 
 class ReminderViewModel extends ChangeNotifier {
   final _db = FirebaseFirestore.instance;
@@ -34,10 +36,11 @@ class ReminderViewModel extends ChangeNotifier {
   Future<void> createReminder(Reminder reminder) async {
     try {
       await _db.collection('reminders').add(reminder.toMap());
-      await fetchReminders(); // refresh UI
+      log("Reminder created: ${reminder.toMap()}");
+      await fetchReminders();
     } catch (e) {
-      log("Failed to create reminder: $e");
-      throw Exception("Failed to create reminder");
+      log("${ErrorMessage.STORE_REMINDER_ERROR}: $e");
+      return;
     }
   }
 
@@ -46,19 +49,27 @@ class ReminderViewModel extends ChangeNotifier {
     try {
       await _db
           .collection('reminders')
-          .doc(reminder.id)
+          .doc(reminder.reminderId)
           .update(reminder.toMap());
+      log("Reminder updated: ${reminder.toMap()}");
 
-      await fetchReminders(); // refresh UI
+      await fetchReminders();
     } catch (e) {
-      log("Failed to update reminder: $e");
-      throw Exception("Failed to update reminder");
+      log("${ErrorMessage.UPDATE_REMINDER_ERROR}: $e");
+      return;
     }
   }
 
   // delete reminders/{id}
   Future<void> deleteReminder(String id) async {
-    await _db.collection('reminders').doc(id).delete();
-    await fetchReminders();
+    try {
+      await _db.collection('reminders').doc(id).delete();
+      log("Reminder deleted for reminder id: $id");
+
+      await fetchReminders();
+    } catch (e) {
+      log("${ErrorMessage.DELETE_REMINDER_ERROR}: $e");
+      return;
+    }
   }
 }

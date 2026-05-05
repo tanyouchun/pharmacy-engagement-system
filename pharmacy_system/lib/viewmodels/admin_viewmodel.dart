@@ -1,14 +1,17 @@
 import 'dart:developer';
+import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../models/account_issue.dart';
 
 class AdminManageUserViewModel extends ChangeNotifier {
   final _usersRef = FirebaseFirestore.instance.collection('users');
 
   List<QueryDocumentSnapshot> _users = [];
-  List<QueryDocumentSnapshot> _reports = [];
-  List<QueryDocumentSnapshot> get reports => _reports;
+  List<AccountIssueReport> _reports = [];
+  List<AccountIssueReport> get reports => _reports;
 
   bool _isLoadingReports = true;
   bool get isLoadingReports => _isLoadingReports;
@@ -21,6 +24,10 @@ class AdminManageUserViewModel extends ChangeNotifier {
 
   List<QueryDocumentSnapshot> get users => _users;
   bool get isLoading => _isLoading;
+
+  StreamSubscription? _authSub;
+  StreamSubscription? _usersSub;
+  StreamSubscription? _reportsSub;
 
   Future<bool> submitReport({
     required String reportedUserId,
@@ -36,16 +43,18 @@ class AdminManageUserViewModel extends ChangeNotifier {
     }
 
     try {
-      await FirebaseFirestore.instance.collection('account_issues').add({
-        "reportedUserId": reportedUserId,
-        "reportedName": reportedName,
-        "reportedRole": reportedRole,
-        "reportedBy": reportedBy,
-        "reason": reason,
-        "status": "pending",
-        "createdAt": FieldValue.serverTimestamp(),
-      });
-
+      final data = AccountIssueReport(
+        reportedUserId: reportedUserId,
+        reportedName: reportedName,
+        reportedRole: reportedRole,
+        reportedBy: reportedBy,
+        reason: reason,
+        status: "pending",
+      );
+      await FirebaseFirestore.instance
+          .collection('account_issues')
+          .add(data.toMap());
+      log("Suspended user account: ${data.toMap()}");
       return true;
     } catch (e) {
       _reportError = e.toString();
@@ -54,8 +63,39 @@ class AdminManageUserViewModel extends ChangeNotifier {
     }
   }
 
+  void initAuthListener() {
+    _authSub?.cancel();
+
+    _authSub = FirebaseAuth.instance.authStateChanges().listen((user) async {
+      _usersSub?.cancel();
+      _reportsSub?.cancel();
+
+      if (user == null) {
+        log("User logged out → clearing Firestore listeners");
+
+        _users = [];
+        _reports = [];
+        _isLoading = true;
+        _isLoadingReports = true;
+        _userError = null;
+        _reportError = null;
+
+        notifyListeners();
+        return;
+      }
+      log("User logged in → restarting Firestore listeners");
+      await user.getIdToken(true);
+      await Future.delayed(const Duration(milliseconds: 300));
+      listenToUsers();
+      listenToReports();
+    });
+  }
+
   void listenToUsers() {
-    _usersRef.snapshots().listen(
+    _usersSub?.cancel();
+    _userError = null;
+
+    _usersSub = _usersRef.snapshots().listen(
       (snapshot) {
         _users = snapshot.docs;
         _isLoading = false;
@@ -70,13 +110,19 @@ class AdminManageUserViewModel extends ChangeNotifier {
   }
 
   void listenToReports() {
-    FirebaseFirestore.instance
+    _reportsSub?.cancel();
+    _reportError = null;
+
+    _reportsSub = FirebaseFirestore.instance
         .collection('account_issues')
         // .where('status', isEqualTo: 'pending')
         .snapshots()
         .listen(
           (snapshot) {
-            _reports = snapshot.docs;
+            _reports =
+                snapshot.docs
+                    .map((doc) => AccountIssueReport.fromDoc(doc))
+                    .toList();
             log("Loaded ${_reports.length} reports");
             _isLoadingReports = false;
             notifyListeners();
@@ -90,7 +136,7 @@ class AdminManageUserViewModel extends ChangeNotifier {
         );
   }
 
-  Future<void> resolveReport(String reportId) async {
+  Future<void> setStatus(String reportId) async {
     try {
       await FirebaseFirestore.instance
           .collection('account_issues')
@@ -102,7 +148,7 @@ class AdminManageUserViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> suspendUser(
+  Future<void> blockAccount(
     String uid, {
     Duration? duration,
     bool permanent = false,
@@ -125,7 +171,7 @@ class AdminManageUserViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> unsuspendUser(String uid) async {
+  Future<void> unBlockAccount(String uid) async {
     try {
       await _usersRef.doc(uid).update({
         "isBlocked": false,
@@ -145,5 +191,13 @@ class AdminManageUserViewModel extends ChangeNotifier {
     } catch (e) {
       return null;
     }
+  }
+
+  @override
+  void dispose() {
+    _authSub?.cancel();
+    _usersSub?.cancel();
+    _reportsSub?.cancel();
+    super.dispose();
   }
 }
