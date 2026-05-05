@@ -24,8 +24,8 @@ class PharmacistProfileViewModel extends ChangeNotifier {
   String pharmacyName = '';
   int experience = 0;
 
-  User? get _currentUser => FirebaseAuth.instance.currentUser;
-  String? get _uid => _currentUser?.uid;
+  // User? get _currentUser => FirebaseAuth.instance.currentUser;
+  // String? get _uid => _currentUser?.uid;
 
   Future<void> checkProfileExists() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -228,12 +228,12 @@ class PharmacistProfileViewModel extends ChangeNotifier {
     super.dispose();
   }
 
-    void _requireAuth() {
-    if (_uid == null) {
-      errorMessage = ("Pharmacist Profile error: ${ErrorMessage.AUTH_ERROR}");
-      throw Exception("Pharmacist Profile error: ${ErrorMessage.AUTH_ERROR}");
-    } else {
-      log("Authenticated user ID for pharmacist profile view: $_uid");
-    }
-  }
+  //   void _requireAuth() {
+  //   if (_uid == null) {
+  //     errorMessage = ("Pharmacist Profile error: ${ErrorMessage.AUTH_ERROR}");
+  //     throw Exception("Pharmacist Profile error: ${ErrorMessage.AUTH_ERROR}");
+  //   } else {
+  //     log("Authenticated user ID for pharmacist profile view: $_uid");
+  //   }
+  // }
 }
