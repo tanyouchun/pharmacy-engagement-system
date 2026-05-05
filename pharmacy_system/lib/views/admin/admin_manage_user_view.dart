@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
+
 import '../../viewmodels/admin_viewmodel.dart';
 import '../user/pharmacist_profile_details_view.dart';
 import '../pharmacist/user_profile_details_view.dart';
@@ -13,19 +15,12 @@ class AdminManageUserView extends StatefulWidget {
 }
 
 class _AdminManageUserViewState extends State<AdminManageUserView> {
+
   @override
   void initState() {
     super.initState();
 
-    Future.microtask(() {
-      final adminManageUserViewModel = Provider.of<AdminManageUserViewModel>(
-        context,
-        listen: false,
-      );
-
-      adminManageUserViewModel.listenToUsers();
-      adminManageUserViewModel.listenToReports();
-    });
+    context.read<AdminManageUserViewModel>().initAuthListener();
   }
 
   @override

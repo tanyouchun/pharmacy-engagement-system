@@ -31,7 +31,12 @@ class LoginViewModel extends ChangeNotifier {
       final uid = credential.user?.uid;
       log("Current logged in user ID: ${credential.user?.uid}");
       if (uid != null) {
-        await _checkUserStatus(uid);
+        final error = await _checkUserStatus(uid);
+        if (error != null) {
+          errorMessage = error;
+          notifyListeners();
+          return;
+        }
       }
       log("Login success UID: $uid");
     } on FirebaseAuthException catch (e) {
@@ -75,7 +80,7 @@ class LoginViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> _checkUserStatus(String uid) async {
+  Future<String?> _checkUserStatus(String uid) async {
     try {
       log("Checking user status for $uid");
       final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
@@ -95,7 +100,7 @@ class LoginViewModel extends ChangeNotifier {
           "isPermanentBan": false,
         });
 
-        return;
+        return null; // New user, no need to check block status
       }
 
       final data = userDoc.data();
@@ -106,7 +111,7 @@ class LoginViewModel extends ChangeNotifier {
         if (data?['isPermanentBan'] == true) {
           log("Account $uid is permanently banned. Signing out user.");
           await FirebaseAuth.instance.signOut();
-          throw Exception("Account permanently banned");
+          return "Account permanently banned";
         }
 
         if (suspendUntil != null) {
@@ -117,9 +122,7 @@ class LoginViewModel extends ChangeNotifier {
               "Account $uid is currently suspended until $until. Signing out user.",
             );
             await FirebaseAuth.instance.signOut();
-            throw Exception(
-              "Your account is suspended until ${until.toLocal()}",
-            );
+            return "Your account is suspended until ${until.toLocal()}";
           } else {
             await userDoc.reference.update({
               'isBlocked': false,
@@ -130,7 +133,7 @@ class LoginViewModel extends ChangeNotifier {
       }
     } catch (e) {
       log("Error checking user status for $uid: $e");
-      throw Exception("Failed to check account status. Please try again.");
+      return "Unable to verify account status";
     }
   }
 }

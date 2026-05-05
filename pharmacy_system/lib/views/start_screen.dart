@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'login_view.dart';
 import 'signup_view.dart';
 
-//Show login and sign up button
 class StartScreen extends StatelessWidget {
   const StartScreen({super.key});
 

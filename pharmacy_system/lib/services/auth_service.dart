@@ -73,11 +73,10 @@ class AuthService {
     await _firebaseAuth.signOut();
   }
 
-  //TODO unuse logout function?
-  // Future<void> logout() async {
-  //   final AuthService auth = AuthService();
-  //   await auth.signOut();
-  // }
+  Future<void> logout() async {
+    final AuthService auth = AuthService();
+    await auth.signOut();
+  }
 
   String? get userId {
     return _firebaseAuth.currentUser?.uid;

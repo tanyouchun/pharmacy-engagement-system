@@ -29,6 +29,7 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   String? _role;
   bool _isLoadingRole = true;
+  final AuthService _authService = AuthService();
 
   @override
   void initState() {
@@ -73,7 +74,7 @@ class _HomePageState extends State<HomePage> {
       final chatViewModel = context.read<ChatViewModel>();
       chatViewModel.disposeListener();
       
-      await AuthService().signOut();
+      _authService.logout();
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
