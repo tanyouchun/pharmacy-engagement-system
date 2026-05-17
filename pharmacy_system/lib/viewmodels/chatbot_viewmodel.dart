@@ -77,7 +77,6 @@ class ChatBotViewModel extends ChangeNotifier {
     });
   }
 
-  /// 🔥 Save message to Firebase
   Future<void> _saveMessage(String role, String content) async {
     if (_uid == null) return;
 

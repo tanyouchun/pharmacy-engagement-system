@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+
 import '../../viewmodels/reminder_viewmodel.dart';
 import 'user_create_reminder_view.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -230,28 +232,115 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                     : reminderViewModel.reminders.isEmpty
                     ? const Center(child: Text("No reminders yet"))
                     : ListView.builder(
+                      padding: const EdgeInsets.only(bottom: 100),
                       itemCount: reminderViewModel.reminders.length,
                       itemBuilder: (context, index) {
                         final reminder = reminderViewModel.reminders[index];
 
-                        return Card(
-                          margin: const EdgeInsets.symmetric(
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
                             horizontal: 16,
                             vertical: 8,
                           ),
-                          child: ListTile(
-                            title: Text(reminder.medicationName),
-                            subtitle: Text(reminder.frequency),
-                            trailing: Text(
-                              "${reminder.scheduleTime.hour}:${reminder.scheduleTime.minute.toString().padLeft(2, '0')}",
-                            ),
-                            onTap:
-                                () => _showReminderDetails(context, reminder),
-                            onLongPress:
-                                () => _confirmDelete(
-                                  context,
-                                  reminder.reminderId,
+                          child: Slidable(
+                            key: ValueKey(reminder.reminderId),
+
+                            endActionPane: ActionPane(
+                              motion: const DrawerMotion(),
+                              extentRatio: 0.5,
+
+                              children: [
+                                /// EDIT
+                                SlidableAction(
+                                  onPressed: (_) => _goToEdit(reminder),
+                                  backgroundColor: Colors.blue,
+                                  foregroundColor: Colors.white,
+                                  icon: Icons.edit,
+                                  label: 'Edit',
+                                  borderRadius: BorderRadius.circular(16),
                                 ),
+
+                                /// DELETE
+                                SlidableAction(
+                                  onPressed:
+                                      (_) => _confirmDelete(
+                                        context,
+                                        reminder.reminderId,
+                                      ),
+                                  backgroundColor: Colors.red,
+                                  foregroundColor: Colors.white,
+                                  icon: Icons.delete,
+                                  label: 'Delete',
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ],
+                            ),
+
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(18),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.05),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 10,
+                                ),
+
+                                leading: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.withOpacity(0.1),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.medication,
+                                    color: Colors.blue,
+                                  ),
+                                ),
+
+                                title: Text(
+                                  reminder.medicationName,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+
+                                subtitle: Padding(
+                                  padding: const EdgeInsets.only(top: 5),
+                                  child: Text(reminder.frequency),
+                                ),
+
+                                trailing: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.access_time, size: 18),
+
+                                    const SizedBox(height: 4),
+
+                                    Text(
+                                      "${reminder.scheduleTime.hour}:${reminder.scheduleTime.minute.toString().padLeft(2, '0')}",
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                onTap:
+                                    () =>
+                                        _showReminderDetails(context, reminder),
+                              ),
+                            ),
                           ),
                         );
                       },
