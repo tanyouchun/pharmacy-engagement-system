@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:pharmacy_system/viewmodels/prescription_viewmodel.dart';
-import 'package:pharmacy_system/utils/prescription_client.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 import '../../viewmodels/user_profile_viewmodel.dart';
 import '../../utils/report_client.dart';
+import 'package:pharmacy_system/viewmodels/prescription_viewmodel.dart';
+import 'package:pharmacy_system/utils/prescription_client.dart';
 
 class UserProfileDetailsView extends StatefulWidget {
   final String userId;
@@ -206,62 +207,149 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                           ),
                         )
                         : ListView.builder(
-                          padding: const EdgeInsets.only(bottom: 100),
+                          padding: const EdgeInsets.only(bottom: 200),
                           itemCount: prescriptionViewModel.prescriptions.length,
                           itemBuilder: (context, index) {
                             final prescription =
                                 prescriptionViewModel.prescriptions[index];
 
-                            return Card(
-                              margin: const EdgeInsets.symmetric(
-                                horizontal: 20,
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
                                 vertical: 6,
                               ),
-                              child: ListTile(
-                                leading: const Icon(Icons.medication),
-                                title: Text(prescription.medicineName),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                              child: Slidable(
+                                key: ValueKey(prescription.prescriptionId),
+
+                                endActionPane: ActionPane(
+                                  motion: const DrawerMotion(),
+                                  extentRatio: 0.5,
+
                                   children: [
-                                    Text(
-                                      "Added: ${prescription.issueDate != null ? "${prescription.issueDate!.year}-${prescription.issueDate!.month}-${prescription.issueDate!.day}" : ""}",
+                                    SlidableAction(
+                                      onPressed: (_) {
+                                        PrescriptionClient.showEditPrescription(
+                                          context,
+                                          prescription,
+                                          userId: widget.userId,
+                                        );
+                                      },
+                                      backgroundColor: Colors.blue,
+                                      foregroundColor: Colors.white,
+                                      icon: Icons.edit,
+                                      label: 'Edit',
+                                      borderRadius: BorderRadius.circular(16),
                                     ),
-                                    Text(
-                                      "Added By: ${prescription.addedByName}",
+
+                                    SlidableAction(
+                                      onPressed: (_) {
+                                        prescriptionViewModel
+                                            .deleteUserPrescription(
+                                              widget.userId,
+                                              prescription.prescriptionId,
+                                            );
+                                      },
+                                      backgroundColor: Colors.red,
+                                      foregroundColor: Colors.white,
+                                      icon: Icons.delete,
+                                      label: 'Delete',
+                                      borderRadius: BorderRadius.circular(16),
                                     ),
                                   ],
                                 ),
-                                trailing:
-                                    !isAdmin
-                                        ? Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            IconButton(
-                                              icon: const Icon(Icons.edit),
-                                              onPressed: () {
-                                                PrescriptionClient.showEditPrescription(
-                                                  context,
-                                                  prescription,
-                                                  userId:
-                                                      widget
-                                                          .userId, // important
-                                                );
-                                              },
+
+                                child: Card(
+                                  elevation: 2,
+                                  color: const Color(0xFFEAF4FF),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
+                                  shadowColor: Colors.black.withOpacity(0.15),
+
+                                  child: ListTile(
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 10,
+                                    ),
+
+                                    leading: Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.withOpacity(0.1),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.medication,
+                                        color: Colors.blue,
+                                      ),
+                                    ),
+
+                                    title: Text(
+                                      prescription.medicineName,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+
+                                    subtitle: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          margin: const EdgeInsets.only(
+                                            top: 6,
+                                            bottom: 6,
+                                          ),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.blue.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(
+                                              20,
                                             ),
-                                            IconButton(
-                                              icon: const Icon(Icons.delete),
-                                              onPressed: () {
-                                                prescriptionViewModel
-                                                    .deleteUserPrescription(
-                                                      widget.userId,
-                                                      prescription
-                                                          .prescriptionId,
-                                                    );
-                                              },
+                                          ),
+                                          child: Text(
+                                            prescription.frequency,
+                                            style: const TextStyle(
+                                              color: Colors.blue,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 12,
                                             ),
-                                          ],
-                                        )
-                                        : null,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+
+                                    trailing: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          prescription.issueDate != null
+                                              ? "${prescription.issueDate!.year}-${prescription.issueDate!.month}-${prescription.issueDate!.day}"
+                                              : "",
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          prescription.addedByName,
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                               ),
                             );
                           },
@@ -308,5 +396,4 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
       ],
     );
   }
-
 }

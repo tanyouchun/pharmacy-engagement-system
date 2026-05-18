@@ -128,7 +128,6 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                       ),
 
                       //TODO insert avatar here
-                      /// USER AVATAR
                       // const CircleAvatar(
                       //   radius: 20,
                       //   backgroundImage: AssetImage(

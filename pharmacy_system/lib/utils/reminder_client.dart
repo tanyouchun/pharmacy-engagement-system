@@ -5,11 +5,16 @@ import '../models/reminder.dart';
 import '../viewmodels/reminder_viewmodel.dart';
 
 class ReminderClient {
-  static void showReminderForm(BuildContext context, {Reminder? reminder}) {
+  static void showReminderForm(
+    BuildContext context, {
+    Reminder? reminder,
+    String? initialMedicineName,
+    String? initialFrequency,
+  }) {
     final isEditing = reminder != null;
 
     final medicationController = TextEditingController(
-      text: reminder?.medicationName ?? "",
+      text: reminder?.medicationName ?? initialMedicineName ?? "",
     );
 
     TimeOfDay? selectedTime =
@@ -20,7 +25,7 @@ class ReminderClient {
             )
             : TimeOfDay.now();
 
-    String frequency = reminder?.frequency ?? "Once Daily";
+    String frequency = reminder?.frequency ?? initialFrequency ?? "Once Daily";
 
     final reminderViewModel = Provider.of<ReminderViewModel>(
       context,
@@ -429,5 +434,17 @@ class ReminderClient {
     }
 
     return times;
+  }
+
+  static void showReminderFormFromPrescription(
+    BuildContext context, {
+    required String medicineName,
+    required String frequency,
+  }) {
+    showReminderForm(
+      context,
+      initialMedicineName: medicineName,
+      initialFrequency: frequency,
+    );
   }
 }

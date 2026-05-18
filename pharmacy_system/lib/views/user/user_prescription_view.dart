@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../viewmodels/prescription_viewmodel.dart';
 import 'package:pharmacy_system/utils/prescription_client.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:pharmacy_system/utils/reminder_client.dart';
 
 class PrescriptionPage extends StatefulWidget {
   const PrescriptionPage({super.key});
@@ -51,7 +52,7 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
 
                       endActionPane: ActionPane(
                         motion: const DrawerMotion(),
-                        extentRatio: 0.5,
+                        extentRatio: 0.85,
 
                         children: [
                           SlidableAction(
@@ -78,6 +79,21 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
                             foregroundColor: Colors.white,
                             icon: Icons.delete,
                             label: 'Delete',
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+
+                          SlidableAction(
+                            onPressed: (_) {
+                              ReminderClient.showReminderFormFromPrescription(
+                                context,
+                                medicineName: prescription.medicineName,
+                                frequency: prescription.frequency,
+                              );
+                            },
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                            icon: Icons.alarm_add,
+                            label: 'Reminder',
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ],

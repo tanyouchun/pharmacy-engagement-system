@@ -12,7 +12,7 @@ class PrescriptionClient {
     final nameController = TextEditingController();
     final notesController = TextEditingController();
 
-    String frequency = "Once daily";
+    String frequency = "Once Daily";
 
     final prescriptionViewModel = Provider.of<PrescriptionViewModel>(
       context,
@@ -131,13 +131,10 @@ class PrescriptionClient {
 
                             items:
                                 [
-                                      "Once daily",
-                                      "Twice daily",
-                                      "Thrice daily",
-                                      "Every 6 hours",
-                                      "Every 8 hours",
-                                      "Every 12 hours",
-                                      "Every 24 hours",
+                                      "Once Daily",
+                                      "Twice Daily",
+                                      "Three Times Daily",
+                                      "Four Times Daily",
                                     ]
                                     .map(
                                       (f) => DropdownMenuItem(
@@ -364,13 +361,10 @@ class PrescriptionClient {
 
                             items:
                                 [
-                                      "Once daily",
-                                      "Twice daily",
-                                      "Thrice daily",
-                                      "Every 6 hours",
-                                      "Every 8 hours",
-                                      "Every 12 hours",
-                                      "Every 24 hours",
+                                      "Once Daily",
+                                      "Twice Daily",
+                                      "Three Times Daily",
+                                      "Four Times Daily",
                                     ]
                                     .map(
                                       (f) => DropdownMenuItem(
