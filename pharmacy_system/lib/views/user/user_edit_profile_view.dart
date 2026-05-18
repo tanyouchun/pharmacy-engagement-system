@@ -97,7 +97,6 @@ class EditProfileView extends StatelessWidget {
                 child: Column(
                   children: [
 
-                    /// AVATAR
                     Container(
                       height: 90,
                       width: 90,

@@ -345,7 +345,6 @@ class PharmacistEditProfileView extends StatelessWidget {
   }
 }
 
-/// DELETE DIALOG
 void _showDeleteDialog(BuildContext context) {
   final parentContext = context;
 

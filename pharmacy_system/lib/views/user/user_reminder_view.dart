@@ -3,9 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
 import '../../viewmodels/reminder_viewmodel.dart';
-import 'user_create_reminder_view.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../models/reminder.dart';
+import '../../utils/reminder_client.dart';
 
 class ReminderHomeView extends StatefulWidget {
   final String? role;
@@ -252,7 +252,12 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                               children: [
                                 /// EDIT
                                 SlidableAction(
-                                  onPressed: (_) => _goToEdit(reminder),
+                                  onPressed: (_) {
+                                    ReminderClient.showReminderForm(
+                                      context,
+                                      reminder: reminder,
+                                    );
+                                  },
                                   backgroundColor: Colors.blue,
                                   foregroundColor: Colors.white,
                                   icon: Icons.edit,
@@ -354,12 +359,7 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
               ? null
               : FloatingActionButton.extended(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const CreateReminderView(),
-                    ),
-                  );
+                  ReminderClient.showReminderForm(context);
                 },
                 backgroundColor: const Color(0xFF4FC3CF),
                 foregroundColor: Colors.black,
@@ -406,7 +406,10 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                   ElevatedButton.icon(
                     onPressed: () {
                       Navigator.pop(context);
-                      _goToEdit(reminder);
+                      ReminderClient.showReminderForm(
+                        context,
+                        reminder: reminder,
+                      );
                     },
                     icon: const Icon(Icons.edit),
                     label: const Text("Edit"),
@@ -462,13 +465,6 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
               ),
             ],
           ),
-    );
-  }
-
-  void _goToEdit(reminder) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => CreateReminderView(reminder: reminder)),
     );
   }
 }

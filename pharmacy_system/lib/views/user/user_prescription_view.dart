@@ -45,15 +45,66 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 5),
                     child: Card(
+                      elevation: 2,
+                      color: const Color(0xFFEAF4FF),
+
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+
+                      shadowColor: Colors.black.withOpacity(0.15),
                       child: ListTile(
-                        leading: const Icon(Icons.medication),
+                        leading: Container(
+                          padding: const EdgeInsets.all(10),
+
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+
+                          child: const Icon(
+                            Icons.medication,
+                            color: Colors.blue,
+                          ),
+                        ),
                         title: Text(prescription.medicineName),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            /// FREQUENCY
+                            Container(
+                              margin: const EdgeInsets.only(top: 4, bottom: 6),
+
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+
+                              decoration: BoxDecoration(
+                                color: Colors.blue.withOpacity(0.1),
+
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+
+                              child: Text(
+                                prescription.frequency,
+
+                                style: const TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+
+                            /// DATE
                             Text(
                               "Added: ${prescription.issueDate != null ? "${prescription.issueDate!.year}-${prescription.issueDate!.month}-${prescription.issueDate!.day}" : ""}",
                             ),
+
+                            const SizedBox(height: 2),
+
+                            /// PHARMACIST
                             Text("Added By: ${prescription.addedByName}"),
                           ],
                         ),

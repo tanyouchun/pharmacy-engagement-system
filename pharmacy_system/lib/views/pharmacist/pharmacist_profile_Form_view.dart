@@ -172,7 +172,6 @@ class _PharmacistProfileFormViewState extends State<PharmacistProfileFormView> {
 
                       const SizedBox(height: 35),
 
-                      /// SAVE BUTTON
                       SizedBox(
                         width: double.infinity,
                         height: 58,
