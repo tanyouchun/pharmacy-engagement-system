@@ -20,7 +20,7 @@ class ReminderClient {
             )
             : TimeOfDay.now();
 
-    String frequency = reminder?.frequency ?? "Once daily";
+    String frequency = reminder?.frequency ?? "Once Daily";
 
     final reminderViewModel = Provider.of<ReminderViewModel>(
       context,
@@ -28,13 +28,10 @@ class ReminderClient {
     );
 
     final frequencies = [
-      "Once daily",
-      "Twice daily",
-      "Thrice daily",
-      "Every 6 hours",
-      "Every 8 hours",
-      "Every 12 hours",
-      "Every 24 hours",
+      "Once Daily",
+      "Twice Daily",
+      "Three Times Daily",
+      "Four Times Daily",
     ];
 
     showDialog(
@@ -71,30 +68,30 @@ class ReminderClient {
                 selectedTime!.minute,
               );
 
+              final reminderTimes = generateReminderTimes(
+                selectedTime!,
+                frequency,
+              );
+
               if (!isEditing) {
                 await reminderViewModel.createReminder(
                   Reminder(
                     reminderId: "",
-
                     userId: reminderViewModel.userId,
-
                     prescriptionId: "",
-
                     medicationName: medicationController.text,
-
                     scheduleTime: dateTime,
-
                     frequency: frequency,
+                    reminderTimes: reminderTimes,
                   ),
                 );
               } else {
                 await reminderViewModel.updateReminder(
                   reminder!.copyWith(
                     medicationName: medicationController.text,
-
                     time: dateTime,
-
                     frequency: frequency,
+                    reminderTimes: reminderTimes,
                   ),
                 );
               }
@@ -393,5 +390,44 @@ class ReminderClient {
         ),
       ],
     );
+  }
+
+  static List<String> generateReminderTimes(
+    TimeOfDay startTime,
+    String frequency,
+  ) {
+    int timesPerDay = 1;
+
+    switch (frequency.toLowerCase()) {
+      case "twice daily":
+        timesPerDay = 2;
+        break;
+
+      case "three times daily":
+        timesPerDay = 3;
+        break;
+
+      case "four times daily":
+        timesPerDay = 4;
+        break;
+
+      default:
+        timesPerDay = 1;
+    }
+
+    final intervalHours = 24 ~/ timesPerDay;
+
+    final times = <String>[];
+
+    for (int i = 0; i < timesPerDay; i++) {
+      final hour = (startTime.hour + (intervalHours * i)) % 24;
+
+      final formatted =
+          "${hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}";
+
+      times.add(formatted);
+    }
+
+    return times;
   }
 }

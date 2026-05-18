@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:pharmacy_system/utils/prescription_client.dart';
 import 'package:provider/provider.dart';
+
 import '../../viewmodels/prescription_viewmodel.dart';
+import 'package:pharmacy_system/utils/prescription_client.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class PrescriptionPage extends StatefulWidget {
   const PrescriptionPage({super.key});
@@ -44,92 +46,129 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
 
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 5),
-                    child: Card(
-                      elevation: 2,
-                      color: const Color(0xFFEAF4FF),
+                    child: Slidable(
+                      key: ValueKey(prescription.prescriptionId),
 
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
+                      endActionPane: ActionPane(
+                        motion: const DrawerMotion(),
+                        extentRatio: 0.5,
+
+                        children: [
+                          SlidableAction(
+                            onPressed: (_) {
+                              PrescriptionClient.showEditPrescription(
+                                context,
+                                prescription,
+                              );
+                            },
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                            icon: Icons.edit,
+                            label: 'Edit',
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+
+                          SlidableAction(
+                            onPressed: (_) {
+                              prescriptionViewModel.deletePrescription(
+                                prescription.prescriptionId,
+                              );
+                            },
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            icon: Icons.delete,
+                            label: 'Delete',
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ],
                       ),
 
-                      shadowColor: Colors.black.withOpacity(0.15),
-                      child: ListTile(
-                        leading: Container(
-                          padding: const EdgeInsets.all(10),
+                      child: Card(
+                        elevation: 2,
+                        color: const Color(0xFFEAF4FF),
 
-                          decoration: BoxDecoration(
-                            color: Colors.blue.withOpacity(0.1),
-                            shape: BoxShape.circle,
-                          ),
-
-                          child: const Icon(
-                            Icons.medication,
-                            color: Colors.blue,
-                          ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
                         ),
-                        title: Text(prescription.medicineName),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            /// FREQUENCY
-                            Container(
-                              margin: const EdgeInsets.only(top: 4, bottom: 6),
 
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
+                        shadowColor: Colors.black.withOpacity(0.15),
+                        child: ListTile(
+                          leading: Container(
+                            padding: const EdgeInsets.all(10),
 
-                              decoration: BoxDecoration(
-                                color: Colors.blue.withOpacity(0.1),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
 
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-
-                              child: Text(
-                                prescription.frequency,
-
-                                style: const TextStyle(
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12,
+                            child: const Icon(
+                              Icons.medication,
+                              color: Colors.blue,
+                            ),
+                          ),
+                          title: Text(prescription.medicineName),
+                          subtitle: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      margin: const EdgeInsets.only(
+                                        top: 4,
+                                        bottom: 6,
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        prescription.frequency,
+                                        style: const TextStyle(
+                                          color: Colors.blue,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ),
 
-                            /// DATE
-                            Text(
-                              "Added: ${prescription.issueDate != null ? "${prescription.issueDate!.year}-${prescription.issueDate!.month}-${prescription.issueDate!.day}" : ""}",
-                            ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const SizedBox(height: 2),
 
-                            const SizedBox(height: 2),
+                                  Text(
+                                    prescription.issueDate != null
+                                        ? "AddedTime: ${prescription.issueDate!.year}-${prescription.issueDate!.month}-${prescription.issueDate!.day}"
+                                        : "",
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
 
-                            /// PHARMACIST
-                            Text("Added By: ${prescription.addedByName}"),
-                          ],
-                        ),
+                                  const SizedBox(height: 2),
 
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit),
-                              onPressed: () {
-                                PrescriptionClient.showEditPrescription(
-                                  context,
-                                  prescription,
-                                );
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () {
-                                prescriptionViewModel.deletePrescription(
-                                  prescription.prescriptionId,
-                                );
-                              },
-                            ),
-                          ],
+                                  Text(
+                                    "AddedBy: ${prescription.addedByName}",
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
