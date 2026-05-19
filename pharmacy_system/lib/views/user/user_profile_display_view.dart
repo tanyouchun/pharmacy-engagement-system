@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../viewmodels/user_profile_viewmodel.dart';
+import '../ai_analysis_sheet.dart';
 import 'user_edit_profile_view.dart';
 
 class UserProfileDisplayView extends StatefulWidget {
@@ -127,17 +128,36 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
         ),
       ),
 
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const EditProfileView()),
-          );
-        },
-        backgroundColor: const Color(0xFF4FC3CF),
-        foregroundColor: Colors.black,
-        icon: const Icon(Icons.add),
-        label: const Text("Edit Profile"),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 32),
+            child: FloatingActionButton.extended(
+              heroTag: "ai",
+              backgroundColor: const Color(0xFFDCC6FF),
+              onPressed: () {
+                _generateAIAnalysis(context);
+              },
+              icon: const Icon(Icons.smart_toy),
+              label: const Text("AI Analysis"),
+            ),
+          ),
+
+          FloatingActionButton.extended(
+            heroTag: "edit",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const EditProfileView()),
+              );
+            },
+            backgroundColor: const Color(0xFF4FC3CF),
+            foregroundColor: Colors.black,
+            icon: const Icon(Icons.edit),
+            label: const Text("Edit Profile"),
+          ),
+        ],
       ),
     );
   }
@@ -159,4 +179,13 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
       ],
     );
   }
+
+  void _generateAIAnalysis(BuildContext context) async {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (_) => const AIAnalysisSheet(),
+  );
+}
 }

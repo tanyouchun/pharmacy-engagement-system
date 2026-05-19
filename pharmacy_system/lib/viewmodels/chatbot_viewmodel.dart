@@ -104,7 +104,7 @@ class ChatBotViewModel extends ChangeNotifier {
     try {
       final openAIMessages = getOpenAIMessages();
 
-      final reply = await _service.sendMessage(openAIMessages);
+      final reply = await _service.sendMessage(messages: openAIMessages, promptKey: "chatbot_prompt");
 
       messages.add({"role": "assistant", "content": reply});
       await _saveMessage("assistant", reply);
