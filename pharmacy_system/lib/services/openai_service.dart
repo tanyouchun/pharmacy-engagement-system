@@ -3,10 +3,11 @@ import 'dart:developer';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:yaml/yaml.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class OpenAIService {
-  // final String _apiKey = "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";
-  final String _apiKey = "TESTING_KEY";
+  final String _apiKey = dotenv.env['OPENAI_API_KEY'] ?? '';
+  // final String _apiKey = "TESTING_KEY";
 
   Future<String> _loadPrompt(String key) async {
     final yamlString = await rootBundle.loadString(

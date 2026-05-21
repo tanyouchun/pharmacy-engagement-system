@@ -253,7 +253,6 @@ class UserProfileViewModel extends ChangeNotifier {
     try {
       _requireAuth();
 
-      /// LOAD PRESCRIPTIONS
       final prescriptionSnapshot =
           await _firestore
               .collection("user_profiles")
@@ -267,7 +266,6 @@ class UserProfileViewModel extends ChangeNotifier {
               .map((doc) => Prescription.fromDoc(doc))
               .toList();
 
-      /// BUILD PRESCRIPTION TEXT
       String prescriptionText = "";
 
       for (final p in prescriptions) {
@@ -306,7 +304,6 @@ class UserProfileViewModel extends ChangeNotifier {
       return result;
     } catch (e) {
       log("AI Analysis Error: $e");
-
       return "Unable to generate AI analysis.";
     }
   }
