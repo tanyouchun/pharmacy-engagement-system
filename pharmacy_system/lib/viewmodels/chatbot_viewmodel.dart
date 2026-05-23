@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,11 +12,13 @@ class ChatBotViewModel extends ChangeNotifier {
 
   String? get _uid => _auth.currentUser?.uid;
 
+  StreamSubscription<User?>? _authSub;
+
   List<Map<String, String>> messages = [];
   bool isLoading = false;
 
   ChatBotViewModel() {
-    _auth.authStateChanges().listen((user) async {
+    _authSub = _auth.authStateChanges().listen((user) async {
       messages.clear();
 
       if (user == null) {
@@ -23,11 +26,13 @@ class ChatBotViewModel extends ChangeNotifier {
           "role": "assistant",
           "content": "Please log in to use the chatbot.",
         });
+
         notifyListeners();
         return;
       }
 
       await _loadChat();
+      notifyListeners();
     });
   }
 
@@ -41,21 +46,26 @@ class ChatBotViewModel extends ChangeNotifier {
   Future<void> _loadChat() async {
     if (_uid == null) return;
 
-    final snapshot =
-        await _firestore
-            .collection("users")
-            .doc(_uid)
-            .collection("chatbot_messages")
-            .orderBy("timestamp")
-            .get();
+    try {
+      final snapshot =
+          await _firestore
+              .collection("users")
+              .doc(_uid)
+              .collection("chatbot_messages")
+              .orderBy("timestamp")
+              .get();
 
-    messages =
-        snapshot.docs.map((doc) {
-          return {
-            "role": doc["role"] as String,
-            "content": doc["content"] as String,
-          };
-        }).toList();
+      messages =
+          snapshot.docs.map((doc) {
+            return {
+              "role": doc["role"] as String,
+              "content": doc["content"] as String,
+            };
+          }).toList();
+    } catch (e) {
+      log("Error loading chatbot chat: $e");
+      messages = [];
+    }
 
     if (messages.isEmpty) {
       _addWelcomeMessage();
@@ -80,15 +90,19 @@ class ChatBotViewModel extends ChangeNotifier {
   Future<void> _saveMessage(String role, String content) async {
     if (_uid == null) return;
 
-    await _firestore
-        .collection("users")
-        .doc(_uid)
-        .collection("chatbot_messages")
-        .add({
-          "role": role,
-          "content": content,
-          "timestamp": FieldValue.serverTimestamp(),
-        });
+    try {
+      await _firestore
+          .collection("users")
+          .doc(_uid)
+          .collection("chatbot_messages")
+          .add({
+            "role": role,
+            "content": content,
+            "timestamp": FieldValue.serverTimestamp(),
+          });
+    } catch (e) {
+      log("Error saving chatbot message: $e");
+    }
   }
 
   Future<void> sendMessage(String userMessage) async {
@@ -104,7 +118,10 @@ class ChatBotViewModel extends ChangeNotifier {
     try {
       final openAIMessages = getOpenAIMessages();
 
-      final reply = await _service.sendMessage(messages: openAIMessages, promptKey: "chatbot_prompt");
+      final reply = await _service.sendMessage(
+        messages: openAIMessages,
+        promptKey: "chatbot_prompt",
+      );
 
       messages.add({"role": "assistant", "content": reply});
       await _saveMessage("assistant", reply);
@@ -119,5 +136,11 @@ class ChatBotViewModel extends ChangeNotifier {
 
     isLoading = false;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _authSub?.cancel();
+    super.dispose();
   }
 }

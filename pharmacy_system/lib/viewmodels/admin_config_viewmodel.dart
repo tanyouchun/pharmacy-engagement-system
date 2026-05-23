@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 
@@ -16,9 +17,24 @@ class AdminManageConfigViewModel extends ChangeNotifier {
   bool _disposed = false;
 
   StreamSubscription? _configSub;
+  StreamSubscription? _authSub;
 
   AdminManageConfigViewModel() {
-    _listenToConfig();
+    _authSub = FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (user == null) {
+        log("User logged out in AdminManageConfigViewModel → cancelling Firestore listener");
+        _configSub?.cancel();
+        _configSub = null;
+        _isChatbotEnabled = true;
+        _isAIAnalysisEnabled = true;
+        if (!_disposed) {
+          notifyListeners();
+        }
+      } else {
+        log("User logged in in AdminManageConfigViewModel → starting Firestore listener");
+        _listenToConfig();
+      }
+    });
   }
 
   void _listenToConfig() {
@@ -48,6 +64,8 @@ class AdminManageConfigViewModel extends ChangeNotifier {
 
           if (_disposed) return;
           notifyListeners();
+        }, onError: (e) {
+          log("Error listening to config: $e");
         });
   }
 
@@ -85,6 +103,7 @@ class AdminManageConfigViewModel extends ChangeNotifier {
   void dispose() {
     _disposed = true;
     _configSub?.cancel();
+    _authSub?.cancel();
     super.dispose();
   }
 }
