@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:pharmacy_system/viewmodels/admin_viewmodel.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'firebase_options.dart';
 import 'viewmodels/login_viewmodel.dart';
@@ -11,11 +12,17 @@ import 'viewmodels/prescription_viewmodel.dart';
 import 'viewmodels/chat_viewmodel.dart';
 import 'viewmodels/reminder_viewmodel.dart';
 import 'viewmodels/pharmacist_profile_viewmodel.dart';
+import 'viewmodels/chatbot_viewmodel.dart';
+import 'viewmodels/admin_config_viewmodel.dart';
+
 import 'views/auth_wrapper.dart';
 import 'views/pharmacist/pharmacist_profile_Form_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await dotenv.load(fileName: ".env");
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(const MyApp());
@@ -36,6 +43,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ReminderViewModel()),
         ChangeNotifierProvider(create: (_) => PharmacistProfileViewModel()),
         ChangeNotifierProvider(create: (_) => AdminManageUserViewModel()),
+        ChangeNotifierProvider(create: (_) => ChatBotViewModel()),
+        ChangeNotifierProvider(create: (_) => AdminManageConfigViewModel()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

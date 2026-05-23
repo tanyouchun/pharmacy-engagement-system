@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+
 import '../../viewmodels/reminder_viewmodel.dart';
-import 'user_create_reminder_view.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../models/reminder.dart';
+import '../../utils/reminder_client.dart';
 
 class ReminderHomeView extends StatefulWidget {
   final String? role;
@@ -126,7 +128,6 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                       ),
 
                       //TODO insert avatar here
-                      /// USER AVATAR
                       // const CircleAvatar(
                       //   radius: 20,
                       //   backgroundImage: AssetImage(
@@ -229,30 +230,256 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                     // regular user view (medication reminders)
                     : reminderViewModel.reminders.isEmpty
                     ? const Center(child: Text("No reminders yet"))
-                    : ListView.builder(
-                      itemCount: reminderViewModel.reminders.length,
-                      itemBuilder: (context, index) {
-                        final reminder = reminderViewModel.reminders[index];
+                    : Builder(
+                      builder: (context) {
+                        final groupedReminders = <String, List<Reminder>>{};
 
-                        return Card(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
+                        for (var reminder in reminderViewModel.reminders) {
+                          final period = getReminderPeriod(
+                            reminder.scheduleTime,
+                          );
+
+                          groupedReminders.putIfAbsent(period, () => []);
+                          groupedReminders[period]!.add(reminder);
+                        }
+
+                        return ListView(
+                          padding: const EdgeInsets.only(
+                            left: 16,
+                            right: 16,
+                            bottom: 100,
                           ),
-                          child: ListTile(
-                            title: Text(reminder.medicationName),
-                            subtitle: Text(reminder.frequency),
-                            trailing: Text(
-                              "${reminder.scheduleTime.hour}:${reminder.scheduleTime.minute.toString().padLeft(2, '0')}",
-                            ),
-                            onTap:
-                                () => _showReminderDetails(context, reminder),
-                            onLongPress:
-                                () => _confirmDelete(
-                                  context,
-                                  reminder.reminderId,
-                                ),
-                          ),
+
+                          children:
+                              groupedReminders.entries.map((entry) {
+                                final sectionTitle = entry.key;
+                                final reminders = entry.value;
+
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        top: 12,
+                                        bottom: 10,
+                                      ),
+
+                                      child: Text(
+                                        sectionTitle,
+
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+
+                                    ...reminders.map((reminder) {
+                                      return Padding(
+                                        padding: const EdgeInsets.only(
+                                          bottom: 10,
+                                        ),
+
+                                        child: Slidable(
+                                          key: ValueKey(reminder.reminderId),
+
+                                          endActionPane: ActionPane(
+                                            motion: const DrawerMotion(),
+                                            extentRatio: 0.5,
+
+                                            children: [
+                                              SlidableAction(
+                                                onPressed: (_) {
+                                                  ReminderClient.showReminderForm(
+                                                    context,
+                                                    reminder: reminder,
+                                                  );
+                                                },
+                                                backgroundColor: Colors.blue,
+                                                foregroundColor: Colors.white,
+                                                icon: Icons.edit,
+                                                label: 'Edit',
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
+                                              ),
+
+                                              SlidableAction(
+                                                onPressed:
+                                                    (_) => _confirmDelete(
+                                                      context,
+                                                      reminder.reminderId,
+                                                    ),
+                                                backgroundColor: Colors.red,
+                                                foregroundColor: Colors.white,
+                                                icon: Icons.delete,
+                                                label: 'Delete',
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
+                                              ),
+                                            ],
+                                          ),
+
+                                          child: Card(
+                                            elevation: 2,
+                                            color: const Color(0xFFEAF4FF),
+
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(18),
+                                            ),
+
+                                            child: ListTile(
+                                              contentPadding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 20,
+                                                    vertical: 10,
+                                                  ),
+
+                                              leading: Container(
+                                                padding: const EdgeInsets.all(
+                                                  10,
+                                                ),
+
+                                                decoration: BoxDecoration(
+                                                  color: Colors.blue
+                                                      .withOpacity(0.1),
+                                                  shape: BoxShape.circle,
+                                                ),
+
+                                                child: const Icon(
+                                                  Icons.medication,
+                                                  color: Colors.blue,
+                                                ),
+                                              ),
+
+                                              title: Text(
+                                                reminder.medicationName,
+
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+
+                                              subtitle: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+
+                                                children: [
+                                                  Container(
+                                                    margin:
+                                                        const EdgeInsets.only(
+                                                          top: 4,
+                                                          bottom: 6,
+                                                        ),
+
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          horizontal: 10,
+                                                          vertical: 4,
+                                                        ),
+
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.blue
+                                                          .withOpacity(0.1),
+
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            20,
+                                                          ),
+                                                    ),
+
+                                                    child: Text(
+                                                      reminder.frequency,
+
+                                                      style: const TextStyle(
+                                                        color: Colors.blue,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+
+                                              trailing: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.end,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  const Icon(
+                                                    Icons.access_time,
+                                                    size: 18,
+                                                  ),
+                                                  const SizedBox(height: 4),
+
+                                                  Builder(
+                                                    builder: (_) {
+                                                      final times =
+                                                          reminder
+                                                              .reminderTimes;
+
+                                                      List<List<String>>
+                                                      chunks = [];
+                                                      for (
+                                                        int i = 0;
+                                                        i < times.length;
+                                                        i += 2
+                                                      ) {
+                                                        chunks.add(
+                                                          times.sublist(
+                                                            i,
+                                                            i + 2 > times.length
+                                                                ? times.length
+                                                                : i + 2,
+                                                          ),
+                                                        );
+                                                      }
+
+                                                      return Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .end,
+                                                        children:
+                                                            chunks.map((chunk) {
+                                                              return Text(
+                                                                chunk.join(
+                                                                  " • ",
+                                                                ),
+                                                                style: const TextStyle(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                  fontSize: 11,
+                                                                ),
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .right,
+                                                              );
+                                                            }).toList(),
+                                                      );
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+
+                                              onTap:
+                                                  () => _showReminderDetails(
+                                                    context,
+                                                    reminder,
+                                                  ),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }),
+                                  ],
+                                );
+                              }).toList(),
                         );
                       },
                     ),
@@ -265,12 +492,7 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
               ? null
               : FloatingActionButton.extended(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const CreateReminderView(),
-                    ),
-                  );
+                  ReminderClient.showReminderForm(context);
                 },
                 backgroundColor: const Color(0xFF4FC3CF),
                 foregroundColor: Colors.black,
@@ -304,40 +526,39 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
               const SizedBox(height: 10),
 
               Text("Frequency: ${reminder.frequency}"),
-              Text(
-                "Time: ${reminder.scheduleTime.hour}:${reminder.scheduleTime.minute.toString().padLeft(2, '0')}",
+              const SizedBox(height: 8),
+
+              const Text(
+                "Reminder Times:",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+
+              const SizedBox(height: 6),
+
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children:
+                    reminder.reminderTimes.map((time) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.access_time,
+                              size: 16,
+                              color: Colors.blue,
+                            ),
+
+                            const SizedBox(width: 6),
+
+                            Text(time),
+                          ],
+                        ),
+                      );
+                    }).toList(),
               ),
 
               const SizedBox(height: 20),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  /// EDIT
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      _goToEdit(reminder);
-                    },
-                    icon: const Icon(Icons.edit),
-                    label: const Text("Edit"),
-                  ),
-
-                  /// DELETE
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                    ),
-                    onPressed: () {
-                      Navigator.pop(context);
-                      //TODO need to check reminderId?
-                      _confirmDelete(context, reminder.reminderId);
-                    },
-                    icon: const Icon(Icons.delete),
-                    label: const Text("Delete"),
-                  ),
-                ],
-              ),
             ],
           ),
         );
@@ -376,10 +597,15 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
     );
   }
 
-  void _goToEdit(reminder) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => CreateReminderView(reminder: reminder)),
-    );
+  String getReminderPeriod(DateTime time) {
+    final hour = time.hour;
+
+    if (hour >= 5 && hour < 12) {
+      return "Morning ☀️";
+    } else if (hour >= 12 && hour < 18) {
+      return "Afternoon 🌤️";
+    } else {
+      return "Night 🌙";
+    }
   }
 }
