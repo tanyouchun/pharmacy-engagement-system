@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -52,7 +54,7 @@ class AdminManageConfigViewModel extends ChangeNotifier {
   Future<void> updateChatbotStatus(bool value) async {
     try {
       _isChatbotEnabled = value;
-
+      log("Updating chatbot status to: $value");
       notifyListeners();
 
       await _firestore.collection("config").doc("system").set({
@@ -60,14 +62,14 @@ class AdminManageConfigViewModel extends ChangeNotifier {
         "aiAnalysisEnabled": _isAIAnalysisEnabled,
       });
     } catch (e) {
-      debugPrint("Error updating chatbot config: $e");
+      log("Error updating chatbot config: $e");
     }
   }
 
   Future<void> updateAIAnalysisStatus(bool value) async {
     try {
       _isAIAnalysisEnabled = value;
-
+      log("Updating AI analysis status to: $value");
       notifyListeners();
 
       await _firestore.collection("config").doc("system").set({
@@ -75,7 +77,7 @@ class AdminManageConfigViewModel extends ChangeNotifier {
         "aiAnalysisEnabled": value,
       });
     } catch (e) {
-      debugPrint("Error updating AI analysis config: $e");
+      log("Error updating AI analysis config: $e");
     }
   }
 
