@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../viewmodels/user_profile_viewmodel.dart';
+import '../../viewmodels/admin_config_viewmodel.dart';
 
 class AIAnalysisSheet extends StatefulWidget {
   const AIAnalysisSheet({super.key});
@@ -44,6 +45,12 @@ class _AIAnalysisSheetState extends State<AIAnalysisSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final adminConfigViewModel = Provider.of<AdminManageConfigViewModel>(
+      context,
+    );
+
+    final isAIAnalysisEnabled = adminConfigViewModel.isAIAnalysisEnabled;
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.8,
 
@@ -119,7 +126,41 @@ class _AIAnalysisSheetState extends State<AIAnalysisSheet> {
                 ),
 
                 child:
-                    !hasStarted
+                    !isAIAnalysisEnabled
+                        ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.block,
+                                size: 70,
+                                color: Colors.red.shade200,
+                              ),
+
+                              const SizedBox(height: 20),
+
+                              const Text(
+                                "AI Analysis Unavailable",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+
+                              const SizedBox(height: 10),
+
+                              Text(
+                                "AI Analysis is currently unavailable, please try again later.",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                        : !hasStarted
                         ? Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,

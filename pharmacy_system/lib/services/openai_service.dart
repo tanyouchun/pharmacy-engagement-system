@@ -7,7 +7,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class OpenAIService {
   final String _apiKey = dotenv.env['OPENAI_API_KEY'] ?? '';
-  // final String _apiKey = "TESTING_KEY";
 
   Future<String> _loadPrompt(String key) async {
     final yamlString = await rootBundle.loadString(
@@ -27,14 +26,11 @@ class OpenAIService {
     log("System Prompt loaded from yaml file: $systemPrompt");
 
     final finalMessages = [
-    {
-      "role": "system",
-      "content": systemPrompt,
-    },
+      {"role": "system", "content": systemPrompt},
 
-    ...messages,
-  ];
-  log("Final messages to be sent to OpenAI API: ${finalMessages.toString()}");
+      ...messages,
+    ];
+    log("Final messages to be sent to OpenAI API: ${finalMessages.toString()}");
 
     final url = Uri.parse("https://api.openai.com/v1/chat/completions");
 
