@@ -15,6 +15,10 @@ class PrescriptionViewModel extends ChangeNotifier {
   String? errorMessage;
   User? get _currentUser => FirebaseAuth.instance.currentUser;
   String? get _uid => _currentUser?.uid;
+  String? get uid => _uid;
+
+  bool isPrescriptionVisible = true;
+  bool isUpdatingVisibility = false;
 
   //load prescriptions for current user: user_profiles/{userId}/prescriptions
   Future<void> loadPrescriptions() async {
@@ -42,6 +46,43 @@ class PrescriptionViewModel extends ChangeNotifier {
       errorMessage = ErrorMessage.LOAD_PRESCRIPTION_ERROR;
       isLoadingPrescription = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> loadPrescriptionVisibility(String userId) async {
+    try {
+      final doc =
+          await _firestore.collection("user_profiles").doc(userId).get();
+
+      isPrescriptionVisible = doc.data()?['prescriptionVisibility'] ?? true;
+
+      notifyListeners();
+    } catch (e) {
+      log("Load prescription visibility error: $e");
+    }
+  }
+
+  Future<void> updatePrescriptionVisibility(bool value) async {
+    try {
+      _requireAuth();
+
+      isUpdatingVisibility = true;
+      notifyListeners();
+      log("Updating prescription visibility to: $value for user: $_uid");
+
+      await _firestore.collection("user_profiles").doc(_uid).update({
+        "prescriptionVisibility": value,
+      });
+
+      isPrescriptionVisible = value;
+
+      isUpdatingVisibility = false;
+      notifyListeners();
+    } catch (e) {
+      isUpdatingVisibility = false;
+      notifyListeners();
+
+      log("Update prescription visibility error: $e");
     }
   }
 
