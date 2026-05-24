@@ -17,6 +17,7 @@ import 'viewmodels/admin_config_viewmodel.dart';
 
 import 'views/auth_wrapper.dart';
 import 'views/pharmacist/pharmacist_profile_Form_view.dart';
+import 'views/user/user_create_profile_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,6 +51,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         routes: {
           '/pharmacistProfile': (context) => const PharmacistProfileFormView(),
+          // '/userCreateProfile': (_) => const ProfileView(),
         },
         home: const AuthWrapper(),
       ),

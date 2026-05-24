@@ -53,7 +53,7 @@ class LoginViewModel extends ChangeNotifier {
   }
 
   // Google Sign-In
-  Future<void> signInWithGoogle() async {
+  Future<String?> signInWithGoogle() async {
     try {
       isLoading = true;
       notifyListeners();
@@ -63,16 +63,17 @@ class LoginViewModel extends ChangeNotifier {
         log("Google sign-in cancelled by user");
         isLoading = false;
         notifyListeners();
-        return;
+        return null;
       }
       final uid = userCredential.user?.uid;
 
       if (uid != null) {
-        await _checkUserStatus(uid);
+        return await _checkUserStatus(uid);
       }
     } catch (e) {
       log("Google Sign in error. ${ErrorMessage.LOGIN_ERROR}: $e");
       errorMessage = e.toString().replaceAll("Exception: ", "");
+      return errorMessage;
     } finally {
       isLoading = false;
       notifyListeners();
@@ -86,20 +87,21 @@ class LoginViewModel extends ChangeNotifier {
       final userDoc = await userRef.get();
 
       if (!userDoc.exists) {
-        log("New Google user detected. Creating Firestore record...");
+        // log("New Google user detected. Creating Firestore record...");
 
-        await userRef.set({
-          "email": FirebaseAuth.instance.currentUser?.email ?? "",
-          "name": FirebaseAuth.instance.currentUser?.displayName ?? "",
-          "role": "user",
-          "createdAt": FieldValue.serverTimestamp(),
-          "isBlocked": false,
-          "suspendUntil": null,
-          "reportCount": 0,
-          "isPermanentBan": false,
-        });
+        // await userRef.set({
+        //   "email": FirebaseAuth.instance.currentUser?.email ?? "",
+        //   "name": FirebaseAuth.instance.currentUser?.displayName ?? "",
+        //   "role": "user",
+        //   "createdAt": FieldValue.serverTimestamp(),
+        //   "isBlocked": false,
+        //   "suspendUntil": null,
+        //   "reportCount": 0,
+        //   "isPermanentBan": false,
+        // });
 
-        return null; // New user, no need to check block status
+        // return null; // New user, no need to check block status
+        return "NEW_GOOGLE_USER";
       }
 
       final data = userDoc.data();
