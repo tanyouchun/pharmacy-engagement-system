@@ -89,108 +89,217 @@ class _PharmacistProfileDetailsViewState
         ],
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              /// HEADER
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.only(top: 32, bottom: 18),
 
-            // Avatar
-            const CircleAvatar(
-              radius: 50,
-              backgroundImage: NetworkImage("https://i.pravatar.cc/150?img=5"),
-            ),
-
-            const SizedBox(height: 10),
-
-            // Name
-            Text(
-              pharmacistProfileViewModel.name,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-
-            const SizedBox(height: 20),
-
-            /// 📊 Info Cards
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildStat(
-                    Icons.badge,
-                    "License",
-                    pharmacistProfileViewModel.license,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF4FC3CF), Color(0xFF6FE7F7)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  _buildStat(
-                    Icons.local_pharmacy,
-                    "Pharmacy",
-                    pharmacistProfileViewModel.pharmacyName,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(28),
+                    bottomRight: Radius.circular(28),
                   ),
-                  _buildStat(
-                    Icons.work,
-                    "Experience",
-                    "${pharmacistProfileViewModel.experience} yrs",
-                  ),
-                ],
+                ),
+
+                child: Column(
+                  children: [
+                    /// AVATAR
+                    Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
+                      child: const CircleAvatar(
+                        radius: 38,
+                        backgroundColor: Colors.white,
+                        child: Icon(
+                          Icons.local_pharmacy,
+                          size: 42,
+                          color: Color(0xFF4FC3CF),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    /// NAME
+                    Text(
+                      pharmacistProfileViewModel.name.isEmpty
+                          ? "Pharmacist"
+                          : pharmacistProfileViewModel.name,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+
+                    const SizedBox(height: 4),
+
+                    Text(
+                      pharmacistProfileViewModel.pharmacyName.isEmpty
+                          ? "Pharmacy"
+                          : pharmacistProfileViewModel.pharmacyName,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
 
-            const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
-            /// 📝 Extra Info Section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "About Pharmacist",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[700],
+              /// STATS
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _buildStatCard(
+                        icon: Icons.badge,
+                        title: "License",
+                        value:
+                            pharmacistProfileViewModel.license.isEmpty
+                                ? "-"
+                                : pharmacistProfileViewModel.license,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildStatCard(
+                        icon: Icons.work,
+                        title: "Experience",
+                        value:
+                            pharmacistProfileViewModel.experience == 0
+                                ? "-"
+                                : "${pharmacistProfileViewModel.experience} yrs",
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildStatCard(
+                        icon: Icons.verified,
+                        title: "Status",
+                        value: "Active",
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              /// ABOUT CARD
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(22),
+
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: const [
+                          Icon(Icons.info_outline, color: Color(0xFF4FC3CF)),
+                          SizedBox(width: 8),
+                          Text(
+                            "About Pharmacist",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      Text(
+                        "${pharmacistProfileViewModel.name} is a licensed pharmacist "
+                        "working at ${pharmacistProfileViewModel.pharmacyName} "
+                        "with ${pharmacistProfileViewModel.experience} years of experience.",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          height: 1.4,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 10),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 3,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    "${pharmacistProfileViewModel.name} is a licensed pharmacist working at ${pharmacistProfileViewModel.pharmacyName} with ${pharmacistProfileViewModel.experience} years of experience.",
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                ),
-              ),
-            ),
-          ],
+              const SizedBox(height: 40),
+            ],
+          ),
         ),
       ),
     );
     return scaffold;
   }
 
-  Widget _buildStat(IconData icon, String title, String value) {
-    return Column(
-      children: [
-        Icon(icon, color: Colors.blue),
-        const SizedBox(height: 5),
-        Text(title, style: const TextStyle(fontSize: 12)),
-        const SizedBox(height: 3),
-        Text(
-          value,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.blue,
+  Widget _buildStatCard({
+    required IconData icon,
+    required String title,
+    required String value,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
+
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
           ),
-        ),
-      ],
+        ],
+      ),
+
+      child: Column(
+        children: [
+          Icon(icon, color: const Color(0xFF4FC3CF)),
+
+          const SizedBox(height: 6),
+
+          Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+
+          const SizedBox(height: 4),
+
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          ),
+        ],
+      ),
     );
   }
 }

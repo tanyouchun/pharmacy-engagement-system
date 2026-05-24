@@ -45,6 +45,7 @@ class SignupViewModel extends ChangeNotifier {
         await FirebaseFirestore.instance.collection('users').doc(uid).set({
           'email': emailController.text.trim(),
           'role': isPharmacist ? 'pharmacist' : 'user',
+          'approvalStatus': isPharmacist ? 'pending' : 'approved',
           'isBlocked': false,
           'isPermanentBan': false,
           'suspendUntil': null,

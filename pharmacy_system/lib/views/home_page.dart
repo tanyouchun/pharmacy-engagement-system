@@ -17,6 +17,8 @@ import 'pharmacist/pharmacist_profile_wrapper.dart';
 import 'user/user_chat_list_view.dart';
 import 'pharmacist/pharmacist_chat_list_view.dart';
 import 'user/user_reminder_view.dart';
+import 'pharmacist/pharmacist_pending_approval_view.dart';
+import 'admin/admin_pharmacist_approval_view.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -30,6 +32,7 @@ class _HomePageState extends State<HomePage> {
   String? _role;
   bool _isLoadingRole = true;
   final AuthService _authService = AuthService();
+  String? _approvalStatus;
 
   @override
   void initState() {
@@ -57,6 +60,7 @@ class _HomePageState extends State<HomePage> {
       if (!mounted) return;
       setState(() {
         _role = doc.data()?['role'] as String?;
+        _approvalStatus = doc.data()?['approvalStatus'] as String?;
         _isLoadingRole = false;
       });
     } catch (e) {
@@ -73,7 +77,7 @@ class _HomePageState extends State<HomePage> {
     try {
       final chatViewModel = context.read<ChatViewModel>();
       chatViewModel.disposeListener();
-      
+
       _authService.logout();
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
@@ -91,7 +95,13 @@ class _HomePageState extends State<HomePage> {
 
   String get _title {
     if (_role == 'admin') {
-      final titles = ["Home", "Manage User", "AI Assistant", "Manage Config"];
+      final titles = [
+        "Home",
+        "Manage User",
+        "Pharmacists",
+        "AI Assistant",
+        "Manage Config",
+      ];
       return (_currentIndex < titles.length) ? titles[_currentIndex] : "Home";
     }
     final titles =
@@ -127,6 +137,7 @@ class _HomePageState extends State<HomePage> {
       return [
         home,
         const AdminManageUserView(),
+        const AdminPharmacistApprovalView(),
         const ChatbotView(),
         const AdminManageConfigView(),
       ];
@@ -140,12 +151,37 @@ class _HomePageState extends State<HomePage> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
+    if (_role == 'pharmacist' &&
+        (_approvalStatus == 'pending' || _approvalStatus == 'rejected')) {
+      return PharmacistPendingApprovalView(
+        approvalStatus: _approvalStatus ?? 'pending',
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(_title),
+        centerTitle: true,
+        elevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+
+        title: Text(
+          _title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+
         actions: [
-          IconButton(onPressed: _logout, icon: const Icon(Icons.logout)),
+          IconButton(
+            onPressed: _logout,
+            icon: const Icon(Icons.logout),
+            tooltip: "Logout",
+          ),
         ],
+
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(height: 1, color: Colors.grey.withOpacity(0.15)),
+        ),
       ),
 
       body: _pages[_currentIndex],
@@ -185,6 +221,10 @@ class _HomePageState extends State<HomePage> {
                       const BottomNavigationBarItem(
                         icon: Icon(Icons.group_outlined),
                         label: "Manage User",
+                      ),
+                      const BottomNavigationBarItem(
+                        icon: Icon(Icons.approval),
+                        label: "Pharmacists",
                       ),
                       const BottomNavigationBarItem(
                         icon: Icon(Icons.smart_toy, size: 30),

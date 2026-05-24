@@ -104,62 +104,150 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              const SizedBox(height: 20),
+              /// TOP HEADER
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.only(top: 28, bottom: 16),
 
-              //TODO: replace with real profile picture
-              CircleAvatar(
-                radius: 50,
-                // backgroundImage: NetworkImage("https://i.pravatar.cc/150?img=3"),
-              ),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF4FC3CF), Color(0xFF6FE7F7)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
 
-              const SizedBox(height: 10),
-
-              Text(
-                userProfileViewModel.name,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(28),
+                    bottomRight: Radius.circular(28),
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: 20),
-
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                child: Column(
                   children: [
-                    _buildStat(Icons.cake, "Age", userProfileViewModel.age),
-                    _buildStat(
-                      Icons.height,
-                      "Height",
-                      "${userProfileViewModel.height} cm",
+                    /// PROFILE IMAGE
+                    Container(
+                      padding: const EdgeInsets.all(3),
+
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
+
+                      child: const CircleAvatar(
+                        radius: 38,
+                        backgroundColor: Colors.white,
+
+                        child: Icon(
+                          Icons.person,
+                          size: 42,
+                          color: Color(0xFF4FC3CF),
+                        ),
+                      ),
                     ),
-                    _buildStat(
-                      Icons.monitor_weight,
-                      "Weight",
-                      "${userProfileViewModel.weight} kg",
+
+                    const SizedBox(height: 8),
+
+                    Text(
+                      userProfileViewModel.name,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+
+                    const SizedBox(height: 2),
+
+                    Text(
+                      userProfileViewModel.gender,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 50),
+              const SizedBox(height: 18),
 
+              /// STATS
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+
+                child: Row(
                   children: [
-                    const Text(
-                      "Medical Conditions",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: _buildStatCard(
+                        icon: Icons.cake,
+                        title: "Age",
+                        value: userProfileViewModel.age,
                       ),
                     ),
-                    const SizedBox(height: 10),
 
+                    const SizedBox(width: 12),
+
+                    Expanded(
+                      child: _buildStatCard(
+                        icon: Icons.height,
+                        title: "Height",
+                        value: "${userProfileViewModel.height} cm",
+                      ),
+                    ),
+
+                    const SizedBox(width: 12),
+
+                    Expanded(
+                      child: _buildStatCard(
+                        icon: Icons.monitor_weight,
+                        title: "Weight",
+                        value: "${userProfileViewModel.weight} kg",
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              /// ALLERGIES SECTION
+              _buildSectionCard(
+                title: "Allergies",
+                icon: Icons.warning_amber_rounded,
+                iconColor: Colors.orange,
+
+                child:
+                    userProfileViewModel.allergies.isEmpty
+                        ? const Text(
+                          "No allergies recorded",
+                          style: TextStyle(color: Colors.grey),
+                        )
+                        : Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children:
+                              userProfileViewModel.allergies
+                                  .split(',')
+                                  .map(
+                                    (allergy) => Chip(
+                                      label: Text(allergy.trim()),
+                                      backgroundColor: Colors.orange.shade50,
+                                    ),
+                                  )
+                                  .toList(),
+                        ),
+              ),
+
+              const SizedBox(height: 18),
+
+              /// MEDICAL CONDITIONS
+              _buildSectionCard(
+                title: "Medical Conditions",
+                icon: Icons.favorite,
+                iconColor: Colors.redAccent,
+
+                child:
                     userProfileViewModel.medicalConditions.isEmpty
                         ? const Text(
                           "No medical conditions",
@@ -179,18 +267,24 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                                   )
                                   .toList(),
                         ),
-                  ],
-                ),
               ),
+
               const SizedBox(height: 30),
 
+              /// PRESCRIPTION TITLE
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
+
                 child: Align(
                   alignment: Alignment.centerLeft,
+
                   child: Text(
-                    "Prescription history:",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    "Prescription History",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade800,
+                    ),
                   ),
                 ),
               ),
@@ -609,21 +703,97 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
     );
   }
 
-  Widget _buildStat(IconData icon, String title, String value) {
-    return Column(
-      children: [
-        Icon(icon, color: Colors.blue),
-        const SizedBox(height: 5),
-        Text(title, style: const TextStyle(fontSize: 12)),
-        const SizedBox(height: 3),
-        Text(
-          value,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.blue,
+  Widget _buildStatCard({
+    required IconData icon,
+    required String title,
+    required String value,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
+
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
+        ],
+      ),
+
+      child: Column(
+        children: [
+          Icon(icon, color: const Color(0xFF4FC3CF)),
+
+          const SizedBox(height: 8),
+
+          Text(title, style: const TextStyle(color: Colors.grey, fontSize: 13)),
+
+          const SizedBox(height: 4),
+
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionCard({
+    required String title,
+    required IconData icon,
+    required Color iconColor,
+    required Widget child,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-      ],
+
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: iconColor),
+
+                const SizedBox(width: 8),
+
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            child,
+          ],
+        ),
+      ),
     );
   }
 }

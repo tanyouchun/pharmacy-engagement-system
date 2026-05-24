@@ -83,48 +83,55 @@ class LoginViewModel extends ChangeNotifier {
   Future<String?> _checkUserStatus(String uid) async {
     try {
       log("Checking user status for $uid");
+
       final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
       final userDoc = await userRef.get();
 
       if (!userDoc.exists) {
-        // log("New Google user detected. Creating Firestore record...");
-
-        // await userRef.set({
-        //   "email": FirebaseAuth.instance.currentUser?.email ?? "",
-        //   "name": FirebaseAuth.instance.currentUser?.displayName ?? "",
-        //   "role": "user",
-        //   "createdAt": FieldValue.serverTimestamp(),
-        //   "isBlocked": false,
-        //   "suspendUntil": null,
-        //   "reportCount": 0,
-        //   "isPermanentBan": false,
-        // });
-
-        // return null; // New user, no need to check block status
         return "NEW_GOOGLE_USER";
       }
 
       final data = userDoc.data();
+
       log("User data for $uid: $data");
+
+      final role = data?['role'];
+      final approvalStatus = data?['approvalStatus'];
+
+      if (role == 'pharmacist') {
+        if (approvalStatus == 'pending') {
+          return null;
+        }
+
+        if (approvalStatus == 'rejected') {
+          return null;
+        }
+      }
+
       if (data?['isBlocked'] == true) {
         final suspendUntil = data?['suspendUntil'];
 
+        /// Permanent Ban
         if (data?['isPermanentBan'] == true) {
-          log("Account $uid is permanently banned. Signing out user.");
+          log("Account $uid permanently banned");
+
           await FirebaseAuth.instance.signOut();
+
           return "Account permanently banned";
         }
 
+        /// Temporary Suspension
         if (suspendUntil != null) {
           final until = (suspendUntil as Timestamp).toDate();
 
           if (DateTime.now().isBefore(until)) {
-            log(
-              "Account $uid is currently suspended until $until. Signing out user.",
-            );
+            log("Account $uid suspended until $until");
+
             await FirebaseAuth.instance.signOut();
+
             return "Your account is suspended until ${until.toLocal()}";
           } else {
+            /// auto unblock expired suspension
             await userDoc.reference.update({
               'isBlocked': false,
               'suspendUntil': null,
@@ -132,8 +139,11 @@ class LoginViewModel extends ChangeNotifier {
           }
         }
       }
+
+      return null;
     } catch (e) {
       log("Error checking user status for $uid: $e");
+
       return "Unable to verify account status";
     }
   }
