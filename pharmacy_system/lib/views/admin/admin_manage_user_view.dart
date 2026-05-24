@@ -15,7 +15,6 @@ class AdminManageUserView extends StatefulWidget {
 }
 
 class _AdminManageUserViewState extends State<AdminManageUserView> {
-
   @override
   void initState() {
     super.initState();
@@ -58,68 +57,222 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
           final suspendUntil = userData?['suspendUntil'];
           final untilDate = (suspendUntil as Timestamp?)?.toDate();
 
-          return Card(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: ListTile(
-              title: Text("$name ($role)"),
-              subtitle: Column(
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Reason: $reason"),
+                  /// =========================
+                  /// TOP USER INFO
+                  /// =========================
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 26,
+                        backgroundColor:
+                            role == 'pharmacist'
+                                ? const Color(0xFF4FC3CF)
+                                : Colors.deepPurple,
 
-                  if (isBlocked)
-                    Text(
-                      untilDate != null
-                          ? "⏳ Suspended until $untilDate"
-                          : "Blocked",
-                    )
-                  else
-                    const Text(
-                      "✅ Active",
-                      style: TextStyle(color: Colors.green),
-                    ),
-                ],
-              ),
+                        child: Icon(
+                          role == 'pharmacist'
+                              ? Icons.local_pharmacy
+                              : Icons.person,
 
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  /// 👁 View
-                  IconButton(
-                    icon: const Icon(Icons.visibility),
-                    onPressed: () {
-                      _checkAccount(userId, role);
-                    },
+                          color: Colors.white,
+                        ),
+                      ),
+
+                      const SizedBox(width: 14),
+
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              name,
+                              style: const TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+
+                            const SizedBox(height: 3),
+
+                            Text(
+                              role.toUpperCase(),
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      _buildStatusChip(
+                        isBlocked: isBlocked,
+                        untilDate: untilDate,
+                      ),
+                    ],
                   ),
 
-                  // show UNSUSPEND
-                  if (isBlocked)
-                    IconButton(
-                      icon: const Icon(Icons.lock_open, color: Colors.green),
-                      tooltip: "Unsuspend User",
-                      onPressed: () async {
-                        final confirm = await _confirmSuspend(
-                          "Unsuspend User",
-                          "Are you sure you want to unblock this user?",
-                        );
+                  const SizedBox(height: 20),
 
-                        if (!confirm) return;
+                  /// =========================
+                  /// REPORT REASON
+                  /// =========================
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
 
-                        await adminManageUserViewModel.unBlockAccount(userId);
-                      },
-                    )
-                  else
-                    IconButton(
-                      icon: const Icon(Icons.block, color: Colors.red),
-                      tooltip: "Suspend User",
-                      onPressed: () {
-                        _showSuspendDialog(
-                          adminManageUserViewModel,
-                          userId,
-                          report.issueId!,
-                        );
-                      },
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(16),
                     ),
+
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: const [
+                            Icon(
+                              Icons.report_problem_outlined,
+                              color: Colors.orange,
+                              size: 18,
+                            ),
+
+                            SizedBox(width: 6),
+
+                            Text(
+                              "Report Reason",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.orange,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        Text(reason, style: const TextStyle(fontSize: 14)),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  /// =========================
+                  /// ACTIONS
+                  /// =========================
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            _checkAccount(userId, role);
+                          },
+
+                          icon: const Icon(Icons.visibility_outlined),
+
+                          label: const Text("View Profile"),
+
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFF4FC3CF),
+                            side: const BorderSide(color: Color(0xFF4FC3CF)),
+
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: 12),
+
+                      Expanded(
+                        child:
+                            isBlocked
+                                ? ElevatedButton.icon(
+                                  icon: const Icon(Icons.lock_open),
+
+                                  label: const Text("Unsuspend"),
+
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green,
+                                    foregroundColor: Colors.white,
+
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 14,
+                                    ),
+
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                  ),
+
+                                  onPressed: () async {
+                                    final confirm = await _confirmSuspend(
+                                      "Unsuspend User",
+                                      "Are you sure you want to unblock this user?",
+                                    );
+
+                                    if (!confirm) return;
+
+                                    await adminManageUserViewModel
+                                        .unBlockAccount(userId);
+                                  },
+                                )
+                                : ElevatedButton.icon(
+                                  icon: const Icon(Icons.block),
+
+                                  label: const Text("Suspend"),
+
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red,
+                                    foregroundColor: Colors.white,
+
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 14,
+                                    ),
+
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                  ),
+
+                                  onPressed: () {
+                                    _showSuspendDialog(
+                                      adminManageUserViewModel,
+                                      userId,
+                                      report.issueId!,
+                                    );
+                                  },
+                                ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -252,5 +405,50 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
               ),
         ) ??
         false;
+  }
+
+  Widget _buildStatusChip({
+    required bool isBlocked,
+    required DateTime? untilDate,
+  }) {
+    final isSuspended = isBlocked;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+
+      decoration: BoxDecoration(
+        color:
+            isSuspended
+                ? Colors.red.withOpacity(0.12)
+                : Colors.green.withOpacity(0.12),
+
+        borderRadius: BorderRadius.circular(30),
+      ),
+
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isSuspended ? Icons.block : Icons.check_circle,
+            size: 15,
+            color: isSuspended ? Colors.red : Colors.green,
+          ),
+
+          const SizedBox(width: 5),
+
+          Text(
+            isSuspended
+                ? (untilDate != null ? "Suspended" : "Banned")
+                : "Active",
+
+            style: TextStyle(
+              color: isSuspended ? Colors.red : Colors.green,
+              fontWeight: FontWeight.bold,
+              fontSize: 11,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

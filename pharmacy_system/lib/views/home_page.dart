@@ -98,9 +98,9 @@ class _HomePageState extends State<HomePage> {
       final titles = [
         "Home",
         "Manage User",
-        "Pharmacists",
+        "Pharmacists Approval",
         "AI Assistant",
-        "Manage Config",
+        "Manage Chatbot Configuration",
       ];
       return (_currentIndex < titles.length) ? titles[_currentIndex] : "Home";
     }
