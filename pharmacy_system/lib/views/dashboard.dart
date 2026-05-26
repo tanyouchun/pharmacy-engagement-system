@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
-import '../../viewmodels/reminder_viewmodel.dart';
+import '../viewmodels/reminder_viewmodel.dart';
 import 'package:table_calendar/table_calendar.dart';
-import '../../models/reminder.dart';
-import '../../utils/reminder_client.dart';
+import '../models/reminder.dart';
+import '../utils/reminder_client.dart';
 
 class ReminderHomeView extends StatefulWidget {
   final String? role;
