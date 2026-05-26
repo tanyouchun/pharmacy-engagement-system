@@ -162,8 +162,12 @@ class ProfileView extends StatelessWidget {
                                 onPressed: () async {
                                   FocusScope.of(context).unfocus();
 
-                                  bool success =
-                                      await userProfileViewModel.saveProfile();
+                                  final userProfileViewModel =
+                                      context.read<UserProfileViewModel>();
+
+                                  final success = await userProfileViewModel.saveProfile();
+
+                                  if (!context.mounted) return;
 
                                   if (success) {
                                     Navigator.of(context).pushAndRemoveUntil(
@@ -175,10 +179,8 @@ class ProfileView extends StatelessWidget {
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        behavior: SnackBarBehavior.floating,
                                         content: Text(
-                                          userProfileViewModel.errorMessage ??
-                                              "Error occurred",
+                                          userProfileViewModel.errorMessage ?? "Error occurred",
                                         ),
                                       ),
                                     );

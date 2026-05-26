@@ -16,7 +16,7 @@ import 'auth_wrapper.dart';
 import 'pharmacist/pharmacist_profile_wrapper.dart';
 import 'user/user_chat_list_view.dart';
 import 'pharmacist/pharmacist_chat_list_view.dart';
-import 'user/user_reminder_view.dart';
+import 'dashboard.dart';
 import 'pharmacist/pharmacist_pending_approval_view.dart';
 import 'admin/admin_pharmacist_approval_view.dart';
 
