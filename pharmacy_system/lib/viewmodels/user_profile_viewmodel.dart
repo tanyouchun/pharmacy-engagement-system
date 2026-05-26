@@ -12,13 +12,14 @@ class UserProfileViewModel extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final OpenAIService _openAIService = OpenAIService();
 
-  String name = "";
-  String age = "";
-  String gender = "";
-  String weight = "";
-  String height = "";
-  String allergies = "";
-  String medicalConditions = "";
+  // String name = "";
+  // String age = "";
+  // String gender = "";
+  // String weight = "";
+  // String height = "";
+  // String allergies = "";
+  // String medicalConditions = "";
+  UserProfile? profile;
 
   final nameController = TextEditingController();
   final ageController = TextEditingController();
@@ -58,47 +59,28 @@ class UserProfileViewModel extends ChangeNotifier {
 
   Future<void> loadProfile() async {
     try {
-      log("Loading user profile for UID: ${_uid}");
       _requireAuth();
 
       final doc = await _firestore.collection("user_profiles").doc(_uid).get();
-      log("Loading profile for UID: ${_uid}");
 
       if (doc.exists) {
-        log("user profile exist for user ID: ${_uid}");
-        final profile = UserProfile.fromDoc(doc);
+        profile = UserProfile.fromDoc(doc);
 
-        name = profile.name;
-        age = profile.age.toString();
-        gender = profile.gender;
-        weight = profile.weight;
-        height = profile.height;
-        allergies = profile.allergies.join(', ');
-        medicalConditions = profile.medicalConditions.join(', ');
+        hasProfile = true;
 
-        nameController.text = name;
-        ageController.text = age;
-        genderController.text = gender;
-        weightController.text = weight;
-        heightController.text = height;
-        allergiesController.text = allergies;
-        medicalConditionsController.text = medicalConditions;
-
-        // notifyListeners();
+        nameController.text = profile!.name;
+        ageController.text = profile!.age.toString();
+        genderController.text = profile!.gender;
+        weightController.text = profile!.weight;
+        heightController.text = profile!.height;
+        allergiesController.text = profile!.allergies.join(", ");
+        medicalConditionsController.text = profile!.medicalConditions.join(
+          ", ",
+        );
       } else {
-        log("No profile found for user ID: ${_uid}, creating profile.");
-
-        clearControllers();
-
-        name = "";
-        age = "";
-        gender = "";
-        weight = "";
-        height = "";
-        allergies = "";
-        medicalConditions = "";
-
+        profile = null;
         hasProfile = false;
+        clearControllers();
       }
 
       notifyListeners();
@@ -115,21 +97,20 @@ class UserProfileViewModel extends ChangeNotifier {
           await _firestore.collection("user_profiles").doc(userId).get();
 
       if (doc.exists) {
-        final profile = UserProfile.fromDoc(doc);
+        profile = UserProfile.fromDoc(doc);
 
-        name = profile.name;
-        age = profile.age.toString();
-        gender = profile.gender;
-        weight = profile.weight;
-        height = profile.height;
-        allergies = profile.allergies.join(', ');
-        medicalConditions = profile.medicalConditions.join(', ');
-
-        notifyListeners();
+        hasProfile = true;
+      } else {
+        profile = null;
+        hasProfile = false;
       }
+
+      notifyListeners();
     } catch (e) {
       log("${ErrorMessage.LOAD_USER_PROFILE_ERROR}: $e");
+
       errorMessage = ErrorMessage.LOAD_USER_PROFILE_ERROR;
+
       notifyListeners();
     }
   }
@@ -138,39 +119,48 @@ class UserProfileViewModel extends ChangeNotifier {
     try {
       isLoading = true;
       notifyListeners();
+
       _requireAuth();
 
-      log("Creating user profile for user: ${_uid}");
-      final profile = UserProfile(
+      final newProfile = UserProfile(
         id: _uid!,
-        name: nameController.text,
+        name: nameController.text.trim(),
         age: int.tryParse(ageController.text) ?? 0,
-        gender: genderController.text,
-        weight: weightController.text,
-        height: heightController.text,
+        gender: genderController.text.trim(),
+        weight: weightController.text.trim(),
+        height: heightController.text.trim(),
         allergies:
-            allergiesController.text.split(',').map((e) => e.trim()).toList(),
+            allergiesController.text
+                .split(',')
+                .map((e) => e.trim())
+                .where((e) => e.isNotEmpty)
+                .toList(),
         medicalConditions:
             medicalConditionsController.text
                 .split(',')
                 .map((e) => e.trim())
+                .where((e) => e.isNotEmpty)
                 .toList(),
       );
 
       await _firestore
           .collection("user_profiles")
           .doc(_uid)
-          .set(profile.toMap());
+          .set(newProfile.toMap());
 
+      profile = newProfile;
       hasProfile = true;
+
       isLoading = false;
       notifyListeners();
 
       return true;
     } catch (e) {
       isLoading = false;
-      log("${ErrorMessage.SAVE_USER_PROFILE_ERROR}: $e");
       errorMessage = ErrorMessage.SAVE_USER_PROFILE_ERROR;
+
+      log("${ErrorMessage.SAVE_USER_PROFILE_ERROR}: $e");
+
       notifyListeners();
       return false;
     }
@@ -180,36 +170,39 @@ class UserProfileViewModel extends ChangeNotifier {
     try {
       isLoading = true;
       notifyListeners();
+
       _requireAuth();
 
-      final profile = UserProfile(
-        id: _uid!,
-        name: nameController.text,
+      if (profile == null) {
+        throw Exception("Profile does not exist");
+      }
+
+      final updatedProfile = profile!.copyWith(
+        name: nameController.text.trim(),
         age: int.tryParse(ageController.text) ?? 0,
-        gender: genderController.text,
-        weight: weightController.text,
-        height: heightController.text,
+        gender: genderController.text.trim(),
+        weight: weightController.text.trim(),
+        height: heightController.text.trim(),
         allergies:
-            allergiesController.text.split(',').map((e) => e.trim()).toList(),
+            allergiesController.text
+                .split(',')
+                .map((e) => e.trim())
+                .where((e) => e.isNotEmpty)
+                .toList(),
         medicalConditions:
             medicalConditionsController.text
                 .split(',')
                 .map((e) => e.trim())
+                .where((e) => e.isNotEmpty)
                 .toList(),
       );
 
       await _firestore
           .collection("user_profiles")
           .doc(_uid)
-          .update(profile.toMap());
+          .update(updatedProfile.toMap());
 
-      name = nameController.text;
-      age = ageController.text;
-      gender = genderController.text;
-      weight = weightController.text;
-      height = heightController.text;
-      allergies = allergiesController.text;
-      medicalConditions = medicalConditionsController.text;
+      profile = updatedProfile;
 
       isLoading = false;
       notifyListeners();
@@ -217,8 +210,10 @@ class UserProfileViewModel extends ChangeNotifier {
       return true;
     } catch (e) {
       isLoading = false;
-      log("${ErrorMessage.UPDATE_USER_PROFILE_ERROR}: $e");
       errorMessage = ErrorMessage.UPDATE_USER_PROFILE_ERROR;
+
+      log("${ErrorMessage.UPDATE_USER_PROFILE_ERROR}: $e");
+
       notifyListeners();
       return false;
     }

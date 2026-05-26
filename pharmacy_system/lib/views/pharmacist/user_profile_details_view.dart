@@ -64,6 +64,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
   Widget build(BuildContext context) {
     final userProfileViewModel = Provider.of<UserProfileViewModel>(context);
     final prescriptionViewModel = Provider.of<PrescriptionViewModel>(context);
+    final profile = userProfileViewModel.profile;
 
     if (isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -89,7 +90,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                 ReportClient.reportAccount(
                   context: context,
                   reportedUserId: widget.userId,
-                  reportedName: userProfileViewModel.name,
+                  reportedName: profile?.name ?? "",
                   reportedRole: "user",
                 );
               }
@@ -150,7 +151,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                     const SizedBox(height: 8),
 
                     Text(
-                      userProfileViewModel.name,
+                      profile?.name ?? "",
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -161,7 +162,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                     const SizedBox(height: 2),
 
                     Text(
-                      userProfileViewModel.gender,
+                      profile?.gender ?? "",
                       style: const TextStyle(
                         fontSize: 13,
                         color: Colors.black,
@@ -184,7 +185,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                       child: _buildStatCard(
                         icon: Icons.cake,
                         title: "Age",
-                        value: userProfileViewModel.age,
+                        value: profile?.age.toString() ?? "",
                       ),
                     ),
 
@@ -194,7 +195,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                       child: _buildStatCard(
                         icon: Icons.height,
                         title: "Height",
-                        value: "${userProfileViewModel.height} cm",
+                        value: profile != null ? "${profile.height} cm" : "",
                       ),
                     ),
 
@@ -204,7 +205,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                       child: _buildStatCard(
                         icon: Icons.monitor_weight,
                         title: "Weight",
-                        value: "${userProfileViewModel.weight} kg",
+                        value: profile != null ? "${profile.weight} kg" : "",
                       ),
                     ),
                   ],
@@ -220,7 +221,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                 iconColor: Colors.orange,
 
                 child:
-                    userProfileViewModel.allergies.isEmpty
+                    profile?.allergies.isEmpty ?? true
                         ? const Text(
                           "No allergies recorded",
                           style: TextStyle(color: Colors.grey),
@@ -229,15 +230,15 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                           spacing: 8,
                           runSpacing: 8,
                           children:
-                              userProfileViewModel.allergies
-                                  .split(',')
+                              profile?.allergies
                                   .map(
                                     (allergy) => Chip(
                                       label: Text(allergy.trim()),
                                       backgroundColor: Colors.orange.shade50,
                                     ),
                                   )
-                                  .toList(),
+                                  .toList() ??
+                              [],
                         ),
               ),
 
@@ -250,7 +251,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                 iconColor: Colors.redAccent,
 
                 child:
-                    userProfileViewModel.medicalConditions.isEmpty
+                    profile?.medicalConditions.isEmpty ?? true
                         ? const Text(
                           "No medical conditions",
                           style: TextStyle(color: Colors.grey),
@@ -259,15 +260,15 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                           spacing: 8,
                           runSpacing: 8,
                           children:
-                              userProfileViewModel.medicalConditions
-                                  .split(',')
+                              profile?.medicalConditions
                                   .map(
                                     (condition) => Chip(
                                       label: Text(condition.trim()),
                                       backgroundColor: Colors.blue.shade50,
                                     ),
                                   )
-                                  .toList(),
+                                  .toList() ??
+                              [],
                         ),
               ),
 
@@ -843,6 +844,10 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
       listen: false,
     );
 
+    final profile = userProfileViewModel.profile;
+
+    if (profile == null) return;
+
     /// Respect privacy
     final prescriptions =
         prescriptionViewModel.isPrescriptionVisible
@@ -858,15 +863,14 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
           (_) => AIAnalysisSheet(
             userId: widget.userId,
 
-            name: userProfileViewModel.name,
-            age: userProfileViewModel.age,
-            gender: userProfileViewModel.gender,
-            weight: userProfileViewModel.weight,
-            height: userProfileViewModel.height,
-            allergies: userProfileViewModel.allergies,
-            medicalConditions: userProfileViewModel.medicalConditions,
+            name: profile.name,
+            age: profile.age.toString(),
+            gender: profile.gender,
+            weight: profile.weight,
+            height: profile.height,
+            allergies: profile.allergies.join(", "),
+            medicalConditions: profile.medicalConditions.join(", "),
 
-            /// IMPORTANT
             prescriptions: prescriptions,
           ),
     );
