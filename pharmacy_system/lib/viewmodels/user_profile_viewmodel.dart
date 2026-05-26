@@ -249,22 +249,31 @@ class UserProfileViewModel extends ChangeNotifier {
     }
   }
 
-  Future<String> generateAIAnalysis() async {
+  Future<String> generateAIAnalysis({
+    required String name,
+    required String age,
+    required String gender,
+    required String weight,
+    required String height,
+    required String allergies,
+    required String medicalConditions,
+    required List<Prescription> prescriptions,
+  }) async {
     try {
-      _requireAuth();
+      // _requireAuth();
 
-      final prescriptionSnapshot =
-          await _firestore
-              .collection("user_profiles")
-              .doc(_uid)
-              .collection("prescriptions")
-              .orderBy("issueDate", descending: true)
-              .get();
+      // final prescriptionSnapshot =
+      //     await _firestore
+      //         .collection("user_profiles")
+      //         .doc(_uid)
+      //         .collection("prescriptions")
+      //         .orderBy("issueDate", descending: true)
+      //         .get();
 
-      final prescriptions =
-          prescriptionSnapshot.docs
-              .map((doc) => Prescription.fromDoc(doc))
-              .toList();
+      // final prescriptions =
+      //     prescriptionSnapshot.docs
+      //         .map((doc) => Prescription.fromDoc(doc))
+      //         .toList();
 
       String prescriptionText = "";
 

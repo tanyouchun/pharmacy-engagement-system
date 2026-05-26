@@ -3,9 +3,33 @@ import 'package:provider/provider.dart';
 
 import '../../viewmodels/user_profile_viewmodel.dart';
 import '../../viewmodels/admin_config_viewmodel.dart';
+import '../../models/prescription.dart';
 
 class AIAnalysisSheet extends StatefulWidget {
-  const AIAnalysisSheet({super.key});
+  final String userId;
+
+  final String name;
+  final String age;
+  final String gender;
+  final String weight;
+  final String height;
+  final String allergies;
+  final String medicalConditions;
+
+  final List prescriptions;
+
+  const AIAnalysisSheet({
+    super.key,
+    required this.userId,
+    required this.name,
+    required this.age,
+    required this.gender,
+    required this.weight,
+    required this.height,
+    required this.allergies,
+    required this.medicalConditions,
+    required this.prescriptions,
+  });
 
   @override
   State<AIAnalysisSheet> createState() => _AIAnalysisSheetState();
@@ -29,7 +53,16 @@ class _AIAnalysisSheetState extends State<AIAnalysisSheet> {
     });
 
     try {
-      final result = await userProfileViewModel.generateAIAnalysis();
+      final result = await userProfileViewModel.generateAIAnalysis(
+        name: widget.name,
+        age: widget.age,
+        gender: widget.gender,
+        weight: widget.weight,
+        height: widget.height,
+        allergies: widget.allergies,
+        medicalConditions: widget.medicalConditions,
+        prescriptions: List<Prescription>.from(widget.prescriptions),
+      );
 
       setState(() {
         analysis = result;
@@ -50,6 +83,7 @@ class _AIAnalysisSheetState extends State<AIAnalysisSheet> {
     );
 
     final isAIAnalysisEnabled = adminConfigViewModel.isAIAnalysisEnabled;
+    final hasInsufficientData = widget.prescriptions.isEmpty;
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.8,
@@ -151,6 +185,40 @@ class _AIAnalysisSheetState extends State<AIAnalysisSheet> {
 
                               Text(
                                 "AI Analysis is currently unavailable, please try again later.",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                        : hasInsufficientData
+                        ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.lock_outline,
+                                size: 70,
+                                color: Colors.orange.shade200,
+                              ),
+
+                              const SizedBox(height: 20),
+
+                              const Text(
+                                "Insufficient Data",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+
+                              const SizedBox(height: 10),
+
+                              Text(
+                                "AI Analysis requires visible prescription history to generate analysis.",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: Colors.grey.shade600,

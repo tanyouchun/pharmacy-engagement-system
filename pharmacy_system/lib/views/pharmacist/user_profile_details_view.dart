@@ -8,6 +8,7 @@ import '../../viewmodels/user_profile_viewmodel.dart';
 import '../../utils/report_client.dart';
 import 'package:pharmacy_system/viewmodels/prescription_viewmodel.dart';
 import 'package:pharmacy_system/utils/prescription_client.dart';
+import '../ai_analysis_sheet.dart';
 
 class UserProfileDetailsView extends StatefulWidget {
   final String userId;
@@ -502,20 +503,53 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
       ),
 
       // floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+
       floatingActionButton:
           isAdmin
-              ? null
-              : FloatingActionButton.extended(
+              ? FloatingActionButton.extended(
+                heroTag: "ai_analysis",
                 onPressed: () {
-                  PrescriptionClient.showAddPrescription(
-                    context: context,
-                    userId: widget.userId,
-                  );
+                  _generateAIAnalysis(context);
                 },
-                backgroundColor: const Color(0xFF4FC3CF),
+                backgroundColor: const Color(0xFFDCC6FF),
                 foregroundColor: Colors.black,
-                label: const Text("Add new prescription"),
-                icon: const Icon(Icons.add),
+                icon: const Icon(Icons.smart_toy),
+                label: const Text("AI Analysis"),
+              )
+              : Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    /// AI ANALYSIS
+                    FloatingActionButton.extended(
+                      heroTag: "ai_analysis",
+                      onPressed: () {
+                        _generateAIAnalysis(context);
+                      },
+                      backgroundColor: const Color(0xFFDCC6FF),
+                      foregroundColor: Colors.black,
+                      icon: const Icon(Icons.smart_toy),
+                      label: const Text("AI Analysis"),
+                    ),
+
+                    /// ADD PRESCRIPTION
+                    FloatingActionButton.extended(
+                      heroTag: "add_prescription",
+                      onPressed: () {
+                        PrescriptionClient.showAddPrescription(
+                          context: context,
+                          userId: widget.userId,
+                        );
+                      },
+                      backgroundColor: const Color(0xFF4FC3CF),
+                      foregroundColor: Colors.black,
+                      label: const Text("Add Prescription"),
+                      icon: const Icon(Icons.add),
+                    ),
+                  ],
+                ),
               ),
     );
   }
@@ -794,6 +828,46 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
           ],
         ),
       ),
+    );
+  }
+
+  void _generateAIAnalysis(BuildContext context) {
+    final userProfileViewModel = Provider.of<UserProfileViewModel>(
+      context,
+      listen: false,
+    );
+
+    final prescriptionViewModel = Provider.of<PrescriptionViewModel>(
+      context,
+      listen: false,
+    );
+
+    /// Respect privacy
+    final prescriptions =
+        prescriptionViewModel.isPrescriptionVisible
+            ? prescriptionViewModel.prescriptions
+            : [];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+
+      builder:
+          (_) => AIAnalysisSheet(
+            userId: widget.userId,
+
+            name: userProfileViewModel.name,
+            age: userProfileViewModel.age,
+            gender: userProfileViewModel.gender,
+            weight: userProfileViewModel.weight,
+            height: userProfileViewModel.height,
+            allergies: userProfileViewModel.allergies,
+            medicalConditions: userProfileViewModel.medicalConditions,
+
+            /// IMPORTANT
+            prescriptions: prescriptions,
+          ),
     );
   }
 }

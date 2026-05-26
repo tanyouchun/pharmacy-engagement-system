@@ -193,8 +193,6 @@ class AdminManageUserViewModel extends ChangeNotifier {
     }
   }
 
-  //TODO: admin function -> approve pharmacist account
-
   @override
   void dispose() {
     _authSub?.cancel();

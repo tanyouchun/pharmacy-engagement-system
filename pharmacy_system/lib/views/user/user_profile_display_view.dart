@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../viewmodels/user_profile_viewmodel.dart';
 import '../ai_analysis_sheet.dart';
 import 'user_edit_profile_view.dart';
+import '../../viewmodels/prescription_viewmodel.dart';
 
 class UserProfileDisplayView extends StatefulWidget {
   const UserProfileDisplayView({super.key});
@@ -102,7 +103,11 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
 
                   Text(
                     userProfileViewModel.gender,
-                    style: const TextStyle(fontSize: 13, color: Colors.black, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -350,12 +355,36 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
     );
   }
 
-  void _generateAIAnalysis(BuildContext context) async {
+  void _generateAIAnalysis(BuildContext context) {
+    final userProfileViewModel = Provider.of<UserProfileViewModel>(
+      context,
+      listen: false,
+    );
+
+    final prescriptionViewModel = Provider.of<PrescriptionViewModel>(
+      context,
+      listen: false,
+    );
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => const AIAnalysisSheet(),
+
+      builder:
+          (_) => AIAnalysisSheet(
+            userId: "",
+
+            name: userProfileViewModel.name,
+            age: userProfileViewModel.age,
+            gender: userProfileViewModel.gender,
+            weight: userProfileViewModel.weight,
+            height: userProfileViewModel.height,
+            allergies: userProfileViewModel.allergies,
+            medicalConditions: userProfileViewModel.medicalConditions,
+
+            prescriptions: prescriptionViewModel.prescriptions,
+          ),
     );
   }
 }
