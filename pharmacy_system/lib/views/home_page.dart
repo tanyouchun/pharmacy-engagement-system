@@ -21,22 +21,30 @@ import 'pharmacist/pharmacist_pending_approval_view.dart';
 import 'admin/admin_pharmacist_approval_view.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final int initialIndex;
+
+  const HomePage({super.key, this.initialIndex = 0});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  int _currentIndex = 0;
+  late int _currentIndex;
+
   String? _role;
   bool _isLoadingRole = true;
+
   final AuthService _authService = AuthService();
+
   String? _approvalStatus;
 
   @override
   void initState() {
     super.initState();
+
+    _currentIndex = widget.initialIndex;
+
     _loadUserRole();
   }
 
