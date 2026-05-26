@@ -103,6 +103,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
+          padding: const EdgeInsets.only(bottom: 100),
           child: Column(
             children: [
               /// TOP HEADER

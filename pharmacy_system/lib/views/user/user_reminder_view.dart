@@ -40,85 +40,139 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
     final reminderViewModel = Provider.of<ReminderViewModel>(context);
     final isPharmacist = widget.role == 'pharmacist';
     final isAdmin = widget.role == 'admin';
-    final today = DateTime.now();
 
     return Scaffold(
       body: Column(
         children: [
           /// HEADER
           Container(
-            padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF6DD5FA), Color(0xFF2980B9)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF4FACFE), Color(0xFF00C6FB)],
               ),
+
               borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(25),
-                bottomRight: Radius.circular(25),
+                bottomLeft: Radius.circular(28),
+                bottomRight: Radius.circular(28),
               ),
             ),
+
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+
               children: [
-                // AI BANNER CARD
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
+                Text(
+                  "Hello 👋",
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: 13,
                   ),
+                ),
+
+                const SizedBox(height: 2),
+
+                Text(
+                  isAdmin
+                      ? "Admin Dashboard"
+                      : isPharmacist
+                      ? "Pharmacist Dashboard"
+                      : "Home Page",
+
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 14),
+
+                /// AI CARD
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 14,
+                  ),
+
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.16),
+
+                    borderRadius: BorderRadius.circular(20),
+
+                    border: Border.all(color: Colors.white.withOpacity(0.1)),
+                  ),
+
                   child: Row(
                     children: [
-                      // AI IMAGE
                       Container(
-                        height: 60,
-                        width: 60,
+                        height: 52,
+                        width: 52,
+
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(14),
                         ),
+
                         child: const Icon(
-                          Icons.smart_toy,
+                          Icons.smart_toy_rounded,
                           color: Colors.white,
-                          size: 35,
+                          size: 28,
                         ),
                       ),
 
-                      const SizedBox(width: 15),
+                      const SizedBox(width: 12),
 
-                      /// TEXT + BUTTON
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
+
                           children: [
                             const Text(
                               "AI Assistant",
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 16,
+                                fontSize: 15,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
 
-                            const SizedBox(height: 5),
+                            const SizedBox(height: 3),
+
+                            Text(
+                              "Ask medicine-related questions.",
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.85),
+                                fontSize: 11.5,
+                              ),
+                            ),
+
+                            const SizedBox(height: 10),
 
                             GestureDetector(
                               onTap: () {
                                 widget.onOpenChatbot?.call();
                               },
+
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 12,
                                   vertical: 6,
                                 ),
+
                                 decoration: BoxDecoration(
                                   color: Colors.white,
-                                  borderRadius: BorderRadius.circular(20),
+                                  borderRadius: BorderRadius.circular(30),
                                 ),
+
                                 child: const Text(
                                   "Chat with AI",
                                   style: TextStyle(
-                                    color: Colors.black87,
-                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 11,
                                   ),
                                 ),
                               ),
@@ -126,76 +180,82 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                           ],
                         ),
                       ),
-
-                      //TODO insert avatar here
-                      // const CircleAvatar(
-                      //   radius: 20,
-                      //   backgroundImage: AssetImage(
-                      //     "assets/avatar.png",
-                      //   ),
-                      // ),
                     ],
                   ),
                 ),
-
-                const SizedBox(height: 15),
               ],
             ),
           ),
 
           const SizedBox(height: 10),
 
-          //calender imported from table_calendar
-          TableCalendar(
-            firstDay: DateTime.utc(2020, 1, 1),
-            lastDay: DateTime.utc(2030, 12, 31),
-            focusedDay: _focusedDay,
-            calendarFormat: CalendarFormat.week,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
 
-            headerStyle: const HeaderStyle(
-              formatButtonVisible: false,
-              titleCentered: true,
-            ),
-            daysOfWeekHeight: 20,
-            rowHeight: 40,
-            selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-            onDaySelected: (selectedDay, focusedDay) {
-              setState(() {
-                _selectedDay = selectedDay;
-                _focusedDay = focusedDay;
-              });
-            },
-            calendarStyle: const CalendarStyle(
-              todayDecoration: BoxDecoration(
-                color: Colors.blue,
-                shape: BoxShape.circle,
+            child: Container(
+              padding: const EdgeInsets.all(10),
+
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+
+                boxShadow: [
+                  BoxShadow(
+                    blurRadius: 18,
+                    offset: const Offset(0, 6),
+                    color: Colors.black.withOpacity(0.05),
+                  ),
+                ],
               ),
-              selectedDecoration: BoxDecoration(
-                color: Colors.deepPurple,
-                shape: BoxShape.circle,
+
+              child: TableCalendar(
+                firstDay: DateTime.utc(2020, 1, 1),
+                lastDay: DateTime.utc(2030, 12, 31),
+                focusedDay: _focusedDay,
+                calendarFormat: CalendarFormat.week,
+
+                headerStyle: const HeaderStyle(
+                  formatButtonVisible: false,
+                  titleCentered: true,
+                ),
+
+                daysOfWeekHeight: 20,
+                rowHeight: 45,
+
+                selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+
+                onDaySelected: (selectedDay, focusedDay) {
+                  setState(() {
+                    _selectedDay = selectedDay;
+                    _focusedDay = focusedDay;
+                  });
+                },
+
+                calendarStyle: CalendarStyle(
+                  todayDecoration: BoxDecoration(
+                    color: Colors.blue.shade300,
+                    shape: BoxShape.circle,
+                  ),
+
+                  selectedDecoration: const BoxDecoration(
+                    color: Color(0xFF3D5CFF),
+                    shape: BoxShape.circle,
+                  ),
+
+                  selectedTextStyle: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+
+                  todayTextStyle: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ),
-          const SizedBox(height: 20),
-
-          Text("Today: ${today.day}/${today.month}/${today.year}"),
-          const SizedBox(height: 20),
-
-          // pharmacist no medication reminders, just AI banner
-          isPharmacist
-              ? const Text(
-                "Pharmacist Home Page",
-                style: TextStyle(color: Colors.black, fontSize: 18),
-              )
-              : isAdmin
-              ? const Text(
-                "Admin Homepage",
-                style: TextStyle(color: Colors.black, fontSize: 18),
-              )
-              : const Text(
-                "Medication Reminders",
-                style: TextStyle(color: Colors.black, fontSize: 18),
-              ),
+          const SizedBox(height: 18),
 
           Expanded(
             child:
@@ -232,254 +292,340 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                     ? const Center(child: Text("No reminders yet"))
                     : Builder(
                       builder: (context) {
-                        final groupedReminders = <String, List<Reminder>>{};
+                        final reminders = [...reminderViewModel.reminders];
 
-                        for (var reminder in reminderViewModel.reminders) {
-                          final period = getReminderPeriod(
-                            reminder.scheduleTime,
-                          );
-
-                          groupedReminders.putIfAbsent(period, () => []);
-                          groupedReminders[period]!.add(reminder);
-                        }
+                        reminders.sort(
+                          (a, b) => a.scheduleTime.compareTo(b.scheduleTime),
+                        );
 
                         return ListView(
-                          padding: const EdgeInsets.only(
-                            left: 16,
-                            right: 16,
-                            bottom: 100,
-                          ),
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
 
-                          children:
-                              groupedReminders.entries.map((entry) {
-                                final sectionTitle = entry.key;
-                                final reminders = entry.value;
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
 
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
 
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        top: 12,
-                                        bottom: 10,
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          Color(0xFF4FACFE),
+                                          Color(0xFF00C6FB),
+                                        ],
                                       ),
 
-                                      child: Text(
-                                        sectionTitle,
-
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                      borderRadius: BorderRadius.circular(14),
                                     ),
 
-                                    ...reminders.map((reminder) {
-                                      return Padding(
-                                        padding: const EdgeInsets.only(
-                                          bottom: 10,
+                                    child: const Icon(
+                                      Icons.alarm_rounded,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                  ),
+
+                                  const SizedBox(width: 12),
+
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+
+                                      children: [
+                                        const Text(
+                                          "Medication Reminders",
+
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
 
-                                        child: Slidable(
-                                          key: ValueKey(reminder.reminderId),
+                                        const SizedBox(height: 2),
 
-                                          endActionPane: ActionPane(
-                                            motion: const DrawerMotion(),
-                                            extentRatio: 0.5,
+                                        Text(
+                                          "Stay consistent with your medication schedule.",
 
-                                            children: [
-                                              SlidableAction(
-                                                onPressed: (_) {
-                                                  ReminderClient.showReminderForm(
-                                                    context,
-                                                    reminder: reminder,
-                                                  );
-                                                },
-                                                backgroundColor: Colors.blue,
-                                                foregroundColor: Colors.white,
-                                                icon: Icons.edit,
-                                                label: 'Edit',
-                                                borderRadius:
-                                                    BorderRadius.circular(16),
-                                              ),
-
-                                              SlidableAction(
-                                                onPressed:
-                                                    (_) => _confirmDelete(
-                                                      context,
-                                                      reminder.reminderId,
-                                                    ),
-                                                backgroundColor: Colors.red,
-                                                foregroundColor: Colors.white,
-                                                icon: Icons.delete,
-                                                label: 'Delete',
-                                                borderRadius:
-                                                    BorderRadius.circular(16),
-                                              ),
-                                            ],
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey,
                                           ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
 
-                                          child: Card(
-                                            elevation: 2,
-                                            color: const Color(0xFFEAF4FF),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 6,
+                                    ),
 
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(18),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue.withOpacity(0.08),
+                                      borderRadius: BorderRadius.circular(18),
+                                    ),
+
+                                    child: Text(
+                                      "${reminders.length}",
+
+                                      style: const TextStyle(
+                                        color: Color(0xFF4FACFE),
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(height: 18),
+
+                            ...reminders.map((reminder) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 14),
+
+                                child: Slidable(
+                                  key: ValueKey(reminder.reminderId),
+
+                                  endActionPane: ActionPane(
+                                    motion: const DrawerMotion(),
+                                    extentRatio: 0.5,
+
+                                    children: [
+                                      SlidableAction(
+                                        onPressed: (_) {
+                                          ReminderClient.showReminderForm(
+                                            context,
+                                            reminder: reminder,
+                                          );
+                                        },
+                                        backgroundColor: Colors.blue,
+                                        foregroundColor: Colors.white,
+                                        icon: Icons.edit,
+                                        label: 'Edit',
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+
+                                      SlidableAction(
+                                        onPressed:
+                                            (_) => _confirmDelete(
+                                              context,
+                                              reminder.reminderId,
                                             ),
+                                        backgroundColor: Colors.red,
+                                        foregroundColor: Colors.white,
+                                        icon: Icons.delete,
+                                        label: 'Delete',
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                    ],
+                                  ),
 
-                                            child: ListTile(
-                                              contentPadding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 20,
-                                                    vertical: 10,
-                                                  ),
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(18),
 
-                                              leading: Container(
-                                                padding: const EdgeInsets.all(
-                                                  10,
-                                                ),
+                                    onTap:
+                                        () => _showReminderDetails(
+                                          context,
+                                          reminder,
+                                        ),
 
-                                                decoration: BoxDecoration(
-                                                  color: Colors.blue
-                                                      .withOpacity(0.1),
-                                                  shape: BoxShape.circle,
-                                                ),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 14,
+                                        vertical: 12,
+                                      ),
 
-                                                child: const Icon(
-                                                  Icons.medication,
-                                                  color: Colors.blue,
-                                                ),
-                                              ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(18),
 
-                                              title: Text(
-                                                reminder.medicationName,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            blurRadius: 10,
+                                            offset: const Offset(0, 4),
+                                            color: Colors.black.withOpacity(
+                                              0.04,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
 
-                                                style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 16,
-                                                ),
-                                              ),
+                                      child: Row(
+                                        children: [
+                                          /// ICON
+                                          Container(
+                                            padding: const EdgeInsets.all(10),
 
-                                              subtitle: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-
-                                                children: [
-                                                  Container(
-                                                    margin:
-                                                        const EdgeInsets.only(
-                                                          top: 4,
-                                                          bottom: 6,
-                                                        ),
-
-                                                    padding:
-                                                        const EdgeInsets.symmetric(
-                                                          horizontal: 10,
-                                                          vertical: 4,
-                                                        ),
-
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.blue
-                                                          .withOpacity(0.1),
-
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            20,
-                                                          ),
-                                                    ),
-
-                                                    child: Text(
-                                                      reminder.frequency,
-
-                                                      style: const TextStyle(
-                                                        color: Colors.blue,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        fontSize: 12,
-                                                      ),
-                                                    ),
-                                                  ),
+                                            decoration: BoxDecoration(
+                                              gradient: const LinearGradient(
+                                                colors: [
+                                                  Color(0xFF4FACFE),
+                                                  Color(0xFF00C6FB),
                                                 ],
                                               ),
 
-                                              trailing: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.end,
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  const Icon(
-                                                    Icons.access_time,
-                                                    size: 18,
-                                                  ),
-                                                  const SizedBox(height: 4),
+                                              borderRadius:
+                                                  BorderRadius.circular(14),
+                                            ),
 
-                                                  Builder(
-                                                    builder: (_) {
-                                                      final times =
-                                                          reminder
-                                                              .reminderTimes;
+                                            child: const Icon(
+                                              Icons.medication_rounded,
+                                              color: Colors.white,
+                                              size: 20,
+                                            ),
+                                          ),
 
-                                                      List<List<String>>
-                                                      chunks = [];
-                                                      for (
-                                                        int i = 0;
-                                                        i < times.length;
-                                                        i += 2
-                                                      ) {
-                                                        chunks.add(
-                                                          times.sublist(
-                                                            i,
-                                                            i + 2 > times.length
-                                                                ? times.length
-                                                                : i + 2,
+                                          const SizedBox(width: 12),
+
+                                          /// CONTENT
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
+
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Expanded(
+                                                      child: Text(
+                                                        reminder.medicationName,
+                                                        maxLines: 1,
+                                                        overflow:
+                                                            TextOverflow
+                                                                .ellipsis,
+
+                                                        style: const TextStyle(
+                                                          fontSize: 14.5,
+                                                          fontWeight:
+                                                              FontWeight.w700,
+                                                        ),
+                                                      ),
+                                                    ),
+
+                                                    Container(
+                                                      padding:
+                                                          const EdgeInsets.symmetric(
+                                                            horizontal: 8,
+                                                            vertical: 4,
                                                           ),
-                                                        );
-                                                      }
 
-                                                      return Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .end,
-                                                        children:
-                                                            chunks.map((chunk) {
-                                                              return Text(
-                                                                chunk.join(
-                                                                  " • ",
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.blue
+                                                            .withOpacity(0.08),
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              20,
+                                                            ),
+                                                      ),
+
+                                                      child: Text(
+                                                        reminder.frequency,
+
+                                                        style: const TextStyle(
+                                                          color: Color(
+                                                            0xFF4FACFE,
+                                                          ),
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          fontSize: 10.5,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+
+                                                const SizedBox(height: 8),
+
+                                                Wrap(
+                                                  spacing: 6,
+                                                  runSpacing: 6,
+
+                                                  children:
+                                                      reminder.reminderTimes.map((
+                                                        time,
+                                                      ) {
+                                                        return Container(
+                                                          padding:
+                                                              const EdgeInsets.symmetric(
+                                                                horizontal: 8,
+                                                                vertical: 5,
+                                                              ),
+
+                                                          decoration: BoxDecoration(
+                                                            color:
+                                                                Colors
+                                                                    .grey
+                                                                    .shade100,
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                  12,
                                                                 ),
+                                                          ),
+
+                                                          child: Row(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .min,
+
+                                                            children: [
+                                                              const Icon(
+                                                                Icons
+                                                                    .access_time,
+                                                                size: 12,
+                                                                color:
+                                                                    Colors.grey,
+                                                              ),
+
+                                                              const SizedBox(
+                                                                width: 4,
+                                                              ),
+
+                                                              Text(
+                                                                time,
+
                                                                 style: const TextStyle(
+                                                                  fontSize:
+                                                                      10.5,
                                                                   fontWeight:
                                                                       FontWeight
                                                                           .w600,
-                                                                  fontSize: 11,
                                                                 ),
-                                                                textAlign:
-                                                                    TextAlign
-                                                                        .right,
-                                                              );
-                                                            }).toList(),
-                                                      );
-                                                    },
-                                                  ),
-                                                ],
-                                              ),
-
-                                              onTap:
-                                                  () => _showReminderDetails(
-                                                    context,
-                                                    reminder,
-                                                  ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        );
+                                                      }).toList(),
+                                                ),
+                                              ],
                                             ),
                                           ),
-                                        ),
-                                      );
-                                    }),
-                                  ],
-                                );
-                              }).toList(),
+
+                                          const SizedBox(width: 8),
+
+                                          Icon(
+                                            Icons.chevron_right_rounded,
+                                            color: Colors.grey.shade400,
+                                            size: 18,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }),
+                          ],
                         );
                       },
                     ),
@@ -505,62 +651,262 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
   void _showReminderDetails(BuildContext context, Reminder reminder) {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+
       builder: (_) {
-        return Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                reminder.medicationName,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.5,
+          minChildSize: 0.35,
+          maxChildSize: 0.85,
+
+          builder: (context, scrollController) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
               ),
 
-              const SizedBox(height: 10),
+              child: SingleChildScrollView(
+                controller: scrollController,
 
-              Text("Frequency: ${reminder.frequency}"),
-              const SizedBox(height: 8),
+                padding: const EdgeInsets.all(20),
 
-              const Text(
-                "Reminder Times:",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
 
-              const SizedBox(height: 6),
+                  children: [
+                    /// TOP DRAG HANDLE
+                    Center(
+                      child: Container(
+                        width: 50,
+                        height: 5,
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
 
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children:
-                    reminder.reminderTimes.map((time) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.access_time,
-                              size: 16,
-                              color: Colors.blue,
+                    /// TITLE
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+
+                          child: const Icon(
+                            Icons.medication,
+                            color: Colors.blue,
+                            size: 26,
+                          ),
+                        ),
+
+                        const SizedBox(width: 14),
+
+                        Expanded(
+                          child: Text(
+                            reminder.medicationName,
+
+                            style: const TextStyle(
+                              fontSize: 21,
+                              fontWeight: FontWeight.bold,
                             ),
+                          ),
+                        ),
+                      ],
+                    ),
 
-                            const SizedBox(width: 6),
+                    const SizedBox(height: 18),
 
-                            Text(time),
+                    /// FREQUENCY CHIP
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
+
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+
+                        children: [
+                          const Icon(
+                            Icons.repeat,
+                            size: 18,
+                            color: Colors.blue,
+                          ),
+
+                          const SizedBox(width: 6),
+
+                          Text(
+                            reminder.frequency,
+
+                            style: const TextStyle(
+                              color: Colors.blue,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    /// REMINDER TIMES CARD
+                    Container(
+                      width: double.infinity,
+
+                      padding: const EdgeInsets.all(18),
+
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+
+                        borderRadius: BorderRadius.circular(18),
+
+                        border: Border.all(color: Colors.grey.shade200),
+                      ),
+
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+
+                        children: [
+                          const Row(
+                            children: [
+                              Icon(
+                                Icons.access_time_rounded,
+                                size: 18,
+                                color: Colors.black87,
+                              ),
+
+                              SizedBox(width: 8),
+
+                              Text(
+                                "Reminder Times",
+
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 14),
+
+                          ...reminder.reminderTimes.map((time) {
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 10),
+
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 12,
+                              ),
+
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(14),
+
+                                boxShadow: [
+                                  BoxShadow(
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 3),
+                                    color: Colors.black.withOpacity(0.03),
+                                  ),
+                                ],
+                              ),
+
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue.withOpacity(0.1),
+                                      shape: BoxShape.circle,
+                                    ),
+
+                                    child: const Icon(
+                                      Icons.alarm,
+                                      color: Colors.blue,
+                                      size: 18,
+                                    ),
+                                  ),
+
+                                  const SizedBox(width: 12),
+
+                                  Text(
+                                    time,
+
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    /// INFO CARD
+                    Container(
+                      width: double.infinity,
+
+                      padding: const EdgeInsets.all(16),
+
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.blue.withOpacity(0.08),
+                            Colors.cyan.withOpacity(0.08),
                           ],
                         ),
-                      );
-                    }).toList(),
-              ),
 
-              const SizedBox(height: 20),
-            ],
-          ),
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+
+                      child: Row(
+                        children: [
+                          const Icon(Icons.info_outline, color: Colors.blue),
+
+                          const SizedBox(width: 12),
+
+                          Expanded(
+                            child: Text(
+                              "Make sure to take your medication on time according to the reminder schedule.",
+
+                              style: TextStyle(
+                                color: Colors.grey.shade800,
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            );
+          },
         );
       },
     );
@@ -595,17 +941,5 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
             ],
           ),
     );
-  }
-
-  String getReminderPeriod(DateTime time) {
-    final hour = time.hour;
-
-    if (hour >= 5 && hour < 12) {
-      return "Morning ☀️";
-    } else if (hour >= 12 && hour < 18) {
-      return "Afternoon 🌤️";
-    } else {
-      return "Night 🌙";
-    }
   }
 }

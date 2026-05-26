@@ -79,19 +79,19 @@ class _ChatViewState extends State<ChatView> {
                         ),
                       ),
                     ),
-                    Positioned(
-                      bottom: 2,
-                      right: 2,
-                      child: Container(
-                        width: 12,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          color: Colors.green,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.white, width: 2),
-                        ),
-                      ),
-                    ),
+                    // Positioned(
+                    //   bottom: 2,
+                    //   right: 2,
+                    //   child: Container(
+                    //     width: 12,
+                    //     height: 12,
+                    //     decoration: BoxDecoration(
+                    //       color: Colors.green,
+                    //       borderRadius: BorderRadius.circular(20),
+                    //       border: Border.all(color: Colors.white, width: 2),
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
                 const SizedBox(width: 12),
@@ -358,72 +358,155 @@ class _ChatViewState extends State<ChatView> {
     );
   }
 
-  String _formatTimestamp(dynamic timestamp) {
-    if (timestamp == null) return "";
+  // String _formatTimestamp(dynamic timestamp) {
+  //   if (timestamp == null) return "";
 
-    try {
-      final date = timestamp.toDate();
+  //   try {
+  //     final date = timestamp.toDate();
 
-      final hour = date.hour > 12 ? date.hour - 12 : date.hour;
+  //     final hour = date.hour > 12 ? date.hour - 12 : date.hour;
 
-      final minute = date.minute.toString().padLeft(2, '0');
+  //     final minute = date.minute.toString().padLeft(2, '0');
 
-      final ampm = date.hour >= 12 ? "PM" : "AM";
+  //     final ampm = date.hour >= 12 ? "PM" : "AM";
 
-      return "$hour:$minute $ampm";
-    } catch (_) {
-      return "";
-    }
-  }
+  //     return "$hour:$minute $ampm";
+  //   } catch (_) {
+  //     return "";
+  //   }
+  // }
 
   void _showOptions(BuildContext context, String messageId, String text) {
     showModalBottomSheet(
       context: context,
-
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-
+      backgroundColor: Colors.transparent,
       builder: (_) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.edit),
-
-                  title: const Text("Edit Message"),
-
-                  onTap: () {
-                    Navigator.pop(context);
-                    _showEditDialog(messageId, text);
-                  },
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              /// drag handle
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(10),
                 ),
+              ),
 
-                ListTile(
-                  leading: const Icon(Icons.delete, color: Colors.red),
+              const SizedBox(height: 16),
 
-                  title: const Text("Delete Message"),
+              const Text(
+                "Message Options",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
 
-                  onTap: () async {
-                    Navigator.pop(context);
+              const SizedBox(height: 20),
 
-                    final chatViewModel = Provider.of<ChatViewModel>(
-                      context,
-                      listen: false,
-                    );
+              /// EDIT BUTTON
+              _actionTile(
+                icon: Icons.edit_rounded,
+                title: "Edit Message",
+                subtitle: "Modify your message",
+                color: const Color(0xFF4FC3CF),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showEditDialog(messageId, text);
+                },
+              ),
 
-                    await chatViewModel.deleteMessage(widget.chatId, messageId);
-                  },
-                ),
-              ],
-            ),
+              const SizedBox(height: 12),
+
+              /// DELETE BUTTON
+              _actionTile(
+                icon: Icons.delete_rounded,
+                title: "Delete Message",
+                subtitle: "Remove this message permanently",
+                color: Colors.redAccent,
+                onTap: () async {
+                  Navigator.pop(context);
+
+                  final chatViewModel = Provider.of<ChatViewModel>(
+                    context,
+                    listen: false,
+                  );
+
+                  await chatViewModel.deleteMessage(widget.chatId, messageId);
+                },
+              ),
+
+              const SizedBox(height: 10),
+            ],
           ),
         );
       },
+    );
+  }
+
+  Widget _actionTile({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: color.withOpacity(0.2)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: color),
+            ),
+
+            const SizedBox(width: 12),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  ),
+                ],
+              ),
+            ),
+
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 14,
+              color: Colors.grey.shade400,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
