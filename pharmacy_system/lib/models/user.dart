@@ -1,8 +1,8 @@
-abstract class Profile {
+abstract class User {
   final String id;
   final String name;
 
-  Profile({
+  User({
     required this.id,
     required this.name,
   });

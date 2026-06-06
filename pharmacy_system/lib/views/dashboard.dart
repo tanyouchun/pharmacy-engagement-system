@@ -6,6 +6,7 @@ import '../viewmodels/reminder_viewmodel.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../models/reminder.dart';
 import '../utils/reminder_client.dart';
+import '../services/notification_service.dart';
 
 class ReminderHomeView extends StatefulWidget {
   final String? role;
@@ -419,7 +420,7 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                                         onPressed:
                                             (_) => _confirmDelete(
                                               context,
-                                              reminder.reminderId,
+                                              reminder,
                                             ),
                                         backgroundColor: Colors.red,
                                         foregroundColor: Colors.white,
@@ -645,6 +646,18 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                 label: const Text("Add new reminder"),
                 icon: const Icon(Icons.add),
               ),
+      // floatingActionButton: Column(
+      //   mainAxisSize: MainAxisSize.min,
+      //   children: [
+      //     FloatingActionButton(
+      //       heroTag: "test",
+      //       onPressed: () async {
+      //         await NotificationService.instance.showTestNotification();
+      //       },
+      //       child: const Icon(Icons.notifications),
+      //     ),
+      //   ],
+      // ),
     );
   }
 
@@ -912,7 +925,7 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
     );
   }
 
-  void _confirmDelete(BuildContext context, String reminderId) {
+  void _confirmDelete(BuildContext context, Reminder reminder) {
     final reminderViewModel = Provider.of<ReminderViewModel>(
       context,
       listen: false,
@@ -933,7 +946,7 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
               ),
               TextButton(
                 onPressed: () async {
-                  await reminderViewModel.deleteReminder(reminderId);
+                  await reminderViewModel.deleteReminder(reminder);
                   Navigator.pop(context);
                 },
                 child: const Text("Delete"),

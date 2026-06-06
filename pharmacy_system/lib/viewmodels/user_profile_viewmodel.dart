@@ -12,13 +12,6 @@ class UserProfileViewModel extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final OpenAIService _openAIService = OpenAIService();
 
-  // String name = "";
-  // String age = "";
-  // String gender = "";
-  // String weight = "";
-  // String height = "";
-  // String allergies = "";
-  // String medicalConditions = "";
   UserProfile? profile;
 
   final nameController = TextEditingController();
@@ -255,21 +248,6 @@ class UserProfileViewModel extends ChangeNotifier {
     required List<Prescription> prescriptions,
   }) async {
     try {
-      // _requireAuth();
-
-      // final prescriptionSnapshot =
-      //     await _firestore
-      //         .collection("user_profiles")
-      //         .doc(_uid)
-      //         .collection("prescriptions")
-      //         .orderBy("issueDate", descending: true)
-      //         .get();
-
-      // final prescriptions =
-      //     prescriptionSnapshot.docs
-      //         .map((doc) => Prescription.fromDoc(doc))
-      //         .toList();
-
       String prescriptionText = "";
 
       for (final p in prescriptions) {

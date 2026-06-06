@@ -88,6 +88,7 @@ class ReminderClient {
                     scheduleTime: dateTime,
                     frequency: frequency,
                     reminderTimes: reminderTimes,
+                    isActive: true,
                   ),
                 );
               } else {
@@ -97,6 +98,7 @@ class ReminderClient {
                     time: dateTime,
                     frequency: frequency,
                     reminderTimes: reminderTimes,
+                    isActive: true,
                   ),
                 );
               }

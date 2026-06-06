@@ -41,6 +41,7 @@ class _ChatViewState extends State<ChatView> {
           chatId: widget.chatId,
           currentUserId: user.uid,
         );
+        await chatViewModel.markMessagesAsRead(widget.chatId);
       }
     });
   }
@@ -257,6 +258,7 @@ class _ChatViewState extends State<ChatView> {
                                 context,
                                 msg.messageId,
                                 msg.messageText,
+                                msg.timestamp,
                               )
                               : null,
                       child: Align(
@@ -297,6 +299,19 @@ class _ChatViewState extends State<ChatView> {
                                   color: isMe ? Colors.white : Colors.black87,
                                 ),
                               ),
+                              if (msg.isEdited)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4),
+                                  child: Text(
+                                    'edited',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color:
+                                          isMe ? Colors.white70 : Colors.grey,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ),
                             ],
                           ),
                         ),
@@ -358,25 +373,16 @@ class _ChatViewState extends State<ChatView> {
     );
   }
 
-  // String _formatTimestamp(dynamic timestamp) {
-  //   if (timestamp == null) return "";
+  void _showOptions(
+    BuildContext context,
+    String messageId,
+    String text,
+    DateTime timestamp,
+  ) {
+    final now = DateTime.now();
+    final differenceInMinutes = now.difference(timestamp).inMinutes;
+    final canEditDelete = differenceInMinutes <= 30;
 
-  //   try {
-  //     final date = timestamp.toDate();
-
-  //     final hour = date.hour > 12 ? date.hour - 12 : date.hour;
-
-  //     final minute = date.minute.toString().padLeft(2, '0');
-
-  //     final ampm = date.hour >= 12 ? "PM" : "AM";
-
-  //     return "$hour:$minute $ampm";
-  //   } catch (_) {
-  //     return "";
-  //   }
-  // }
-
-  void _showOptions(BuildContext context, String messageId, String text) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -409,37 +415,128 @@ class _ChatViewState extends State<ChatView> {
 
               const SizedBox(height: 20),
 
-              /// EDIT BUTTON
-              _actionTile(
-                icon: Icons.edit_rounded,
-                title: "Edit Message",
-                subtitle: "Modify your message",
-                color: const Color(0xFF4FC3CF),
-                onTap: () {
-                  Navigator.pop(context);
-                  _showEditDialog(messageId, text);
-                },
-              ),
+              if (canEditDelete)
+                /// EDIT BUTTON
+                _actionTile(
+                  icon: Icons.edit_rounded,
+                  title: "Edit Message",
+                  subtitle: "Modify your message",
+                  color: const Color(0xFF4FC3CF),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showEditDialog(messageId, text);
+                  },
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.lock_outline,
+                        color: Colors.grey.shade600,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Cannot Edit",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                            Text(
+                              "Messages can only be edited within 30 minutes",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
-              const SizedBox(height: 12),
+              if (canEditDelete)
+                const SizedBox(height: 12)
+              else
+                const SizedBox(height: 12),
 
-              /// DELETE BUTTON
-              _actionTile(
-                icon: Icons.delete_rounded,
-                title: "Delete Message",
-                subtitle: "Remove this message permanently",
-                color: Colors.redAccent,
-                onTap: () async {
-                  Navigator.pop(context);
+              if (canEditDelete)
+                /// DELETE BUTTON
+                _actionTile(
+                  icon: Icons.delete_rounded,
+                  title: "Delete Message",
+                  subtitle: "Remove this message permanently",
+                  color: Colors.redAccent,
+                  onTap: () async {
+                    Navigator.pop(context);
 
-                  final chatViewModel = Provider.of<ChatViewModel>(
-                    context,
-                    listen: false,
-                  );
+                    final chatViewModel = Provider.of<ChatViewModel>(
+                      context,
+                      listen: false,
+                    );
 
-                  await chatViewModel.deleteMessage(widget.chatId, messageId);
-                },
-              ),
+                    await chatViewModel.deleteMessage(widget.chatId, messageId);
+                  },
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.lock_outline,
+                        color: Colors.grey.shade600,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Cannot Delete",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                            Text(
+                              "Messages can only be deleted within 30 minutes",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
               const SizedBox(height: 10),
             ],

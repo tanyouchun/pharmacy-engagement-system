@@ -1,6 +1,6 @@
-import 'profile.dart';
+import 'user.dart';
 
-class AdminProfile extends Profile {
+class AdminProfile extends User {
   final String roleLevel; // e.g. superadmin, moderator
 
   AdminProfile({

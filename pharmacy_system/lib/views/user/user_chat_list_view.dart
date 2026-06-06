@@ -244,174 +244,187 @@ class _ChatListViewState extends State<ChatListView> {
                               return const SizedBox.shrink();
                             }
 
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 14),
+                            return StreamBuilder<QuerySnapshot>(
+                              stream:
+                                  FirebaseFirestore.instance
+                                      .collection('chats')
+                                      .doc(chat.id)
+                                      .collection('messages')
+                                      .where('isRead', isEqualTo: false)
+                                      .snapshots(),
+                              builder: (context, unreadSnap) {
+                                final hasUnread =
+                                    unreadSnap.hasData &&
+                                    unreadSnap.data!.docs.any(
+                                      (doc) =>
+                                          (doc.data()
+                                              as Map<
+                                                String,
+                                                dynamic
+                                              >)['senderId'] !=
+                                          user.uid,
+                                    );
 
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-
-                                borderRadius: BorderRadius.circular(24),
-
-                                boxShadow: [
-                                  BoxShadow(
-                                    blurRadius: 16,
-                                    offset: const Offset(0, 6),
-                                    color: Colors.black.withOpacity(0.04),
-                                  ),
-                                ],
-                              ),
-
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(24),
-
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-
-                                    MaterialPageRoute(
-                                      builder:
-                                          (_) => ChatView(
-                                            chatId: chat.id,
-                                            otherUserId: otherUserId,
-                                          ),
-                                    ),
-                                  );
-                                },
-
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16),
-
-                                  child: Row(
-                                    children: [
-                                      /// AVATAR
-                                      Stack(
-                                        children: [
-                                          Container(
-                                            height: 62,
-                                            width: 62,
-
-                                            decoration: BoxDecoration(
-                                              gradient: const LinearGradient(
-                                                colors: [
-                                                  Color(0xFF4FACFE),
-                                                  Color(0xFF00C6FB),
-                                                ],
-                                              ),
-
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-
-                                            child: Center(
-                                              child: Text(
-                                                name.isNotEmpty
-                                                    ? name[0].toUpperCase()
-                                                    : "U",
-
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 24,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-
-                                          // Positioned(
-                                          //   right: 0,
-                                          //   bottom: 0,
-
-                                          //   child: Container(
-                                          //     width: 14,
-                                          //     height: 14,
-
-                                          //     decoration: BoxDecoration(
-                                          //       color: Colors.green,
-                                          //       shape: BoxShape.circle,
-
-                                          //       border: Border.all(
-                                          //         color: Colors.white,
-                                          //         width: 2,
-                                          //       ),
-                                          //     ),
-                                          //   ),
-                                          // ),
-                                        ],
-                                      ),
-
-                                      const SizedBox(width: 16),
-
-                                      /// INFO
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-
-                                          children: [
-                                            Text(
-                                              name,
-
-                                              style: const TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-
-                                            const SizedBox(height: 6),
-
-                                            Text(
-                                              lastMessage,
-
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-
-                                              style: TextStyle(
-                                                color: Colors.grey.shade600,
-                                                fontSize: 13,
-                                                height: 1.3,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-
-                                      const SizedBox(width: 12),
-
-                                      /// TIME
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-
-                                        children: [
-                                          Text(
-                                            FormatTime.formatTime(
-                                              lastTimestamp,
-                                            ),
-
-                                            style: TextStyle(
-                                              color: Colors.grey.shade500,
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-
-                                          const SizedBox(height: 10),
-
-                                          // Container(
-                                          //   width: 8,
-                                          //   height: 8,
-
-                                          //   decoration: const BoxDecoration(
-                                          //     color: Color(0xFF4FC3CF),
-                                          //     shape: BoxShape.circle,
-                                          //   ),
-                                          // ),
-                                        ],
+                                return Container(
+                                  margin: const EdgeInsets.only(bottom: 14),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(24),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        blurRadius: 16,
+                                        offset: const Offset(0, 6),
+                                        color: Colors.black.withOpacity(0.04),
                                       ),
                                     ],
                                   ),
-                                ),
-                              ),
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(24),
+
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+
+                                        MaterialPageRoute(
+                                          builder:
+                                              (_) => ChatView(
+                                                chatId: chat.id,
+                                                otherUserId: otherUserId,
+                                              ),
+                                        ),
+                                      );
+                                    },
+
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16),
+
+                                      child: Row(
+                                        children: [
+                                          /// AVATAR
+                                          Stack(
+                                            children: [
+                                              Container(
+                                                height: 62,
+                                                width: 62,
+
+                                                decoration: BoxDecoration(
+                                                  gradient:
+                                                      const LinearGradient(
+                                                        colors: [
+                                                          Color(0xFF4FACFE),
+                                                          Color(0xFF00C6FB),
+                                                        ],
+                                                      ),
+
+                                                  borderRadius:
+                                                      BorderRadius.circular(20),
+                                                ),
+
+                                                child: Center(
+                                                  child: Text(
+                                                    name.isNotEmpty
+                                                        ? name[0].toUpperCase()
+                                                        : "U",
+
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 24,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+
+                                          const SizedBox(width: 16),
+
+                                          /// INFO
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+
+                                              children: [
+                                                Text(
+                                                  name,
+
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+
+                                                const SizedBox(height: 6),
+
+                                                Text(
+                                                  lastMessage,
+
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+
+                                                  style: TextStyle(
+                                                    color: Colors.grey.shade600,
+                                                    fontSize: 13,
+                                                    height: 1.3,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+
+                                          const SizedBox(width: 12),
+
+                                          /// TIME
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.end,
+
+                                            children: [
+                                              Text(
+                                                FormatTime.formatTime(
+                                                  lastTimestamp,
+                                                ),
+
+                                                style: TextStyle(
+                                                  color: Colors.grey.shade500,
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+
+                                              const SizedBox(height: 10),
+
+                                              if (hasUnread)
+                                                Container(
+                                                  width: 10,
+                                                  height: 10,
+                                                  decoration:
+                                                      const BoxDecoration(
+                                                        color: Colors.red,
+                                                        shape: BoxShape.circle,
+                                                      ),
+                                                ),
+
+                                              // Container(
+                                              //   width: 8,
+                                              //   height: 8,
+
+                                              //   decoration: const BoxDecoration(
+                                              //     color: Color(0xFF4FC3CF),
+                                              //     shape: BoxShape.circle,
+                                              //   ),
+                                              // ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
                             );
                           },
                         );

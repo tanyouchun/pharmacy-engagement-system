@@ -150,6 +150,33 @@ class ChatViewModel extends ChangeNotifier {
     }
   }
 
+  Future<void> markMessagesAsRead(String chatId) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final snapshot =
+          await _firestore
+              .collection('chats')
+              .doc(chatId)
+              .collection('messages')
+              .where('isRead', isEqualTo: false)
+              .get();
+
+      final batch = _firestore.batch();
+
+      for (final doc in snapshot.docs) {
+        if (doc.data()['senderId'] != user.uid) {
+          batch.update(doc.reference, {'isRead': true});
+        }
+      }
+
+      await batch.commit();
+    } catch (e) {
+      log('MARK_MESSAGES_READ_ERROR: $e');
+    }
+  }
+
   Future<void> editMessage(
     String chatId,
     String messageId,

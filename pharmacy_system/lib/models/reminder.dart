@@ -8,6 +8,7 @@ class Reminder {
   final DateTime scheduleTime;
   final String frequency; // e.g. "Once daily"
   final List<String> reminderTimes; // e.g. ["08:00", "20:00"]
+  final bool isActive;
 
   Reminder({
     required this.reminderId,
@@ -17,16 +18,19 @@ class Reminder {
     required this.scheduleTime,
     required this.frequency,
     required this.reminderTimes,
+    required this.isActive,
   });
 
   Map<String, dynamic> toMap() {
     return {
+      'reminderId': reminderId,
       'userId': userId,
       'prescriptionId': prescriptionId,
       'medicationName': medicationName,
-      'scheduleTime': scheduleTime,
+      'scheduleTime': Timestamp.fromDate(scheduleTime),
       'frequency': frequency,
       'reminderTimes': reminderTimes,
+      'isActive': isActive,
     };
   }
 
@@ -47,6 +51,7 @@ class Reminder {
           map['reminderTimes'] != null
               ? List<String>.from(map['reminderTimes'])
               : [],
+      isActive: map['isActive'] ?? false,
     );
   }
 
@@ -55,15 +60,17 @@ class Reminder {
     DateTime? time,
     String? frequency,
     List<String>? reminderTimes,
+    bool? isActive,
   }) {
     return Reminder(
       reminderId: reminderId,
       userId: userId,
       prescriptionId: prescriptionId,
       medicationName: medicationName ?? this.medicationName,
-      scheduleTime: time ?? this.scheduleTime,
+      scheduleTime: time ?? scheduleTime,
       frequency: frequency ?? this.frequency,
       reminderTimes: reminderTimes ?? this.reminderTimes,
+      isActive: isActive ?? this.isActive,
     );
   }
 }
