@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/chat_message.dart';
 import '../services/openai_service.dart';
 
 class ChatBotViewModel extends ChangeNotifier {
@@ -14,7 +15,7 @@ class ChatBotViewModel extends ChangeNotifier {
 
   StreamSubscription<User?>? _authSub;
 
-  List<Map<String, String>> messages = [];
+  List<ChatMessage> messages = [];
   bool isLoading = false;
 
   ChatBotViewModel() {
@@ -22,10 +23,10 @@ class ChatBotViewModel extends ChangeNotifier {
       messages.clear();
 
       if (user == null) {
-        messages.add({
-          "role": "assistant",
-          "content": "Please log in to use the chatbot.",
-        });
+        messages.add(const ChatMessage(
+          role: ChatRole.assistant,
+          content: "Please log in to use the chatbot.",
+        ));
 
         notifyListeners();
         return;
@@ -38,8 +39,8 @@ class ChatBotViewModel extends ChangeNotifier {
 
   List<Map<String, String>> getOpenAIMessages() {
     return messages
-        .where((m) => m["role"] == "user" || m["role"] == "assistant")
-        .map((m) => {"role": m["role"]!, "content": m["content"]!})
+        .where((m) => m.role == ChatRole.user || m.role == ChatRole.assistant)
+        .map((m) => {"role": m.role.value, "content": m.content})
         .toList();
   }
 
@@ -47,21 +48,16 @@ class ChatBotViewModel extends ChangeNotifier {
     if (_uid == null) return;
 
     try {
-      final snapshot =
-          await _firestore
-              .collection("users")
-              .doc(_uid)
-              .collection("chatbot_messages")
-              .orderBy("timestamp")
-              .get();
+      final snapshot = await _firestore
+          .collection("users")
+          .doc(_uid)
+          .collection("chatbot_messages")
+          .orderBy("timestamp")
+          .get();
 
-      messages =
-          snapshot.docs.map((doc) {
-            return {
-              "role": doc["role"] as String,
-              "content": doc["content"] as String,
-            };
-          }).toList();
+      messages = snapshot.docs
+          .map((doc) => ChatMessage.fromMap(doc.data() as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       log("Error loading chatbot chat: $e");
       messages = [];
@@ -75,16 +71,16 @@ class ChatBotViewModel extends ChangeNotifier {
   }
 
   void _addWelcomeMessage() {
-    messages.add({
-      "role": "assistant",
-      "content":
+    messages.add(const ChatMessage(
+      role: ChatRole.assistant,
+      content:
           "Hi! I’m your pharmacist assistant 💊.\n\n"
           "I can help with:\n"
           "• Medication usage\n"
           "• Side effects\n"
           "• Dosage guidance\n\n"
           "How can I help you today?",
-    });
+    ));
   }
 
   Future<void> _saveMessage(String role, String content) async {
@@ -109,7 +105,7 @@ class ChatBotViewModel extends ChangeNotifier {
     if (_uid == null) return;
     if (userMessage.trim().isEmpty) return;
 
-    messages.add({"role": "user", "content": userMessage});
+    messages.add(ChatMessage(role: ChatRole.user, content: userMessage));
     await _saveMessage("user", userMessage);
 
     isLoading = true;
@@ -123,15 +119,15 @@ class ChatBotViewModel extends ChangeNotifier {
         promptKey: "chatbot_prompt",
       );
 
-      messages.add({"role": "assistant", "content": reply});
+      messages.add(ChatMessage(role: ChatRole.assistant, content: reply));
       await _saveMessage("assistant", reply);
     } catch (e) {
       log("Error: $e");
 
-      messages.add({
-        "role": "assistant",
-        "content": "Something went wrong. Please try again later.",
-      });
+      messages.add(const ChatMessage(
+        role: ChatRole.assistant,
+        content: "Something went wrong. Please try again later.",
+      ));
     }
 
     isLoading = false;

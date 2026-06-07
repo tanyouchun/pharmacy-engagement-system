@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../viewmodels/admin_config_viewmodel.dart';
+import '../../viewmodels/admin_viewmodel.dart';
 
 class AdminManageConfigView extends StatefulWidget {
   const AdminManageConfigView({super.key});

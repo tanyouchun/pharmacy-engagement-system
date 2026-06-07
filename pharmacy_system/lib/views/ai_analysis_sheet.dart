@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../viewmodels/user_profile_viewmodel.dart';
-import '../../viewmodels/admin_config_viewmodel.dart';
+import '../../viewmodels/admin_viewmodel.dart';
 import '../../models/prescription.dart';
 
 class AIAnalysisSheet extends StatefulWidget {

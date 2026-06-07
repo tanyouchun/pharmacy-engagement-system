@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 
 import '../../viewmodels/admin_viewmodel.dart';
@@ -51,11 +50,11 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
           final reason = report.reason;
           final userId = report.reportedUserId;
 
-          final userData = adminManageUserViewModel.getUserData(userId);
+          final userProfile = adminManageUserViewModel.getUserById(userId);
 
-          final isBlocked = userData?['isBlocked'] ?? false;
-          final suspendUntil = userData?['suspendUntil'];
-          final untilDate = (suspendUntil as Timestamp?)?.toDate();
+          final isBlocked = userProfile?.isBlocked ?? false;
+          final suspendUntil = userProfile?.suspendUntil;
+          final untilDate = suspendUntil;
 
           return Container(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),

@@ -5,11 +5,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../models/account_issue.dart';
+import '../models/admin_profile.dart';
 
 class AdminManageUserViewModel extends ChangeNotifier {
   final _usersRef = FirebaseFirestore.instance.collection('users');
 
-  List<QueryDocumentSnapshot> _users = [];
+  List<AdminProfile> _users = [];
   List<AccountIssueReport> _reports = [];
   List<AccountIssueReport> get reports => _reports;
 
@@ -22,7 +23,7 @@ class AdminManageUserViewModel extends ChangeNotifier {
   String? _userError;
   String? get userError => _userError;
 
-  List<QueryDocumentSnapshot> get users => _users;
+  List<AdminProfile> get users => _users;
   bool get isLoading => _isLoading;
 
   StreamSubscription? _authSub;
@@ -97,7 +98,8 @@ class AdminManageUserViewModel extends ChangeNotifier {
 
     _usersSub = _usersRef.snapshots().listen(
       (snapshot) {
-        _users = snapshot.docs;
+        _users =
+            snapshot.docs.map((doc) => AdminProfile.fromSnapshot(doc)).toList();
         _isLoading = false;
         notifyListeners();
       },
@@ -165,6 +167,7 @@ class AdminManageUserViewModel extends ChangeNotifier {
         "suspendUntil": permanent ? null : suspendUntil,
         "isPermanentBan": permanent,
       });
+      log("Blocked user account: $uid, duration: $duration, permanent: $permanent");
     } catch (e) {
       _userError = e.toString();
       notifyListeners();
@@ -178,19 +181,23 @@ class AdminManageUserViewModel extends ChangeNotifier {
         "suspendUntil": null,
         "isPermanentBan": false,
       });
+      log("Unblocked user account: $uid");
     } catch (e) {
       _userError = e.toString();
       notifyListeners();
     }
   }
 
-  Map<String, dynamic>? getUserData(String uid) {
+  AdminProfile? getUserById(String uid) {
     try {
-      return _users.firstWhere((u) => u.id == uid).data()
-          as Map<String, dynamic>;
+      return _users.firstWhere((u) => u.id == uid);
     } catch (e) {
       return null;
     }
+  }
+
+  Map<String, dynamic>? getUserData(String uid) {
+    return getUserById(uid)?.toMap();
   }
 
   @override
@@ -198,6 +205,115 @@ class AdminManageUserViewModel extends ChangeNotifier {
     _authSub?.cancel();
     _usersSub?.cancel();
     _reportsSub?.cancel();
+    super.dispose();
+  }
+}
+
+class AdminManageConfigViewModel extends ChangeNotifier {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  bool _isChatbotEnabled = true;
+  bool _isAIAnalysisEnabled = true;
+
+  bool get isChatbotEnabled => _isChatbotEnabled;
+  bool get isAIAnalysisEnabled => _isAIAnalysisEnabled;
+  bool _disposed = false;
+
+  StreamSubscription? _configSub;
+  StreamSubscription? _authSub;
+
+  AdminManageConfigViewModel() {
+    _authSub = FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (user == null) {
+        log(
+          "User logged out in AdminManageConfigViewModel → cancelling Firestore listener",
+        );
+        _configSub?.cancel();
+        _configSub = null;
+        _isChatbotEnabled = true;
+        _isAIAnalysisEnabled = true;
+        if (!_disposed) {
+          notifyListeners();
+        }
+      } else {
+        log(
+          "User logged in in AdminManageConfigViewModel → starting Firestore listener",
+        );
+        _listenToConfig();
+      }
+    });
+  }
+
+  void _listenToConfig() {
+    _configSub?.cancel();
+
+    _configSub = _firestore
+        .collection("config")
+        .doc("system")
+        .snapshots()
+        .listen(
+          (doc) {
+            if (_disposed) return;
+
+            if (doc.exists) {
+              final data = doc.data();
+
+              _isChatbotEnabled = data?["chatbotEnabled"] ?? true;
+              _isAIAnalysisEnabled = data?["aiAnalysisEnabled"] ?? true;
+            } else {
+              _firestore.collection("config").doc("system").set({
+                "chatbotEnabled": true,
+                "aiAnalysisEnabled": true,
+              });
+
+              _isChatbotEnabled = true;
+              _isAIAnalysisEnabled = true;
+            }
+
+            if (_disposed) return;
+            notifyListeners();
+          },
+          onError: (e) {
+            log("Error listening to config: $e");
+          },
+        );
+  }
+
+  Future<void> updateChatbotStatus(bool value) async {
+    try {
+      _isChatbotEnabled = value;
+      log("Updating chatbot status to: $value");
+      notifyListeners();
+
+      await _firestore.collection("config").doc("system").set({
+        "chatbotEnabled": value,
+        "aiAnalysisEnabled": _isAIAnalysisEnabled,
+      });
+    } catch (e) {
+      log("Error updating chatbot config: $e");
+    }
+  }
+
+  Future<void> updateAIAnalysisStatus(bool value) async {
+    try {
+      _isAIAnalysisEnabled = value;
+      log("Updating AI analysis status to: $value");
+      notifyListeners();
+
+      await _firestore.collection("config").doc("system").set({
+        "chatbotEnabled": _isChatbotEnabled,
+        "aiAnalysisEnabled": value,
+      });
+    } catch (e) {
+      log("Error updating AI analysis config: $e");
+    }
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    _configSub?.cancel();
+    _authSub?.cancel();
     super.dispose();
   }
 }
