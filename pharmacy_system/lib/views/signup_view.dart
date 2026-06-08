@@ -81,7 +81,11 @@ class _SignupViewState extends State<SignupView> {
                     },
                   ),
                   const SizedBox(width: 8),
-                  Text(signupViewModel.isPharmacist ? "Pharmacist" : "Regular user"),
+                  Text(
+                    signupViewModel.isPharmacist
+                        ? "Pharmacist"
+                        : "Regular user",
+                  ),
                 ],
               ),
 

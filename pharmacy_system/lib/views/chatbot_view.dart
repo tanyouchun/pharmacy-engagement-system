@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/chat_message.dart';
+import '../models/chatbot_message.dart';
 import '../viewmodels/chatbot_viewmodel.dart';
 import '../viewmodels/admin_viewmodel.dart';
 

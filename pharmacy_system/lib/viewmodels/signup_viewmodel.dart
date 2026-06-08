@@ -1,17 +1,19 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../models/user.dart';
+import '../services/auth_service.dart';
 import '../constants/error_message.dart';
 
 class SignupViewModel extends ChangeNotifier {
+  final _authService = AuthService();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
-  /// Tracks whether the new user is a pharmacist or a regular user.
+  // Tracks whether the new user is a pharmacist or a regular user.
   bool isPharmacist = false;
   bool isLoading = false;
   String? error;
@@ -32,27 +34,26 @@ class SignupViewModel extends ChangeNotifier {
       notifyListeners();
 
       // Create auth user
-      final credential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(
-            email: emailController.text.trim(),
-            password: passwordController.text.trim(),
-          );
+      final credential = await _authService.signUpWithEmail(
+        emailController.text.trim(),
+        passwordController.text.trim(),
+      );
 
       final uid = credential.user?.uid;
 
       // Store basic role info in Firestore
       if (uid != null) {
-        await FirebaseFirestore.instance.collection('users').doc(uid).set({
-          'email': emailController.text.trim(),
-          'role': isPharmacist ? 'pharmacist' : 'user',
-          'approvalStatus': isPharmacist ? 'pending' : 'approved',
-          'isBlocked': false,
-          'isPermanentBan': false,
-          'suspendUntil': null,
-          'reportCount': 0,
-          'name': '',
-          'createdAt': FieldValue.serverTimestamp(),
-        });
+        final newUser = UserAccount.newUser(
+          id: uid,
+          email: emailController.text.trim(),
+          name: '',
+          isPharmacist: isPharmacist,
+        );
+
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .set(newUser.toFirestoreMap());
       }
 
       // Pharmacist  → pharmacist profile form
@@ -62,8 +63,8 @@ class SignupViewModel extends ChangeNotifier {
       } else {
         Navigator.pop(context);
       }
-    } on FirebaseAuthException catch (e) {
-      error = e.message;
+    } catch (e) {
+      error = e.toString().replaceAll("Exception: ", "");
       log("${ErrorMessage.SIGNUP_ERROR}: $error");
       ScaffoldMessenger.of(
         context,

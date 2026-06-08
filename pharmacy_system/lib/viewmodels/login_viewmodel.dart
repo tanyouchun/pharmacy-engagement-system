@@ -111,7 +111,6 @@ class LoginViewModel extends ChangeNotifier {
       if (data?['isBlocked'] == true) {
         final suspendUntil = data?['suspendUntil'];
 
-        /// Permanent Ban
         if (data?['isPermanentBan'] == true) {
           log("Account $uid permanently banned");
 
@@ -120,7 +119,7 @@ class LoginViewModel extends ChangeNotifier {
           return "Account permanently banned";
         }
 
-        /// Temporary Suspension
+        // Temporary Suspension
         if (suspendUntil != null) {
           final until = (suspendUntil as Timestamp).toDate();
 
@@ -131,7 +130,7 @@ class LoginViewModel extends ChangeNotifier {
 
             return "Your account is suspended until ${until.toLocal()}";
           } else {
-            /// auto unblock expired suspension
+            // auto unblock expired suspension
             await userDoc.reference.update({
               'isBlocked': false,
               'suspendUntil': null,

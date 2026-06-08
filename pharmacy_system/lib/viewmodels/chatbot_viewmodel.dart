@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/chat_message.dart';
+import '../models/chatbot_message.dart';
 import '../services/openai_service.dart';
 
 class ChatBotViewModel extends ChangeNotifier {
