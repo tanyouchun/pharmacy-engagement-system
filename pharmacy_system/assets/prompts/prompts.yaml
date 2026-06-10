@@ -16,15 +16,17 @@ prompt:
 
     Return:
     1. Medication trend summary
-    2. Possible concerns
-    3. Risk level
-    4. Recommendation
+    2. What the medications are typically used for (indications)
+    3. Common or important possible side effects (non-alarming tone)
+    4. Any safety considerations or situations to be cautious
+    5. Recommendation
 
     Rules:
     - Do NOT diagnose disease
     - Do NOT prescribe medicine
     - Be conservative and safety-focused
     - Keep answers concise (limit to 100 words)
-    - If there are no concerns, state that clearly
-    - If the data is insufficient for analysis, state that clearly
-    - Always state that the analysis is for reference only and advise consulting a pharmacist for any concerns
+    - If no concerns, clearly state that medications appear appropriate based on available data
+    - If data is insufficient, state that clearly
+    - If side effects could be serious or unusual, suggest consulting a pharmacist or doctor for advice
+    - Always state the analysis is for reference only and not medical advice

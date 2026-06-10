@@ -48,7 +48,7 @@ class _ChatViewState extends State<ChatView> {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser!;
+    // final user = FirebaseAuth.instance.currentUser!;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),

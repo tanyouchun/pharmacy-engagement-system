@@ -4,6 +4,10 @@ class ErrorMessage {
   static const String AUTH_ERROR = "Authentication failed. Please check your credentials.";
   static const String SIGNUP_ERROR = "Unable to sign up. Please try again.";
   static const String LOGIN_ERROR = "Invalid login credentials. Please try again.";
+  static const String PASSWORD_NOT_STRONG_ERROR = "Password must contain at least 8 characters, uppercase, lowercase, number and special character.";
+  static const String PASSWORDS_DO_NOT_MATCH_ERROR = "Passwords do not match. Please try again.";
+  static const String EMAIL_ALREADY_IN_USE_ERROR = "This email is already in use. Please use a different email.";
+  static const String INVALID_EMAIL_ERROR = "Invalid email format. Please enter a valid email address.";
 
   //prescription errors
   static const String LOAD_PRESCRIPTION_ERROR = "Unable to load the prescriptions.";

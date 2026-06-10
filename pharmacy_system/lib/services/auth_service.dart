@@ -18,11 +18,11 @@ class AuthService {
       log("User created successfully with email: $email");
       return userCredential;
     } on FirebaseAuthException catch (e) {
-      log("Sign-up failed: ${e.message}");
-      throw Exception(e.message ?? 'Signup failed');
+      log("Sign-up failed: ${e.code} - ${e.message}");
+      rethrow;
     } catch (e) {
       log("An unknown error occurred: $e");
-      throw Exception('An unknown error occurred');
+      rethrow;
     }
   }
 
