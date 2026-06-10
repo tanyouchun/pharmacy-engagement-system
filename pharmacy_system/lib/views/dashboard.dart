@@ -494,7 +494,6 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               mainAxisSize: MainAxisSize.min,
-
                                               children: [
                                                 Row(
                                                   children: [
@@ -505,7 +504,6 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                                                         overflow:
                                                             TextOverflow
                                                                 .ellipsis,
-
                                                         style: const TextStyle(
                                                           fontSize: 14.5,
                                                           fontWeight:
@@ -520,7 +518,6 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                                                             horizontal: 8,
                                                             vertical: 4,
                                                           ),
-
                                                       decoration: BoxDecoration(
                                                         color: Colors.blue
                                                             .withOpacity(0.08),
@@ -529,10 +526,8 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                                                               20,
                                                             ),
                                                       ),
-
                                                       child: Text(
                                                         reminder.frequency,
-
                                                         style: const TextStyle(
                                                           color: Color(
                                                             0xFF4FACFE,
@@ -546,12 +541,93 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                                                   ],
                                                 ),
 
+                                                if (reminder
+                                                        .strength
+                                                        .isNotEmpty ||
+                                                    reminder.dose.isNotEmpty)
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                          top: 6,
+                                                        ),
+                                                    child: Row(
+                                                      children: [
+                                                        if (reminder
+                                                            .strength
+                                                            .isNotEmpty) ...[
+                                                          const Icon(
+                                                            Icons
+                                                                .science_outlined,
+                                                            size: 14,
+                                                            color: Colors.blue,
+                                                          ),
+                                                          const SizedBox(
+                                                            width: 4,
+                                                          ),
+                                                          Text(
+                                                            reminder.strength,
+                                                            style:
+                                                                const TextStyle(
+                                                                  fontSize: 11,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                ),
+                                                          ),
+                                                        ],
+
+                                                        if (reminder
+                                                                .strength
+                                                                .isNotEmpty &&
+                                                            reminder
+                                                                .dose
+                                                                .isNotEmpty)
+                                                          const Padding(
+                                                            padding:
+                                                                EdgeInsets.symmetric(
+                                                                  horizontal: 8,
+                                                                ),
+                                                            child: Text(
+                                                              "•",
+                                                              style: TextStyle(
+                                                                color:
+                                                                    Colors.grey,
+                                                              ),
+                                                            ),
+                                                          ),
+
+                                                        if (reminder
+                                                            .dose
+                                                            .isNotEmpty) ...[
+                                                          const Icon(
+                                                            Icons
+                                                                .medication_outlined,
+                                                            size: 14,
+                                                            color: Colors.blue,
+                                                          ),
+                                                          const SizedBox(
+                                                            width: 4,
+                                                          ),
+                                                          Text(
+                                                            reminder.dose,
+                                                            style:
+                                                                const TextStyle(
+                                                                  fontSize: 11,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                ),
+                                                          ),
+                                                        ],
+                                                      ],
+                                                    ),
+                                                  ),
+
                                                 const SizedBox(height: 8),
 
                                                 Wrap(
                                                   spacing: 6,
                                                   runSpacing: 6,
-
                                                   children:
                                                       reminder.reminderTimes.map((
                                                         time,
@@ -562,7 +638,6 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                                                                 horizontal: 8,
                                                                 vertical: 5,
                                                               ),
-
                                                           decoration: BoxDecoration(
                                                             color:
                                                                 Colors
@@ -573,12 +648,10 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                                                                   12,
                                                                 ),
                                                           ),
-
                                                           child: Row(
                                                             mainAxisSize:
                                                                 MainAxisSize
                                                                     .min,
-
                                                             children: [
                                                               const Icon(
                                                                 Icons
@@ -587,14 +660,11 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                                                                 color:
                                                                     Colors.grey,
                                                               ),
-
                                                               const SizedBox(
                                                                 width: 4,
                                                               ),
-
                                                               Text(
                                                                 time,
-
                                                                 style: const TextStyle(
                                                                   fontSize:
                                                                       10.5,
@@ -652,7 +722,7 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
       //     FloatingActionButton(
       //       heroTag: "test",
       //       onPressed: () async {
-      //         await NotificationService.instance.showTestNotification();
+      //         await NotificationService.instance.scheduleTest();
       //       },
       //       child: const Icon(Icons.notifications),
       //     ),
@@ -874,6 +944,148 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                         ],
                       ),
                     ),
+
+                    const SizedBox(height: 20),
+
+                    /// MEDICATION DETAILS CARD
+                    if (reminder.strength.isNotEmpty ||
+                        reminder.dose.isNotEmpty)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: Colors.blue.shade100),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Row(
+                              children: [
+                                Icon(
+                                  Icons.medication_liquid_rounded,
+                                  size: 18,
+                                  color: Colors.black87,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  "Medication Details",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 14),
+
+                            Row(
+                              children: [
+                                if (reminder.strength.isNotEmpty)
+                                  Expanded(
+                                    child: Container(
+                                      padding: const EdgeInsets.all(14),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "Strength",
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: Colors.grey.shade600,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            reminder.strength,
+                                            style: const TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+
+                                if (reminder.strength.isNotEmpty &&
+                                    reminder.dose.isNotEmpty)
+                                  const SizedBox(width: 12),
+
+                                if (reminder.dose.isNotEmpty)
+                                  Expanded(
+                                    child: Container(
+                                      padding: const EdgeInsets.all(14),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "Dosage",
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: Colors.grey.shade600,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            reminder.dose,
+                                            style: const TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Duration",
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    "${reminder.duration} days",
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
 
                     const SizedBox(height: 20),
 

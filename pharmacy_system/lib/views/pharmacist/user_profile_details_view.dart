@@ -638,6 +638,57 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
+                        color: const Color(0xFFEAF4FF),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        children: [
+                          _detailRow(
+                            Icons.medication_outlined,
+                            "Medicine",
+                            prescription.medicineName,
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          _detailRow(
+                            Icons.scale,
+                            "Strength",
+                            prescription.strength,
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          _detailRow(
+                            Icons.local_hospital_outlined,
+                            "Dose",
+                            prescription.dose,
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          _detailRow(
+                            Icons.repeat,
+                            "Frequency",
+                            prescription.frequency,
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          _detailRow(
+                            Icons.calendar_month,
+                            "Duration",
+                            "${prescription.duration} days",
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
                         color: Colors.grey.shade50,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(color: Colors.grey.shade200),
@@ -645,84 +696,84 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (prescription.notes != null &&
-                              prescription.notes.toString().trim().isNotEmpty)
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Row(
-                                  children: [
-                                    Icon(
-                                      Icons.note_alt_outlined,
-                                      size: 18,
-                                      color: Colors.grey,
-                                    ),
-                                    SizedBox(width: 6),
-                                    Text(
-                                      "Notes",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
+                          if (prescription.notes.trim().isNotEmpty) ...[
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.shade50,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Colors.orange.shade100,
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Row(
+                                    children: [
+                                      Icon(Icons.note_alt_outlined),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        "Notes",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-
-                                const SizedBox(height: 6),
-
-                                Text(
-                                  prescription.notes,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    height: 1.4,
+                                    ],
                                   ),
-                                ),
 
-                                const SizedBox(height: 12),
+                                  SizedBox(height: 10),
 
-                                const Divider(),
-
-                                const SizedBox(height: 12),
-                              ],
+                                  Text(
+                                    prescription.notes,
+                                    style: TextStyle(height: 1.5),
+                                  ),
+                                ],
+                              ),
                             ),
-
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.calendar_today,
-                                size: 16,
-                                color: Colors.grey,
-                              ),
-
-                              const SizedBox(width: 8),
-
-                              Text(
-                                prescription.issueDate != null
-                                    ? "Date: ${prescription.issueDate!.year}-${prescription.issueDate!.month}-${prescription.issueDate!.day}"
-                                    : "Date: -",
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                            ],
-                          ),
+                          ],
 
                           const SizedBox(height: 12),
 
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.person_outline,
-                                size: 16,
-                                color: Colors.grey,
-                              ),
-
-                              const SizedBox(width: 8),
-
-                              Expanded(
-                                child: Text(
-                                  "Added by: ${prescription.addedByName}",
-                                  style: const TextStyle(fontSize: 14),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade50,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.grey.shade200),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Prescription Information",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
                                 ),
-                              ),
-                            ],
+
+                                const SizedBox(height: 14),
+
+                                _detailRow(
+                                  Icons.calendar_today,
+                                  "Issue Date",
+                                  prescription.issueDate != null
+                                      ? "${prescription.issueDate!.day}/${prescription.issueDate!.month}/${prescription.issueDate!.year}"
+                                      : "-",
+                                ),
+
+                                const SizedBox(height: 12),
+
+                                _detailRow(
+                                  Icons.person_outline,
+                                  "Added By",
+                                  prescription.addedByName,
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -736,6 +787,35 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
           },
         );
       },
+    );
+  }
+
+  Widget _detailRow(IconData icon, String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: Colors.blue),
+
+        const SizedBox(width: 10),
+
+        SizedBox(
+          width: 90,
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.w500),
+          ),
+        ),
+      ],
     );
   }
 

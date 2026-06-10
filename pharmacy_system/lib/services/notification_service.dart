@@ -24,13 +24,26 @@ class NotificationService {
 
     await _plugin.initialize(settings);
 
-    final permissionGranted = await _plugin
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >()
-        ?.requestNotificationsPermission();
+    final permissionGranted =
+        await _plugin
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >()
+            ?.requestNotificationsPermission();
 
     log('Notification permission granted: $permissionGranted');
+    final androidPlugin =
+        _plugin
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >();
+
+    final canSchedule = await androidPlugin?.canScheduleExactNotifications();
+
+    log("canScheduleExactNotifications = $canSchedule");
+
+    await androidPlugin?.requestNotificationsPermission();
+    await androidPlugin?.requestExactAlarmsPermission();
   }
 
   int _notificationId(String reminderId, int index) {
@@ -59,6 +72,9 @@ class NotificationService {
       minute,
     );
 
+    log("Now = ${tz.TZDateTime.now(tz.local)}");
+    log("Scheduled = $scheduledDate");
+    log("tz.local = ${tz.local.name}");
     // log('Now (tz.local) = $now');
     log('Now local DateTime = ${now.toLocal()}');
     // log('Selected notification time = $scheduledDate');
@@ -66,7 +82,9 @@ class NotificationService {
 
     if (scheduledDate.isBefore(now)) {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
-      log('Scheduled time already passed today; scheduling for tomorrow: $scheduledDate');
+      log(
+        'Scheduled time already passed today; scheduling for tomorrow: $scheduledDate',
+      );
     }
 
     await _plugin.zonedSchedule(
@@ -83,7 +101,7 @@ class NotificationService {
           priority: Priority.high,
         ),
       ),
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
     );
   }
@@ -93,7 +111,9 @@ class NotificationService {
     required String medicationName,
     required List<String> reminderTimes,
   }) async {
-    log('Scheduling $reminderTimes for medication: $medicationName (reminderId: $reminderId)');
+    log(
+      'Scheduling $reminderTimes for medication: $medicationName (reminderId: $reminderId)',
+    );
     for (int i = 0; i < reminderTimes.length; i++) {
       try {
         await scheduleDailyReminder(
@@ -101,7 +121,17 @@ class NotificationService {
           medicationName: medicationName,
           time: reminderTimes[i],
         );
-        log('Successfully scheduled notification $i for reminderId: $reminderId');
+        log(
+          'Successfully scheduled notification $i for reminderId: $reminderId',
+        );
+
+        final pending = await _plugin.pendingNotificationRequests();
+
+        log("Pending count: ${pending.length}");
+
+        for (final p in pending) {
+          log("Pending: ${p.id} ${p.title}");
+        }
       } catch (e) {
         log('ERROR scheduling notification $i: $e');
       }
@@ -118,20 +148,53 @@ class NotificationService {
     await _plugin.cancelAll();
   }
 
-  Future<void> showTestNotification() async {
-  await _plugin.show(
-    999,
-    'Test Notification',
-    'If you see this, notifications are working.',
-    const NotificationDetails(
-      android: AndroidNotificationDetails(
-        'test_channel',
-        'Test Notifications',
-        channelDescription: 'Testing notifications',
-        importance: Importance.max,
-        priority: Priority.high,
-      ),
-    ),
-  );
-}
+  // Future<void> showTestNotification() async {
+  //   await _plugin.show(
+  //     999,
+  //     'Test Notification',
+  //     'If you see this, notifications are working.',
+  //     const NotificationDetails(
+  //       android: AndroidNotificationDetails(
+  //         'test_channel',
+  //         'Test Notifications',
+  //         channelDescription: 'Testing notifications',
+  //         importance: Importance.max,
+  //         priority: Priority.high,
+  //       ),
+  //     ),
+  //   );
+  // }
+
+  // Future<void> scheduleTest() async {
+  //   final scheduledDate = tz.TZDateTime.now(
+  //     tz.local,
+  //   ).add(const Duration(minutes: 1));
+
+  //   log("Now = ${tz.TZDateTime.now(tz.local)}");
+  //   log("Scheduled = $scheduledDate");
+
+  //   await _plugin.zonedSchedule(
+  //     1,
+  //     "Test",
+  //     "Should appear in one minute",
+  //     scheduledDate,
+  //     const NotificationDetails(
+  //       android: AndroidNotificationDetails(
+  //         'test_channel',
+  //         'Test Notifications',
+  //         importance: Importance.max,
+  //         priority: Priority.high,
+  //       ),
+  //     ),
+  //     androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+  //   );
+
+  //   final pending = await _plugin.pendingNotificationRequests();
+
+  //   log("Pending notifications: ${pending.length}");
+
+  //   for (final p in pending) {
+  //     log("Pending ID=${p.id}, title=${p.title}");
+  //   }
+  // }
 }

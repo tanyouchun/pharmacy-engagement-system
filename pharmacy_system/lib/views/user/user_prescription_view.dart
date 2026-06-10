@@ -251,8 +251,13 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
                                     onPressed: (_) {
                                       ReminderClient.showReminderFormFromPrescription(
                                         context,
+                                        prescriptionId:
+                                            prescription.prescriptionId,
                                         medicineName: prescription.medicineName,
+                                        strength: prescription.strength,
+                                        dose: prescription.dose,
                                         frequency: prescription.frequency,
+                                        duration: prescription.duration,
                                       );
                                     },
                                     backgroundColor: Colors.green,
@@ -350,7 +355,78 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
                                             ),
                                           ),
 
-                                          const SizedBox(height: 2),
+                                          if (prescription
+                                                  .strength
+                                                  .isNotEmpty ||
+                                              prescription.dose.isNotEmpty)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                top: 6,
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  if (prescription
+                                                      .strength
+                                                      .isNotEmpty) ...[
+                                                    const Icon(
+                                                      Icons.science_outlined,
+                                                      size: 14,
+                                                      color: Colors.blue,
+                                                    ),
+                                                    const SizedBox(width: 4),
+                                                    Text(
+                                                      prescription.strength,
+                                                      style: const TextStyle(
+                                                        fontSize: 11,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
+                                                    ),
+                                                  ],
+
+                                                  if (prescription
+                                                          .strength
+                                                          .isNotEmpty &&
+                                                      prescription
+                                                          .dose
+                                                          .isNotEmpty)
+                                                    const Padding(
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                            horizontal: 8,
+                                                          ),
+                                                      child: Text(
+                                                        "•",
+                                                        style: TextStyle(
+                                                          color: Colors.grey,
+                                                        ),
+                                                      ),
+                                                    ),
+
+                                                  if (prescription
+                                                      .dose
+                                                      .isNotEmpty) ...[
+                                                    const Icon(
+                                                      Icons.medication_outlined,
+                                                      size: 14,
+                                                      color: Colors.blue,
+                                                    ),
+                                                    const SizedBox(width: 4),
+                                                    Text(
+                                                      prescription.dose,
+                                                      style: const TextStyle(
+                                                        fontSize: 11,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ],
+                                              ),
+                                            ),
+
+                                          const SizedBox(height: 16),
 
                                           Text(
                                             "AddedBy: ${prescription.addedByName}",
@@ -460,7 +536,147 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
                       ),
                     ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
+
+                    const SizedBox(height: 12),
+
+                    const SizedBox(height: 20),
+
+                    /// MEDICATION DETAILS CARD
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: Colors.blue.shade100),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Row(
+                            children: [
+                              Icon(
+                                Icons.medication_liquid_rounded,
+                                size: 18,
+                                color: Colors.black87,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                "Medication Details",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 14),
+
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.all(14),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Strength",
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.grey.shade600,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        prescription.strength,
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(width: 12),
+
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.all(14),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Dosage",
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.grey.shade600,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        prescription.dose,
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Duration",
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  "${prescription.duration} days",
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
 
                     Container(
                       padding: const EdgeInsets.all(16),
