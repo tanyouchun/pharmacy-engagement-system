@@ -39,8 +39,29 @@ class LoginViewModel extends ChangeNotifier {
       }
       log("Login success UID: $uid");
     } on FirebaseAuthException catch (e) {
-      log("${ErrorMessage.LOGIN_ERROR}: $e");
-      errorMessage = ErrorMessage.LOGIN_ERROR;
+      switch (e.code) {
+        case 'invalid-email':
+          errorMessage = "Please enter a valid email address.";
+          break;
+
+        case 'user-not-found':
+        case 'wrong-password':
+        case 'invalid-credential':
+          errorMessage = "Invalid email or password.";
+          break;
+
+        case 'user-disabled':
+          errorMessage = "This account has been disabled.";
+          break;
+
+        case 'too-many-requests':
+          errorMessage = "Too many login attempts. Please try again later.";
+          break;
+
+        default:
+          errorMessage = e.message ?? "Login failed.";
+      }
+
       notifyListeners();
     } catch (e) {
       log("Email and password SignIn error. ${ErrorMessage.LOGIN_ERROR}: $e");

@@ -35,7 +35,7 @@ class AuthService {
       return userCredential;
     } on FirebaseAuthException catch (e) {
       log("Sign-in failed: ${e.message}");
-      throw Exception(e.message ?? 'Login failed');
+      rethrow;
     } catch (e) {
       log("An unknown error occurred: $e");
       throw Exception('An unknown error occurred');
