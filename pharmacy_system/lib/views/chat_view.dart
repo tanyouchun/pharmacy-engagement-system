@@ -240,6 +240,52 @@ class _ChatViewState extends State<ChatView> {
           Expanded(
             child: Consumer<ChatViewModel>(
               builder: (context, chatViewModel, _) {
+                if (chatViewModel.messages.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 30),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF4FC3CF).withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.local_pharmacy_outlined,
+                              size: 60,
+                              color: Color(0xFF4FC3CF),
+                            ),
+                          ),
+
+                          const SizedBox(height: 24),
+
+                          const Text(
+                            "No Messages Yet",
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+
+                          const SizedBox(height: 10),
+
+                          Text(
+                            "Ask a question about your medication or start a conversation with your pharmacist.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
                 return ListView.builder(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,
@@ -483,15 +529,9 @@ class _ChatViewState extends State<ChatView> {
                   title: "Delete Message",
                   subtitle: "Remove this message permanently",
                   color: Colors.redAccent,
-                  onTap: () async {
+                  onTap: () {
                     Navigator.pop(context);
-
-                    final chatViewModel = Provider.of<ChatViewModel>(
-                      context,
-                      listen: false,
-                    );
-
-                    await chatViewModel.deleteMessage(widget.chatId, messageId);
+                    _showDeleteConfirmation(messageId);
                   },
                 )
               else
@@ -610,47 +650,191 @@ class _ChatViewState extends State<ChatView> {
   void _showEditDialog(String messageId, String oldText) {
     final editController = TextEditingController(text: oldText);
 
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 45,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF4FC3CF).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.edit_rounded,
+                        color: Color(0xFF4FC3CF),
+                      ),
+                    ),
+
+                    const SizedBox(width: 12),
+
+                    const Expanded(
+                      child: Text(
+                        "Edit Message",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                TextField(
+                  controller: editController,
+                  maxLines: 5,
+                  minLines: 2,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    hintText: "Update your message...",
+                    filled: true,
+                    fillColor: Colors.grey.shade100,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(50),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        child: const Text("Cancel"),
+                      ),
+                    ),
+
+                    const SizedBox(width: 12),
+
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          if (editController.text.trim().isEmpty) return;
+
+                          final chatViewModel = Provider.of<ChatViewModel>(
+                            context,
+                            listen: false,
+                          );
+
+                          await chatViewModel.editMessage(
+                            widget.chatId,
+                            messageId,
+                            editController.text.trim(),
+                          );
+
+                          Navigator.pop(context);
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Message updated successfully"),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF4FC3CF),
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size.fromHeight(50),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        child: const Text("Save Changes"),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 10),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showDeleteConfirmation(String messageId) {
     showDialog(
       context: context,
-
       builder: (_) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-
-          title: const Text("Edit Message"),
-
-          content: TextField(controller: editController, maxLines: 3),
-
+          title: const Row(
+            children: [
+              Icon(Icons.delete_forever, color: Colors.red),
+              SizedBox(width: 8),
+              Text("Delete Message"),
+            ],
+          ),
+          content: const Text(
+            "Are you sure you want to delete this message?\n\nThis action cannot be undone.",
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-
               child: const Text("Cancel"),
             ),
 
             ElevatedButton(
               onPressed: () async {
+                Navigator.pop(context);
+
                 final chatViewModel = Provider.of<ChatViewModel>(
                   context,
                   listen: false,
                 );
 
-                await chatViewModel.editMessage(
-                  widget.chatId,
-                  messageId,
-                  editController.text,
+                await chatViewModel.deleteMessage(widget.chatId, messageId);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Message deleted")),
                 );
-
-                Navigator.pop(context);
               },
-
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4FC3CF),
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
               ),
-
-              child: const Text("Save"),
+              child: const Text("Delete"),
             ),
           ],
         );

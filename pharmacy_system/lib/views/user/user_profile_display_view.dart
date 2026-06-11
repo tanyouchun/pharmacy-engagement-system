@@ -135,7 +135,7 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
                     child: _buildStatCard(
                       icon: Icons.height,
                       title: "Height",
-                      value: userProfileViewModel.profile?.height ?? "",
+                      value: "${userProfileViewModel.profile?.height ?? ""} cm",
                     ),
                   ),
 

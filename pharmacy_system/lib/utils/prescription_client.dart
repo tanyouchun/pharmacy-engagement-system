@@ -11,6 +11,7 @@ class PrescriptionClient {
   }) {
     final nameController = TextEditingController();
     final notesController = TextEditingController();
+    String? medicineNameError;
 
     String frequency = "Once Daily";
     String strength = "100mg";
@@ -100,6 +101,7 @@ class PrescriptionClient {
                         hint: "Enter medicine name",
 
                         icon: Icons.local_pharmacy_outlined,
+                        errorText: medicineNameError,
                       ),
 
                       const SizedBox(height: 18),
@@ -400,6 +402,14 @@ class PrescriptionClient {
                           Expanded(
                             child: ElevatedButton(
                               onPressed: () async {
+                                if (nameController.text.trim().isEmpty) {
+                                  setState(() {
+                                    medicineNameError =
+                                        "Medicine name is required";
+                                  });
+                                  return;
+                                }
+
                                 final prescription = Prescription(
                                   prescriptionId: "",
 
@@ -491,6 +501,7 @@ class PrescriptionClient {
     );
 
     final notesController = TextEditingController(text: prescription.notes);
+    String? medicineNameError;
 
     String frequency = prescription.frequency;
     String strength = prescription.strength;
@@ -560,6 +571,7 @@ class PrescriptionClient {
                         hint: "Enter medicine name",
 
                         icon: Icons.local_pharmacy_outlined,
+                        errorText: medicineNameError,
                       ),
 
                       const SizedBox(height: 18),
@@ -841,6 +853,13 @@ class PrescriptionClient {
                           Expanded(
                             child: ElevatedButton(
                               onPressed: () async {
+                                if (nameController.text.trim().isEmpty) {
+                                  setState(() {
+                                    medicineNameError =
+                                        "Medicine name is required";
+                                  });
+                                  return;
+                                }
                                 final updated = prescription.copyWith(
                                   medicineName: nameController.text,
 
@@ -908,11 +927,10 @@ class PrescriptionClient {
 
   static Widget _buildTextField({
     required TextEditingController controller,
-
     required String label,
     required String hint,
     required IconData icon,
-
+    String? errorText,
     int maxLines = 1,
   }) {
     return Column(
@@ -932,6 +950,7 @@ class PrescriptionClient {
           maxLines: maxLines,
 
           decoration: InputDecoration(
+            errorText: errorText,
             hintText: hint,
 
             prefixIcon: Icon(icon),
@@ -964,5 +983,71 @@ class PrescriptionClient {
         ),
       ],
     );
+  }
+
+  static Future<bool> showDeleteConfirmation(
+    BuildContext context,
+    String medicineName,
+  ) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+              title: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.delete_outline, color: Colors.red),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text("Delete Prescription"),
+                ],
+              ),
+              content: RichText(
+                text: TextSpan(
+                  style: const TextStyle(color: Colors.black87, fontSize: 15),
+                  children: [
+                    const TextSpan(
+                      text:
+                          "Are you sure you want to delete the prescription for ",
+                    ),
+                    TextSpan(
+                      text: medicineName,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const TextSpan(text: "?\n\nThis action cannot be undone."),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, false);
+                  },
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  },
+                  icon: const Icon(Icons.delete, size: 18),
+                  label: const Text("Delete"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
   }
 }

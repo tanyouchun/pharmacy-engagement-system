@@ -262,31 +262,39 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
             child:
                 (isPharmacist || isAdmin)
                     // PHARMACIST VIEW (AI-focused empty state)
-                    ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.smart_toy,
-                            size: 60,
-                            color: Colors.grey,
+                    ? LayoutBuilder(
+                      builder: (context, constraints) {
+                        return SingleChildScrollView(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: constraints.maxHeight,
+                            ),
+                            child: Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.smart_toy,
+                                    size: 60,
+                                    color: Colors.grey,
+                                  ),
+                                  const SizedBox(height: 10),
+                                  const Text(
+                                    "Use AI Assistant to help patients",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  ElevatedButton(
+                                    onPressed: widget.onOpenChatbot,
+                                    child: const Text("Open Chatbot"),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                          const SizedBox(height: 10),
-                          const Text(
-                            "Use AI Assistant to help patients",
-                            style: TextStyle(color: Colors.grey),
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          ElevatedButton(
-                            onPressed: () {
-                              widget.onOpenChatbot?.call();
-                            },
-                            child: const Text("Open Chatbot"),
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     )
                     // regular user view (medication reminders)
                     : reminderViewModel.reminders.isEmpty

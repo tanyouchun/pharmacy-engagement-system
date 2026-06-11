@@ -328,7 +328,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                             ),
                           )
                           : ListView.builder(
-                            padding: const EdgeInsets.only(bottom: 200),
+                            padding: const EdgeInsets.only(bottom: 50),
                             itemCount:
                                 prescriptionViewModel.prescriptions.length,
                             itemBuilder: (context, index) {
@@ -364,8 +364,15 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                                       ),
 
                                       SlidableAction(
-                                        onPressed: (_) {
-                                          prescriptionViewModel
+                                        onPressed: (_) async {
+                                          final confirmed =
+                                              await PrescriptionClient.showDeleteConfirmation(
+                                                context,
+                                                prescription.medicineName,
+                                              );
+
+                                          if (!confirmed) return;
+                                          await prescriptionViewModel
                                               .deleteUserPrescription(
                                                 widget.userId,
                                                 prescription.prescriptionId,

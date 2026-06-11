@@ -205,7 +205,12 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
                   else
                     Expanded(
                       child: ListView.builder(
-                        padding: const EdgeInsets.all(16),
+                        padding: EdgeInsets.only(
+                          left: 16,
+                          right: 16,
+                          top: 16,
+                          bottom: MediaQuery.of(context).padding.bottom + 100,
+                        ),
                         itemCount: prescriptionViewModel.prescriptions.length,
                         itemBuilder: (context, index) {
                           final prescription =
@@ -235,10 +240,18 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
                                   ),
 
                                   SlidableAction(
-                                    onPressed: (_) {
-                                      prescriptionViewModel.deletePrescription(
-                                        prescription.prescriptionId,
-                                      );
+                                    onPressed: (_) async {
+                                      final confirmed =
+                                          await PrescriptionClient.showDeleteConfirmation(
+                                            context,
+                                            prescription.medicineName,
+                                          );
+
+                                      if (!confirmed) return;
+                                      await prescriptionViewModel
+                                          .deletePrescription(
+                                            prescription.prescriptionId,
+                                          );
                                     },
                                     backgroundColor: Colors.red,
                                     foregroundColor: Colors.white,
