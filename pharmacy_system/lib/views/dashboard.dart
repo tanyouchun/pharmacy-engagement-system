@@ -7,6 +7,7 @@ import 'package:table_calendar/table_calendar.dart';
 import '../models/reminder.dart';
 import '../utils/reminder_client.dart';
 import '../services/notification_service.dart';
+import '../services/medication_log_service.dart';
 
 class ReminderHomeView extends StatefulWidget {
   final String? role;
@@ -740,6 +741,8 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
   }
 
   void _showReminderDetails(BuildContext context, Reminder reminder) {
+    final takenNotifier = ValueNotifier<bool>(false);
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -854,6 +857,83 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                     ),
 
                     const SizedBox(height: 20),
+                    Builder(
+                      builder: (context) {
+                        final currentTime = getCurrentReminderTime(
+                          reminder.reminderTimes,
+                        );
+
+                        if (currentTime == null) {
+                          return ElevatedButton.icon(
+                            onPressed: null,
+                            icon: const Icon(Icons.check),
+                            label: const Text("Taken"),
+                          );
+                        }
+
+                        return FutureBuilder<bool>(
+                          future: MedicationLogService().alreadyTaken(
+                            reminderId: reminder.reminderId!,
+                            reminderTime: currentTime,
+                          ),
+                          builder: (context, snapshot) {
+                            final taken = snapshot.data ?? false;
+
+                            return Row(
+                              children: [
+                                ElevatedButton.icon(
+                                  onPressed:
+                                      taken
+                                          ? null
+                                          : () async {
+                                            await MedicationLogService()
+                                                .createAndMarkTaken(
+                                                  reminderId:
+                                                      reminder.reminderId!,
+                                                  userId: reminder.userId!,
+                                                  reminderTime: currentTime,
+                                                );
+
+                                            setState(
+                                              () {},
+                                            ); // 🔥 forces refresh for next reminder
+                                          },
+                                  icon: const Icon(Icons.check),
+                                  label: const Text("Taken"),
+                                ),
+
+                                const SizedBox(width: 12),
+
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        taken
+                                            ? Colors.green.shade100
+                                            : Colors.red.shade100,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    taken ? "Medicine Taken" : "Not Taken",
+                                    style: TextStyle(
+                                      color:
+                                          taken
+                                              ? Colors.green.shade700
+                                              : Colors.red.shade700,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
 
                     /// REMINDER TIMES CARD
                     Container(
@@ -1143,6 +1223,53 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
         );
       },
     );
+  }
+
+  bool isTakeButtonEnabled(List<String> reminderTimes) {
+    final now = DateTime.now();
+
+    for (final time in reminderTimes) {
+      final parts = time.split(':');
+
+      final scheduled = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        int.parse(parts[0]),
+        int.parse(parts[1]),
+      );
+
+      // allow 1 hour after reminder
+      if (now.isAfter(scheduled) &&
+          now.isBefore(scheduled.add(const Duration(hours: 1)))) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  String? getCurrentReminderTime(List<String> reminderTimes) {
+    final now = DateTime.now();
+
+    for (final time in reminderTimes) {
+      final parts = time.split(':');
+
+      final scheduled = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        int.parse(parts[0]),
+        int.parse(parts[1]),
+      );
+
+      if (now.isAfter(scheduled) &&
+          now.isBefore(scheduled.add(const Duration(hours: 5)))) {
+        return time;
+      }
+    }
+
+    return null;
   }
 
   void _confirmDelete(BuildContext context, Reminder reminder) {

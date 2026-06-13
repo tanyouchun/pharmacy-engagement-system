@@ -43,6 +43,7 @@ class ReminderViewModel extends ChangeNotifier {
 
       await NotificationService.instance.scheduleReminderTimes(
         reminderId: docRef.id,
+        userId: reminder.userId,
         medicationName: reminder.medicationName,
         reminderTimes: reminder.reminderTimes,
       );
@@ -62,6 +63,22 @@ class ReminderViewModel extends ChangeNotifier {
         reminder.reminderId,
         reminder.reminderTimes.length,
       );
+
+      final logs =
+          await FirebaseFirestore.instance
+              .collection('medication_logs')
+              .where('reminderId', isEqualTo: reminder.reminderId)
+              .get();
+
+      final batch = FirebaseFirestore.instance.batch();
+
+      for (final doc in logs.docs) {
+        batch.delete(doc.reference);
+      }
+      log("Deleted ${logs.docs.length} medication logs for reminder id: ${reminder.reminderId}");
+
+      await batch.commit();
+
       await _db
           .collection('reminders')
           .doc(reminder.reminderId)
@@ -69,6 +86,7 @@ class ReminderViewModel extends ChangeNotifier {
 
       await NotificationService.instance.scheduleReminderTimes(
         reminderId: reminder.reminderId,
+        userId: reminder.userId,
         medicationName: reminder.medicationName,
         reminderTimes: reminder.reminderTimes,
       );
@@ -89,6 +107,22 @@ class ReminderViewModel extends ChangeNotifier {
         reminder.reminderTimes.length,
       );
 
+      final logs =
+          await FirebaseFirestore.instance
+              .collection('medication_logs')
+              .where('reminderId', isEqualTo: reminder.reminderId)
+              .get();
+
+      final batch = FirebaseFirestore.instance.batch();
+
+      for (final doc in logs.docs) {
+        batch.delete(doc.reference);
+      }
+
+      log("Deleted ${logs.docs.length} medication logs for reminder id: ${reminder.reminderId}");
+
+      await batch.commit();
+
       await _db.collection('reminders').doc(reminder.reminderId).delete();
       log("Reminder deleted for reminder id: ${reminder.reminderId}");
 
@@ -97,5 +131,32 @@ class ReminderViewModel extends ChangeNotifier {
       log("${ErrorMessage.DELETE_REMINDER_ERROR}: $e");
       return;
     }
+  }
+
+  Future<bool> reminderExists(String prescriptionId) async {
+    final snapshot =
+        await _db
+            .collection('reminders')
+            .where('userId', isEqualTo: userId)
+            .where('prescriptionId', isEqualTo: prescriptionId)
+            .get();
+
+    return snapshot.docs.isNotEmpty;
+  }
+
+  bool canTake(String time) {
+    final now = DateTime.now();
+
+    final parts = time.split(':');
+
+    final reminderTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      int.parse(parts[0]),
+      int.parse(parts[1]),
+    );
+
+    return now.isAfter(reminderTime);
   }
 }

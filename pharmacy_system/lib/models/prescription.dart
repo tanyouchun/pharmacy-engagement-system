@@ -34,7 +34,7 @@ class Prescription {
       strength: data['strength'] ?? '',
       dose: data['dose'] ?? '',
       frequency: data['frequency'] ?? '',
-      duration: data['duration'] ?? '',
+      duration: data['duration'] ?? 0,
       notes: data['notes'] ?? '',
       addedBy: data['addedBy'] ?? '',
       addedByName: data['addedByName'] ?? '',

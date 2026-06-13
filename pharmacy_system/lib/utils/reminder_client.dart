@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../models/reminder.dart';
 import '../viewmodels/reminder_viewmodel.dart';
+import '../viewmodels/prescription_viewmodel.dart';
+import '../models/prescription.dart';
 
 class ReminderClient {
   static void showReminderForm(
@@ -16,6 +18,12 @@ class ReminderClient {
     int? initialDuration,
   }) {
     final isEditing = reminder != null;
+    final prescriptionViewModel = Provider.of<PrescriptionViewModel>(
+      context,
+      listen: false,
+    );
+
+    String? prescriptionError;
 
     final medicationController = TextEditingController(
       text: reminder?.medicationName ?? initialMedicineName ?? "",
@@ -57,6 +65,17 @@ class ReminderClient {
       context,
       listen: false,
     );
+    Prescription? selectedPrescription;
+
+    if (prescriptionId.isNotEmpty) {
+      try {
+        selectedPrescription = prescriptionViewModel.prescriptions.firstWhere(
+          (p) => p.prescriptionId == prescriptionId,
+        );
+      } catch (_) {
+        selectedPrescription = null;
+      }
+    }
 
     final frequencies = [
       "Once Daily",
@@ -85,7 +104,21 @@ class ReminderClient {
             }
 
             Future<void> save() async {
-              if (medicationController.text.trim().isEmpty) {
+              if (selectedPrescription == null) {
+                setState(() {
+                  prescriptionError = "Please select a prescription";
+                });
+                return;
+              }
+
+              if (!isEditing &&
+                  await reminderViewModel.reminderExists(
+                    selectedPrescription!.prescriptionId,
+                  )) {
+                setState(() {
+                  prescriptionError =
+                      "Reminder already exists for this prescription";
+                });
                 return;
               }
 
@@ -114,10 +147,14 @@ class ReminderClient {
                   Reminder(
                     reminderId: "",
                     userId: reminderViewModel.userId,
-                    prescriptionId: prescriptionId,
-                    medicationName: medicationController.text,
-                    strength: strength,
-                    dose: dose,
+                    prescriptionId: selectedPrescription?.prescriptionId ?? "",
+                    medicationName:
+                        selectedPrescription?.medicineName ??
+                        medicationController.text,
+
+                    strength: selectedPrescription?.strength ?? strength,
+
+                    dose: selectedPrescription?.dose ?? dose,
                     scheduleTime: dateTime,
                     frequency: frequency,
                     reminderTimes: reminderTimes,
@@ -208,15 +245,65 @@ class ReminderClient {
                       const SizedBox(height: 30),
 
                       /// MEDICATION
-                      _buildTextField(
-                        controller: medicationController,
-
-                        label: "Medication Name",
-
-                        hint: "Enter medication name",
-
-                        icon: Icons.medication_outlined,
+                      const Text(
+                        "Prescription",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
                       ),
+
+                      const SizedBox(height: 10),
+
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<Prescription>(
+                            value: selectedPrescription,
+                            isExpanded: true,
+                            hint: const Text("Select Prescription"),
+                            items:
+                                prescriptionViewModel.prescriptions.map((p) {
+                                  return DropdownMenuItem(
+                                    value: p,
+                                    child: Text(
+                                      "${p.medicineName} (${p.strength})",
+                                    ),
+                                  );
+                                }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                selectedPrescription = value;
+
+                                prescriptionError = null;
+
+                                medicationController.text =
+                                    value?.medicineName ?? "";
+
+                                strength = value?.strength ?? "";
+
+                                dose = value?.dose ?? "";
+
+                                frequency = value?.frequency ?? "Once Daily";
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                      if (prescriptionError != null) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          prescriptionError!,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
 
                       const SizedBox(height: 20),
 
@@ -566,63 +653,63 @@ class ReminderClient {
     );
   }
 
-  static Widget _buildTextField({
-    required TextEditingController controller,
+  // static Widget _buildTextField({
+  //   required TextEditingController controller,
 
-    required String label,
-    required String hint,
-    required IconData icon,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  //   required String label,
+  //   required String hint,
+  //   required IconData icon,
+  // }) {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
 
-      children: [
-        Text(
-          label,
+  //     children: [
+  //       Text(
+  //         label,
 
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-        ),
+  //         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+  //       ),
 
-        const SizedBox(height: 10),
+  //       const SizedBox(height: 10),
 
-        TextField(
-          controller: controller,
+  //       TextField(
+  //         controller: controller,
 
-          decoration: InputDecoration(
-            hintText: hint,
+  //         decoration: InputDecoration(
+  //           hintText: hint,
 
-            prefixIcon: Icon(icon),
+  //           prefixIcon: Icon(icon),
 
-            filled: true,
+  //           filled: true,
 
-            fillColor: Colors.grey.shade100,
+  //           fillColor: Colors.grey.shade100,
 
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
+  //           border: OutlineInputBorder(
+  //             borderRadius: BorderRadius.circular(18),
 
-              borderSide: BorderSide.none,
-            ),
+  //             borderSide: BorderSide.none,
+  //           ),
 
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
+  //           enabledBorder: OutlineInputBorder(
+  //             borderRadius: BorderRadius.circular(18),
 
-              borderSide: BorderSide.none,
-            ),
+  //             borderSide: BorderSide.none,
+  //           ),
 
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
+  //           focusedBorder: OutlineInputBorder(
+  //             borderRadius: BorderRadius.circular(18),
 
-              borderSide: const BorderSide(
-                color: Color(0xFF4FC3CF),
+  //             borderSide: const BorderSide(
+  //               color: Color(0xFF4FC3CF),
 
-                width: 1.5,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+  //               width: 1.5,
+  //             ),
+  //           ),
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 
   static List<String> generateReminderTimes(
     TimeOfDay startTime,

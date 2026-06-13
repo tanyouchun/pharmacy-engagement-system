@@ -3,6 +3,10 @@ import 'dart:developer';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/widgets.dart';
+
+import 'medication_log_service.dart';
 
 class NotificationService {
   NotificationService._();
@@ -108,6 +112,7 @@ class NotificationService {
 
   Future<void> scheduleReminderTimes({
     required String reminderId,
+    required String userId,
     required String medicationName,
     required List<String> reminderTimes,
   }) async {
@@ -144,57 +149,37 @@ class NotificationService {
     }
   }
 
+  // Future<void> _handleNotificationAction(NotificationResponse response) async {
+  //   log("Notification clicked");
+  //   log("ActionId: ${response.actionId}");
+  //   log("Payload: ${response.payload}");
+
+  //   if (response.actionId == 'taken') {
+  //     final logId = response.payload;
+
+  //     if (logId != null) {
+  //       await MedicationLogService().markTaken(logId);
+  //       log("Medication marked taken");
+  //     }
+  //   }
+  // }
+
   Future<void> cancelAll() async {
     await _plugin.cancelAll();
   }
-
-  // Future<void> showTestNotification() async {
-  //   await _plugin.show(
-  //     999,
-  //     'Test Notification',
-  //     'If you see this, notifications are working.',
-  //     const NotificationDetails(
-  //       android: AndroidNotificationDetails(
-  //         'test_channel',
-  //         'Test Notifications',
-  //         channelDescription: 'Testing notifications',
-  //         importance: Importance.max,
-  //         priority: Priority.high,
-  //       ),
-  //     ),
-  //   );
-  // }
-
-  // Future<void> scheduleTest() async {
-  //   final scheduledDate = tz.TZDateTime.now(
-  //     tz.local,
-  //   ).add(const Duration(minutes: 1));
-
-  //   log("Now = ${tz.TZDateTime.now(tz.local)}");
-  //   log("Scheduled = $scheduledDate");
-
-  //   await _plugin.zonedSchedule(
-  //     1,
-  //     "Test",
-  //     "Should appear in one minute",
-  //     scheduledDate,
-  //     const NotificationDetails(
-  //       android: AndroidNotificationDetails(
-  //         'test_channel',
-  //         'Test Notifications',
-  //         importance: Importance.max,
-  //         priority: Priority.high,
-  //       ),
-  //     ),
-  //     androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-  //   );
-
-  //   final pending = await _plugin.pendingNotificationRequests();
-
-  //   log("Pending notifications: ${pending.length}");
-
-  //   for (final p in pending) {
-  //     log("Pending ID=${p.id}, title=${p.title}");
-  //   }
-  // }
 }
+
+// @pragma('vm:entry-point')
+// Future<void> notificationTapBackground(NotificationResponse response) async {
+//   WidgetsFlutterBinding.ensureInitialized();
+
+//   await Firebase.initializeApp();
+
+//   if (response.actionId == 'taken') {
+//     final logId = response.payload;
+
+//     if (logId != null) {
+//       await MedicationLogService().markTaken(logId);
+//     }
+//   }
+// }
