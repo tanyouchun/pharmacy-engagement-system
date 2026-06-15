@@ -244,7 +244,7 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
                                       final confirmed =
                                           await PrescriptionClient.showDeleteConfirmation(
                                             context,
-                                            prescription.medicineName,
+                                            prescription.medicationName,
                                           );
 
                                       if (!confirmed) return;
@@ -266,7 +266,7 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
                                         context,
                                         prescriptionId:
                                             prescription.prescriptionId,
-                                        medicineName: prescription.medicineName,
+                                        medicationName: prescription.medicationName,
                                         strength: prescription.strength,
                                         dose: prescription.dose,
                                         frequency: prescription.frequency,
@@ -309,7 +309,7 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
                                     ),
                                   ),
 
-                                  title: Text(prescription.medicineName),
+                                  title: Text(prescription.medicationName),
 
                                   subtitle: Row(
                                     crossAxisAlignment:
@@ -519,7 +519,7 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            prescription.medicineName,
+                            prescription.medicationName,
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,

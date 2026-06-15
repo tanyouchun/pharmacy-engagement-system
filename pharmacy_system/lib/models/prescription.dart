@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Prescription {
   final String prescriptionId;
-  final String medicineName;
+  final String medicationName;
   final String strength;
   final String dose;
   final String frequency;
@@ -14,7 +14,7 @@ class Prescription {
 
   Prescription({
     required this.prescriptionId,
-    required this.medicineName,
+    required this.medicationName,
     required this.strength,
     required this.dose,
     required this.frequency,
@@ -30,7 +30,7 @@ class Prescription {
 
     return Prescription(
       prescriptionId: doc.id,
-      medicineName: data['medicineName'] ?? '',
+      medicationName: data['medicationName'] ?? '',
       strength: data['strength'] ?? '',
       dose: data['dose'] ?? '',
       frequency: data['frequency'] ?? '',
@@ -44,7 +44,7 @@ class Prescription {
 
   Map<String, dynamic> toMap({bool isUpdate = false}) {
     return {
-      "medicineName": medicineName,
+      "medicationName": medicationName,
       "strength": strength,
       "dose": dose,
       "frequency": frequency,
@@ -58,7 +58,7 @@ class Prescription {
   }
 
   Prescription copyWith({
-    String? medicineName,
+    String? medicationName,
     String? strength,
     String? dose,
     String? frequency,
@@ -69,7 +69,7 @@ class Prescription {
   }) {
     return Prescription(
       prescriptionId: prescriptionId,
-      medicineName: medicineName ?? this.medicineName,
+      medicationName: medicationName ?? this.medicationName,
       strength: strength ?? this.strength,
       dose: dose ?? this.dose,
       frequency: frequency ?? this.frequency,

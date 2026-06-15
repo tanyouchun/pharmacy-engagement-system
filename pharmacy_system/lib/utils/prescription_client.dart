@@ -11,7 +11,7 @@ class PrescriptionClient {
   }) {
     final nameController = TextEditingController();
     final notesController = TextEditingController();
-    String? medicineNameError;
+    String? medicationNameError;
 
     String frequency = "Once Daily";
     String strength = "100mg";
@@ -101,7 +101,7 @@ class PrescriptionClient {
                         hint: "Enter medicine name",
 
                         icon: Icons.local_pharmacy_outlined,
-                        errorText: medicineNameError,
+                        errorText: medicationNameError,
                       ),
 
                       const SizedBox(height: 18),
@@ -404,8 +404,8 @@ class PrescriptionClient {
                               onPressed: () async {
                                 if (nameController.text.trim().isEmpty) {
                                   setState(() {
-                                    medicineNameError =
-                                        "Medicine name is required";
+                                    medicationNameError =
+                                        "Medication name is required";
                                   });
                                   return;
                                 }
@@ -413,7 +413,7 @@ class PrescriptionClient {
                                 final prescription = Prescription(
                                   prescriptionId: "",
 
-                                  medicineName: nameController.text,
+                                  medicationName: nameController.text,
 
                                   strength: strength,
 
@@ -497,11 +497,11 @@ class PrescriptionClient {
     String? userId,
   }) {
     final nameController = TextEditingController(
-      text: prescription.medicineName,
+      text: prescription.medicationName,
     );
 
     final notesController = TextEditingController(text: prescription.notes);
-    String? medicineNameError;
+    String? medicationNameError;
 
     String frequency = prescription.frequency;
     String strength = prescription.strength;
@@ -571,7 +571,7 @@ class PrescriptionClient {
                         hint: "Enter medicine name",
 
                         icon: Icons.local_pharmacy_outlined,
-                        errorText: medicineNameError,
+                        errorText: medicationNameError,
                       ),
 
                       const SizedBox(height: 18),
@@ -855,13 +855,13 @@ class PrescriptionClient {
                               onPressed: () async {
                                 if (nameController.text.trim().isEmpty) {
                                   setState(() {
-                                    medicineNameError =
-                                        "Medicine name is required";
+                                    medicationNameError =
+                                        "Medication name is required";
                                   });
                                   return;
                                 }
                                 final updated = prescription.copyWith(
-                                  medicineName: nameController.text,
+                                  medicationName: nameController.text,
 
                                   strength: strength,
 
@@ -987,7 +987,7 @@ class PrescriptionClient {
 
   static Future<bool> showDeleteConfirmation(
     BuildContext context,
-    String medicineName,
+    String medicationName,
   ) async {
     return await showDialog<bool>(
           context: context,
@@ -1019,7 +1019,7 @@ class PrescriptionClient {
                           "Are you sure you want to delete the prescription for ",
                     ),
                     TextSpan(
-                      text: medicineName,
+                      text: medicationName,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const TextSpan(text: "?\n\nThis action cannot be undone."),

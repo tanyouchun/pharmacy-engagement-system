@@ -368,7 +368,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                                           final confirmed =
                                               await PrescriptionClient.showDeleteConfirmation(
                                                 context,
-                                                prescription.medicineName,
+                                                prescription.medicationName,
                                               );
 
                                           if (!confirmed) return;
@@ -421,7 +421,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                                       ),
 
                                       title: Text(
-                                        prescription.medicineName,
+                                        prescription.medicationName,
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -610,7 +610,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
 
                         Expanded(
                           child: Text(
-                            prescription.medicineName,
+                            prescription.medicationName,
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -652,8 +652,8 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
                         children: [
                           _detailRow(
                             Icons.medication_outlined,
-                            "Medicine",
-                            prescription.medicineName,
+                            "Medication",
+                            prescription.medicationName,
                           ),
 
                           const SizedBox(height: 12),

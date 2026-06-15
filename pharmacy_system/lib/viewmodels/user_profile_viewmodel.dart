@@ -252,7 +252,7 @@ class UserProfileViewModel extends ChangeNotifier {
 
       for (final p in prescriptions) {
         prescriptionText +=
-            "- Medicine: ${p.medicineName}\n"
+            "- Medication: ${p.medicationName}\n"
             "- Frequency: ${p.frequency}\n"
             "- Notes: ${p.notes}\n"
             "- Strength: ${p.strength}\n"

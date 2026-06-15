@@ -10,7 +10,7 @@ class ReminderClient {
   static void showReminderForm(
     BuildContext context, {
     Reminder? reminder,
-    String? initialMedicineName,
+    String? initialMedicationName,
     String? initialStrength,
     String? initialDose,
     String? initialFrequency,
@@ -26,7 +26,7 @@ class ReminderClient {
     String? prescriptionError;
 
     final medicationController = TextEditingController(
-      text: reminder?.medicationName ?? initialMedicineName ?? "",
+      text: reminder?.medicationName ?? initialMedicationName ?? "",
     );
 
     String strength = reminder?.strength ?? initialStrength ?? "100mg";
@@ -104,77 +104,24 @@ class ReminderClient {
             }
 
             Future<void> save() async {
-              if (selectedPrescription == null) {
-                setState(() {
-                  prescriptionError = "Please select a prescription";
-                });
-                return;
-              }
-
-              if (!isEditing &&
-                  await reminderViewModel.reminderExists(
-                    selectedPrescription!.prescriptionId,
-                  )) {
-                setState(() {
-                  prescriptionError =
-                      "Reminder already exists for this prescription";
-                });
-                return;
-              }
-
-              final now = DateTime.now();
-
-              final dateTime = DateTime(
-                now.year,
-                now.month,
-                now.day,
-                selectedTime!.hour,
-                selectedTime!.minute,
+              final error = await reminderViewModel.saveReminder(
+                isEditing: isEditing,
+                existingReminder: reminder,
+                selectedPrescription: selectedPrescription,
+                selectedTime: selectedTime!,
+                frequency: frequency,
+                medicationName: medicationController.text,
+                strength: strength,
+                dose: dose,
+                durationText: durationController.text,
+                durationOption: durationOption,
               );
 
-              final duration =
-                  durationOption == "other"
-                      ? int.tryParse(durationController.text.trim()) ?? 7
-                      : int.parse(durationOption);
-
-              final reminderTimes = generateReminderTimes(
-                selectedTime!,
-                frequency,
-              );
-
-              if (!isEditing) {
-                await reminderViewModel.createReminder(
-                  Reminder(
-                    reminderId: "",
-                    userId: reminderViewModel.userId,
-                    prescriptionId: selectedPrescription?.prescriptionId ?? "",
-                    medicationName:
-                        selectedPrescription?.medicineName ??
-                        medicationController.text,
-
-                    strength: selectedPrescription?.strength ?? strength,
-
-                    dose: selectedPrescription?.dose ?? dose,
-                    scheduleTime: dateTime,
-                    frequency: frequency,
-                    reminderTimes: reminderTimes,
-                    isActive: true,
-                    duration: duration,
-                  ),
-                );
-              } else {
-                await reminderViewModel.updateReminder(
-                  reminder!.copyWith(
-                    medicationName: medicationController.text,
-                    strength: strength,
-                    dose: dose,
-                    time: dateTime,
-                    frequency: frequency,
-                    reminderTimes: reminderTimes,
-                    isActive: true,
-                    duration: duration,
-                  ),
-                );
+              if (error != null) {
+                setState(() {
+                  prescriptionError = error;
+                });
+                return;
               }
 
               if (context.mounted) {
@@ -271,7 +218,7 @@ class ReminderClient {
                                   return DropdownMenuItem(
                                     value: p,
                                     child: Text(
-                                      "${p.medicineName} (${p.strength})",
+                                      "${p.medicationName} (${p.strength})",
                                     ),
                                   );
                                 }).toList(),
@@ -282,7 +229,7 @@ class ReminderClient {
                                 prescriptionError = null;
 
                                 medicationController.text =
-                                    value?.medicineName ?? "";
+                                    value?.medicationName ?? "";
 
                                 strength = value?.strength ?? "";
 
@@ -653,107 +600,10 @@ class ReminderClient {
     );
   }
 
-  // static Widget _buildTextField({
-  //   required TextEditingController controller,
-
-  //   required String label,
-  //   required String hint,
-  //   required IconData icon,
-  // }) {
-  //   return Column(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-
-  //     children: [
-  //       Text(
-  //         label,
-
-  //         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-  //       ),
-
-  //       const SizedBox(height: 10),
-
-  //       TextField(
-  //         controller: controller,
-
-  //         decoration: InputDecoration(
-  //           hintText: hint,
-
-  //           prefixIcon: Icon(icon),
-
-  //           filled: true,
-
-  //           fillColor: Colors.grey.shade100,
-
-  //           border: OutlineInputBorder(
-  //             borderRadius: BorderRadius.circular(18),
-
-  //             borderSide: BorderSide.none,
-  //           ),
-
-  //           enabledBorder: OutlineInputBorder(
-  //             borderRadius: BorderRadius.circular(18),
-
-  //             borderSide: BorderSide.none,
-  //           ),
-
-  //           focusedBorder: OutlineInputBorder(
-  //             borderRadius: BorderRadius.circular(18),
-
-  //             borderSide: const BorderSide(
-  //               color: Color(0xFF4FC3CF),
-
-  //               width: 1.5,
-  //             ),
-  //           ),
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }
-
-  static List<String> generateReminderTimes(
-    TimeOfDay startTime,
-    String frequency,
-  ) {
-    int timesPerDay = 1;
-
-    switch (frequency.toLowerCase()) {
-      case "twice daily":
-        timesPerDay = 2;
-        break;
-
-      case "three times daily":
-        timesPerDay = 3;
-        break;
-
-      case "four times daily":
-        timesPerDay = 4;
-        break;
-
-      default:
-        timesPerDay = 1;
-    }
-
-    final intervalHours = 24 ~/ timesPerDay;
-
-    final times = <String>[];
-
-    for (int i = 0; i < timesPerDay; i++) {
-      final hour = (startTime.hour + (intervalHours * i)) % 24;
-
-      final formatted =
-          "${hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}";
-
-      times.add(formatted);
-    }
-
-    return times;
-  }
-
   static void showReminderFormFromPrescription(
     BuildContext context, {
     required String prescriptionId,
-    required String medicineName,
+    required String medicationName,
     String? strength,
     String? dose,
     required String frequency,
@@ -762,7 +612,7 @@ class ReminderClient {
     showReminderForm(
       context,
       initialPrescriptionId: prescriptionId,
-      initialMedicineName: medicineName,
+      initialMedicationName: medicationName,
       initialStrength: strength,
       initialDose: dose,
       initialFrequency: frequency,

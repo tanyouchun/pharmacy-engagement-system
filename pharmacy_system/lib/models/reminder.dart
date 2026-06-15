@@ -68,10 +68,11 @@ class Reminder {
   }
 
   Reminder copyWith({
+    String? prescriptionId,
     String? medicationName,
     String? strength,
     String? dose,
-    DateTime? time,
+    DateTime? scheduleTime,
     String? frequency,
     List<String>? reminderTimes,
     bool? isActive,
@@ -80,11 +81,11 @@ class Reminder {
     return Reminder(
       reminderId: reminderId,
       userId: userId,
-      prescriptionId: prescriptionId,
+      prescriptionId: prescriptionId ?? this.prescriptionId,
       medicationName: medicationName ?? this.medicationName,
       strength: strength ?? this.strength,
       dose: dose ?? this.dose,
-      scheduleTime: time ?? scheduleTime,
+      scheduleTime: scheduleTime ?? this.scheduleTime,
       frequency: frequency ?? this.frequency,
       reminderTimes: reminderTimes ?? this.reminderTimes,
       isActive: isActive ?? this.isActive,

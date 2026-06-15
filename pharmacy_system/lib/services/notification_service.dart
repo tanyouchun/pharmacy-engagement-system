@@ -3,8 +3,6 @@ import 'dart:developer';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/widgets.dart';
 
 import 'medication_log_service.dart';
 
@@ -149,37 +147,7 @@ class NotificationService {
     }
   }
 
-  // Future<void> _handleNotificationAction(NotificationResponse response) async {
-  //   log("Notification clicked");
-  //   log("ActionId: ${response.actionId}");
-  //   log("Payload: ${response.payload}");
-
-  //   if (response.actionId == 'taken') {
-  //     final logId = response.payload;
-
-  //     if (logId != null) {
-  //       await MedicationLogService().markTaken(logId);
-  //       log("Medication marked taken");
-  //     }
-  //   }
-  // }
-
   Future<void> cancelAll() async {
     await _plugin.cancelAll();
   }
 }
-
-// @pragma('vm:entry-point')
-// Future<void> notificationTapBackground(NotificationResponse response) async {
-//   WidgetsFlutterBinding.ensureInitialized();
-
-//   await Firebase.initializeApp();
-
-//   if (response.actionId == 'taken') {
-//     final logId = response.payload;
-
-//     if (logId != null) {
-//       await MedicationLogService().markTaken(logId);
-//     }
-//   }
-// }
