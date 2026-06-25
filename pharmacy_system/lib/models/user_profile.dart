@@ -1,7 +1,7 @@
-import 'profile.dart';
+import 'user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class UserProfile extends Profile {
+class UserProfile extends User {
   final int age;
   final String gender;
   final String height;

@@ -24,6 +24,7 @@ class _PharmacistProfileFormViewState extends State<PharmacistProfileFormView> {
       backgroundColor: const Color(0xFFF5F7FB),
 
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         elevation: 0,
         centerTitle: true,
         backgroundColor: Colors.white,

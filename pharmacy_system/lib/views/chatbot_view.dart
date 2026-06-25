@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../models/chatbot_message.dart';
 import '../viewmodels/chatbot_viewmodel.dart';
-import '../viewmodels/admin_config_viewmodel.dart';
+import '../viewmodels/admin_viewmodel.dart';
 
 class ChatbotView extends StatefulWidget {
   const ChatbotView({super.key});
@@ -51,7 +52,7 @@ class _ChatbotViewState extends State<ChatbotView> {
                 itemBuilder: (context, index) {
                   final msg = chatBotViewModel.messages[index];
 
-                  bool isUser = msg["role"] == "user";
+                  final isUser = msg.role == ChatRole.user;
 
                   return Align(
                     alignment:
@@ -71,7 +72,7 @@ class _ChatbotViewState extends State<ChatbotView> {
                       ),
 
                       child: Text(
-                        msg["content"]!,
+                        msg.content,
                         style: TextStyle(
                           color: isUser ? Colors.white : Colors.black,
                         ),

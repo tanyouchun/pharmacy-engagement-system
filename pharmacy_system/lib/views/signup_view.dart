@@ -14,6 +14,24 @@ class _SignupViewState extends State<SignupView> {
   final _formKey = GlobalKey<FormState>();
 
   @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final signupViewModel = Provider.of<SignupViewModel>(
+        context,
+        listen: false,
+      );
+
+      signupViewModel.passwordController.addListener(() {
+        signupViewModel.checkPasswordStrength(
+          signupViewModel.passwordController.text,
+        );
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final signupViewModel = Provider.of<SignupViewModel>(context);
 
@@ -25,101 +43,142 @@ class _SignupViewState extends State<SignupView> {
         ),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
 
-              CustomTextField(
-                hint: "Enter your email",
-                icon: Icons.email,
-                controller: signupViewModel.emailController,
-              ),
+                CustomTextField(
+                  hint: "Enter your email",
+                  icon: Icons.email,
+                  controller: signupViewModel.emailController,
+                ),
 
-              const SizedBox(height: 15),
+                const SizedBox(height: 15),
 
-              CustomTextField(
-                hint: "Enter your password",
-                icon: Icons.lock,
-                isPassword: true,
-                controller: signupViewModel.passwordController,
-              ),
+                CustomTextField(
+                  hint: "Enter your password",
+                  icon: Icons.lock,
+                  isPassword: true,
+                  controller: signupViewModel.passwordController,
+                ),
 
-              const SizedBox(height: 15),
+                const SizedBox(height: 5),
 
-              CustomTextField(
-                hint: "Confirm your password",
-                icon: Icons.lock_outline,
-                isPassword: true,
-                controller: signupViewModel.confirmPasswordController,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Please confirm your password";
-                  }
-                  if (value != signupViewModel.passwordController.text) {
-                    return "Passwords do not match";
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 20),
-
-              // ✅ NOW INSIDE COLUMN
-              Row(
-                children: [
-                  const Text("Are you a pharmacist?"),
-                  const SizedBox(width: 16),
-                  Switch(
-                    value: signupViewModel.isPharmacist,
-                    onChanged: (val) {
-                      signupViewModel.isPharmacist = val;
-                      signupViewModel.notifyListeners();
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  Text(signupViewModel.isPharmacist ? "Pharmacist" : "Regular user"),
-                ],
-              ),
-
-              const Spacer(),
-
-              signupViewModel.isLoading
-                  ? const CircularProgressIndicator()
-                  : SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                      ),
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          signupViewModel.signup(context);
-                        }
-                      },
-                      child: const Text(
-                        "Sign Up",
-                        style: TextStyle(fontSize: 16, color: Colors.white),
+                if (signupViewModel.passwordStrength.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6, left: 8),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Password Strength: ${signupViewModel.passwordStrength}",
+                        style: TextStyle(
+                          color: signupViewModel.passwordStrengthColor,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
 
-              const SizedBox(height: 20),
+                const SizedBox(height: 15),
 
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const LoginView()),
-                  );
-                },
-                child: const Text("Already have an account? Sign In"),
-              ),
-            ],
+                CustomTextField(
+                  hint: "Confirm your password",
+                  icon: Icons.lock_outline,
+                  isPassword: true,
+                  controller: signupViewModel.confirmPasswordController,
+                ),
+
+                const SizedBox(height: 20),
+
+                if (signupViewModel.errors.isNotEmpty)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border(
+                        left: BorderSide(color: Colors.red.shade700, width: 5),
+                      ),
+                    ),
+                    child: ListTile(
+                      leading: Icon(
+                        Icons.warning_amber_rounded,
+                        color: Colors.red.shade700,
+                      ),
+                      title: const Text(
+                        "Unable to create account",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children:
+                            signupViewModel.errors.values
+                                .map((e) => Text("• $e"))
+                                .toList(),
+                      ),
+                    ),
+                  ),
+
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    const Text("Are you a pharmacist?"),
+                    const SizedBox(width: 16),
+                    Switch(
+                      value: signupViewModel.isPharmacist,
+                      onChanged: (val) {
+                        signupViewModel.isPharmacist = val;
+                        signupViewModel.notifyListeners();
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      signupViewModel.isPharmacist
+                          ? "Pharmacist"
+                          : "Regular user",
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 40),
+
+                signupViewModel.isLoading
+                    ? const CircularProgressIndicator()
+                    : SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                        ),
+                        onPressed: () {
+                          signupViewModel.signup(context);
+                        },
+                        child: const Text(
+                          "Sign Up",
+                          style: TextStyle(fontSize: 16, color: Colors.white),
+                        ),
+                      ),
+                    ),
+
+                const SizedBox(height: 20),
+
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const LoginView()),
+                    );
+                  },
+                  child: const Text("Already have an account? Sign In"),
+                ),
+              ],
+            ),
           ),
         ),
       ),

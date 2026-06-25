@@ -1,8 +1,8 @@
-import 'profile.dart';
+import 'user.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class PharmacistProfile extends Profile {
+class PharmacistProfile extends User {
   final String license;
   final String pharmacyName;
   final int experience;

@@ -13,7 +13,8 @@ import 'viewmodels/chat_viewmodel.dart';
 import 'viewmodels/reminder_viewmodel.dart';
 import 'viewmodels/pharmacist_profile_viewmodel.dart';
 import 'viewmodels/chatbot_viewmodel.dart';
-import 'viewmodels/admin_config_viewmodel.dart';
+
+import 'services/notification_service.dart';
 
 import 'views/auth_wrapper.dart';
 import 'views/pharmacist/pharmacist_profile_Form_view.dart';
@@ -24,6 +25,8 @@ void main() async {
   await dotenv.load(fileName: ".env");
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  await NotificationService.instance.initialize();
 
   runApp(const MyApp());
 }

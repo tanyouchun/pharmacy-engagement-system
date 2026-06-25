@@ -3,19 +3,53 @@ import 'package:provider/provider.dart';
 
 import '../models/reminder.dart';
 import '../viewmodels/reminder_viewmodel.dart';
+import '../viewmodels/prescription_viewmodel.dart';
+import '../models/prescription.dart';
 
 class ReminderClient {
   static void showReminderForm(
     BuildContext context, {
     Reminder? reminder,
-    String? initialMedicineName,
+    String? initialMedicationName,
+    String? initialStrength,
+    String? initialDose,
     String? initialFrequency,
+    String? initialPrescriptionId,
+    int? initialDuration,
   }) {
     final isEditing = reminder != null;
+    final prescriptionViewModel = Provider.of<PrescriptionViewModel>(
+      context,
+      listen: false,
+    );
+
+    String? prescriptionError;
 
     final medicationController = TextEditingController(
-      text: reminder?.medicationName ?? initialMedicineName ?? "",
+      text: reminder?.medicationName ?? initialMedicationName ?? "",
     );
+
+    String strength = reminder?.strength ?? initialStrength ?? "100mg";
+    String dose = reminder?.dose ?? initialDose ?? "1 pill";
+
+    String durationOption =
+        [
+              "1",
+              "3",
+              "5",
+              "7",
+              "14",
+              "30",
+            ].contains((reminder?.duration ?? initialDuration ?? 3).toString())
+            ? (reminder?.duration ?? initialDuration ?? 3).toString()
+            : "other";
+
+    final durationController = TextEditingController(
+      text: (reminder?.duration ?? initialDuration ?? 3).toString(),
+    );
+
+    final prescriptionId =
+        reminder?.prescriptionId ?? initialPrescriptionId ?? "";
 
     TimeOfDay? selectedTime =
         reminder != null
@@ -31,6 +65,17 @@ class ReminderClient {
       context,
       listen: false,
     );
+    Prescription? selectedPrescription;
+
+    if (prescriptionId.isNotEmpty) {
+      try {
+        selectedPrescription = prescriptionViewModel.prescriptions.firstWhere(
+          (p) => p.prescriptionId == prescriptionId,
+        );
+      } catch (_) {
+        selectedPrescription = null;
+      }
+    }
 
     final frequencies = [
       "Once Daily",
@@ -59,46 +104,24 @@ class ReminderClient {
             }
 
             Future<void> save() async {
-              if (medicationController.text.trim().isEmpty) {
+              final error = await reminderViewModel.saveReminder(
+                isEditing: isEditing,
+                existingReminder: reminder,
+                selectedPrescription: selectedPrescription,
+                selectedTime: selectedTime!,
+                frequency: frequency,
+                medicationName: medicationController.text,
+                strength: strength,
+                dose: dose,
+                durationText: durationController.text,
+                durationOption: durationOption,
+              );
+
+              if (error != null) {
+                setState(() {
+                  prescriptionError = error;
+                });
                 return;
-              }
-
-              final now = DateTime.now();
-
-              final dateTime = DateTime(
-                now.year,
-                now.month,
-                now.day,
-                selectedTime!.hour,
-                selectedTime!.minute,
-              );
-
-              final reminderTimes = generateReminderTimes(
-                selectedTime!,
-                frequency,
-              );
-
-              if (!isEditing) {
-                await reminderViewModel.createReminder(
-                  Reminder(
-                    reminderId: "",
-                    userId: reminderViewModel.userId,
-                    prescriptionId: "",
-                    medicationName: medicationController.text,
-                    scheduleTime: dateTime,
-                    frequency: frequency,
-                    reminderTimes: reminderTimes,
-                  ),
-                );
-              } else {
-                await reminderViewModel.updateReminder(
-                  reminder!.copyWith(
-                    medicationName: medicationController.text,
-                    time: dateTime,
-                    frequency: frequency,
-                    reminderTimes: reminderTimes,
-                  ),
-                );
               }
 
               if (context.mounted) {
@@ -169,15 +192,65 @@ class ReminderClient {
                       const SizedBox(height: 30),
 
                       /// MEDICATION
-                      _buildTextField(
-                        controller: medicationController,
-
-                        label: "Medication Name",
-
-                        hint: "Enter medication name",
-
-                        icon: Icons.medication_outlined,
+                      const Text(
+                        "Prescription",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
                       ),
+
+                      const SizedBox(height: 10),
+
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<Prescription>(
+                            value: selectedPrescription,
+                            isExpanded: true,
+                            hint: const Text("Select Prescription"),
+                            items:
+                                prescriptionViewModel.prescriptions.map((p) {
+                                  return DropdownMenuItem(
+                                    value: p,
+                                    child: Text(
+                                      "${p.medicationName} (${p.strength})",
+                                    ),
+                                  );
+                                }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                selectedPrescription = value;
+
+                                prescriptionError = null;
+
+                                medicationController.text =
+                                    value?.medicationName ?? "";
+
+                                strength = value?.strength ?? "";
+
+                                dose = value?.dose ?? "";
+
+                                frequency = value?.frequency ?? "Once Daily";
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                      if (prescriptionError != null) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          prescriptionError!,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
 
                       const SizedBox(height: 20),
 
@@ -227,6 +300,194 @@ class ReminderClient {
                           ),
                         ),
                       ),
+
+                      const SizedBox(height: 20),
+
+                      /// STRENGTH
+                      // const Text(
+                      //   "Strength",
+
+                      //   style: TextStyle(fontWeight: FontWeight.w600),
+                      // ),
+                      const Text(
+                        "Strength",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: strength,
+                            isExpanded: true,
+                            items:
+                                ["100mg", "250mg", "500mg", "5ml", "10ml"]
+                                    .map(
+                                      (value) => DropdownMenuItem(
+                                        value: value,
+                                        child: Text(value),
+                                      ),
+                                    )
+                                    .toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                strength = value!;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      /// DOSE
+                      // const Text(
+                      //   "Dose",
+
+                      //   style: TextStyle(fontWeight: FontWeight.w600),
+                      // ),
+                      const Text(
+                        "Dose",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: dose,
+                            isExpanded: true,
+                            items:
+                                [
+                                      "1 pill",
+                                      "2 pills",
+                                      "1 tablet",
+                                      "2 tablets",
+                                      "1 teaspoon",
+                                    ]
+                                    .map(
+                                      (value) => DropdownMenuItem(
+                                        value: value,
+                                        child: Text(value),
+                                      ),
+                                    )
+                                    .toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                dose = value!;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      const Text(
+                        "Duration",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: durationOption,
+                            isExpanded: true,
+                            items: const [
+                              DropdownMenuItem(
+                                value: "1",
+                                child: Text("1 day"),
+                              ),
+                              DropdownMenuItem(
+                                value: "3",
+                                child: Text("3 days"),
+                              ),
+                              DropdownMenuItem(
+                                value: "5",
+                                child: Text("5 days"),
+                              ),
+                              DropdownMenuItem(
+                                value: "7",
+                                child: Text("7 days"),
+                              ),
+                              DropdownMenuItem(
+                                value: "14",
+                                child: Text("14 days"),
+                              ),
+                              DropdownMenuItem(
+                                value: "30",
+                                child: Text("30 days"),
+                              ),
+                              DropdownMenuItem(
+                                value: "other",
+                                child: Text("Other"),
+                              ),
+                            ],
+                            onChanged: (value) {
+                              setState(() {
+                                durationOption = value!;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+
+                      if (durationOption == "other") ...[
+                        const SizedBox(height: 12),
+
+                        TextField(
+                          controller: durationController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            hintText: "Enter duration in days",
+                            prefixIcon: const Icon(Icons.calendar_today),
+                            filled: true,
+                            fillColor: Colors.grey.shade100,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(18),
+                              borderSide: BorderSide.none,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(18),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(18),
+                              borderSide: const BorderSide(
+                                color: Color(0xFF4FC3CF),
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
 
                       const SizedBox(height: 20),
 
@@ -339,112 +600,23 @@ class ReminderClient {
     );
   }
 
-  static Widget _buildTextField({
-    required TextEditingController controller,
-
-    required String label,
-    required String hint,
-    required IconData icon,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-
-      children: [
-        Text(
-          label,
-
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-        ),
-
-        const SizedBox(height: 10),
-
-        TextField(
-          controller: controller,
-
-          decoration: InputDecoration(
-            hintText: hint,
-
-            prefixIcon: Icon(icon),
-
-            filled: true,
-
-            fillColor: Colors.grey.shade100,
-
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-
-              borderSide: BorderSide.none,
-            ),
-
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-
-              borderSide: BorderSide.none,
-            ),
-
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-
-              borderSide: const BorderSide(
-                color: Color(0xFF4FC3CF),
-
-                width: 1.5,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  static List<String> generateReminderTimes(
-    TimeOfDay startTime,
-    String frequency,
-  ) {
-    int timesPerDay = 1;
-
-    switch (frequency.toLowerCase()) {
-      case "twice daily":
-        timesPerDay = 2;
-        break;
-
-      case "three times daily":
-        timesPerDay = 3;
-        break;
-
-      case "four times daily":
-        timesPerDay = 4;
-        break;
-
-      default:
-        timesPerDay = 1;
-    }
-
-    final intervalHours = 24 ~/ timesPerDay;
-
-    final times = <String>[];
-
-    for (int i = 0; i < timesPerDay; i++) {
-      final hour = (startTime.hour + (intervalHours * i)) % 24;
-
-      final formatted =
-          "${hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}";
-
-      times.add(formatted);
-    }
-
-    return times;
-  }
-
   static void showReminderFormFromPrescription(
     BuildContext context, {
-    required String medicineName,
+    required String prescriptionId,
+    required String medicationName,
+    String? strength,
+    String? dose,
     required String frequency,
+    required int duration,
   }) {
     showReminderForm(
       context,
-      initialMedicineName: medicineName,
+      initialPrescriptionId: prescriptionId,
+      initialMedicationName: medicationName,
+      initialStrength: strength,
+      initialDose: dose,
       initialFrequency: frequency,
+      initialDuration: duration,
     );
   }
 }

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../viewmodels/login_viewmodel.dart';
 import '../utils/custom_textfield.dart';
 import 'signup_view.dart';
+import 'user/user_create_profile_view.dart';
+import 'pharmacist/pharmacist_profile_Form_view.dart';
 
 class LoginView extends StatelessWidget {
   const LoginView({super.key});
@@ -156,8 +160,16 @@ class LoginView extends StatelessWidget {
                   icon: "assets/images/google.png",
                   text: "Sign in with Google",
                   onTap: () async {
-                    await loginViewModel.signInWithGoogle();
-                    if (context.mounted) {
+                    final result = await loginViewModel.signInWithGoogle();
+
+                    if (!context.mounted) return;
+
+                    if (result == "NEW_GOOGLE_USER") {
+                      _showRoleSelectionDialog(context);
+                      return;
+                    }
+
+                    if (loginViewModel.errorMessage == null) {
                       Navigator.of(context).popUntil((route) => route.isFirst);
                     }
                   },
@@ -171,6 +183,93 @@ class LoginView extends StatelessWidget {
       ),
     );
   }
+}
+
+void _showRoleSelectionDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+
+        title: const Text("Choose Account Type", textAlign: TextAlign.center),
+
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              "Select how you want to use the app.",
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: 20),
+
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.person),
+                label: const Text("Normal User"),
+                onPressed: () async {
+                  await _createGoogleUser(role: "user");
+
+                  if (context.mounted) {
+                    Navigator.pop(context);
+
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (_) => const ProfileView()),
+                      (route) => false,
+                    );
+                  }
+                },
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.local_pharmacy),
+                label: const Text("Pharmacist"),
+                onPressed: () async {
+                  await _createGoogleUser(role: "pharmacist");
+
+                  if (context.mounted) {
+                    Navigator.pop(context);
+
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (_) => const PharmacistProfileFormView(),
+                      ),
+                      (route) => false,
+                    );
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+Future<void> _createGoogleUser({required String role}) async {
+  final user = FirebaseAuth.instance.currentUser;
+
+  if (user == null) return;
+
+  await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+    "email": user.email ?? "",
+    "name": user.displayName ?? "",
+    "role": role,
+    "createdAt": FieldValue.serverTimestamp(),
+    "isBlocked": false,
+    "suspendUntil": null,
+    "reportCount": 0,
+    "isPermanentBan": false,
+  });
 }
 
 Widget _socialButton({

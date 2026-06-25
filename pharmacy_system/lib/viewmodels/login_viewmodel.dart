@@ -39,8 +39,29 @@ class LoginViewModel extends ChangeNotifier {
       }
       log("Login success UID: $uid");
     } on FirebaseAuthException catch (e) {
-      log("${ErrorMessage.LOGIN_ERROR}: $e");
-      errorMessage = ErrorMessage.LOGIN_ERROR;
+      switch (e.code) {
+        case 'invalid-email':
+          errorMessage = "Please enter a valid email address.";
+          break;
+
+        case 'user-not-found':
+        case 'wrong-password':
+        case 'invalid-credential':
+          errorMessage = "Invalid email or password.";
+          break;
+
+        case 'user-disabled':
+          errorMessage = "This account has been disabled.";
+          break;
+
+        case 'too-many-requests':
+          errorMessage = "Too many login attempts. Please try again later.";
+          break;
+
+        default:
+          errorMessage = e.message ?? "Login failed.";
+      }
+
       notifyListeners();
     } catch (e) {
       log("Email and password SignIn error. ${ErrorMessage.LOGIN_ERROR}: $e");
@@ -53,7 +74,7 @@ class LoginViewModel extends ChangeNotifier {
   }
 
   // Google Sign-In
-  Future<void> signInWithGoogle() async {
+  Future<String?> signInWithGoogle() async {
     try {
       isLoading = true;
       notifyListeners();
@@ -63,16 +84,17 @@ class LoginViewModel extends ChangeNotifier {
         log("Google sign-in cancelled by user");
         isLoading = false;
         notifyListeners();
-        return;
+        return null;
       }
       final uid = userCredential.user?.uid;
 
       if (uid != null) {
-        await _checkUserStatus(uid);
+        return await _checkUserStatus(uid);
       }
     } catch (e) {
       log("Google Sign in error. ${ErrorMessage.LOGIN_ERROR}: $e");
       errorMessage = e.toString().replaceAll("Exception: ", "");
+      return errorMessage;
     } finally {
       isLoading = false;
       notifyListeners();
@@ -82,47 +104,54 @@ class LoginViewModel extends ChangeNotifier {
   Future<String?> _checkUserStatus(String uid) async {
     try {
       log("Checking user status for $uid");
+
       final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
       final userDoc = await userRef.get();
 
       if (!userDoc.exists) {
-        log("New Google user detected. Creating Firestore record...");
-
-        await userRef.set({
-          "email": FirebaseAuth.instance.currentUser?.email ?? "",
-          "name": FirebaseAuth.instance.currentUser?.displayName ?? "",
-          "role": "user",
-          "createdAt": FieldValue.serverTimestamp(),
-          "isBlocked": false,
-          "suspendUntil": null,
-          "reportCount": 0,
-          "isPermanentBan": false,
-        });
-
-        return null; // New user, no need to check block status
+        return "NEW_GOOGLE_USER";
       }
 
       final data = userDoc.data();
+
       log("User data for $uid: $data");
+
+      final role = data?['role'];
+      final approvalStatus = data?['approvalStatus'];
+
+      if (role == 'pharmacist') {
+        if (approvalStatus == 'pending') {
+          return null;
+        }
+
+        if (approvalStatus == 'rejected') {
+          return null;
+        }
+      }
+
       if (data?['isBlocked'] == true) {
         final suspendUntil = data?['suspendUntil'];
 
         if (data?['isPermanentBan'] == true) {
-          log("Account $uid is permanently banned. Signing out user.");
+          log("Account $uid permanently banned");
+
           await FirebaseAuth.instance.signOut();
+
           return "Account permanently banned";
         }
 
+        // Temporary Suspension
         if (suspendUntil != null) {
           final until = (suspendUntil as Timestamp).toDate();
 
           if (DateTime.now().isBefore(until)) {
-            log(
-              "Account $uid is currently suspended until $until. Signing out user.",
-            );
+            log("Account $uid suspended until $until");
+
             await FirebaseAuth.instance.signOut();
+
             return "Your account is suspended until ${until.toLocal()}";
           } else {
+            // auto unblock expired suspension
             await userDoc.reference.update({
               'isBlocked': false,
               'suspendUntil': null,
@@ -130,8 +159,11 @@ class LoginViewModel extends ChangeNotifier {
           }
         }
       }
+
+      return null;
     } catch (e) {
       log("Error checking user status for $uid: $e");
+
       return "Unable to verify account status";
     }
   }

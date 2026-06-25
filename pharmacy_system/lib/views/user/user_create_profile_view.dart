@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../viewmodels/user_profile_viewmodel.dart';
+import '../auth_wrapper.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
@@ -20,24 +21,17 @@ class ProfileView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               /// HEADER
               const Text(
                 "Personal Information",
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
 
               const SizedBox(height: 8),
 
               Text(
                 "Complete your healthcare profile information.",
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontSize: 15,
-                ),
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 15),
               ),
 
               const SizedBox(height: 30),
@@ -61,7 +55,6 @@ class ProfileView extends StatelessWidget {
 
                 child: Column(
                   children: [
-
                     /// PROFILE AVATAR
                     Container(
                       height: 90,
@@ -70,10 +63,7 @@ class ProfileView extends StatelessWidget {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: LinearGradient(
-                          colors: [
-                            Colors.blue.shade300,
-                            Colors.blue.shade700,
-                          ],
+                          colors: [Colors.blue.shade300, Colors.blue.shade700],
                         ),
                       ),
 
@@ -139,8 +129,7 @@ class ProfileView extends StatelessWidget {
 
                     /// ALLERGIES
                     _buildTextField(
-                      controller:
-                          userProfileViewModel.allergiesController,
+                      controller: userProfileViewModel.allergiesController,
                       label: "Allergies",
                       hint: "Enter allergies",
                       icon: Icons.warning_amber_rounded,
@@ -152,8 +141,7 @@ class ProfileView extends StatelessWidget {
                     /// MEDICAL CONDITIONS
                     _buildTextField(
                       controller:
-                          userProfileViewModel
-                              .medicalConditionsController,
+                          userProfileViewModel.medicalConditionsController,
                       label: "Medical Conditions",
                       hint: "Enter medical conditions",
                       icon: Icons.local_hospital_outlined,
@@ -169,32 +157,30 @@ class ProfileView extends StatelessWidget {
 
                       child:
                           userProfileViewModel.isLoading
-                              ? const Center(
-                                child:
-                                    CircularProgressIndicator(),
-                              )
+                              ? const Center(child: CircularProgressIndicator())
                               : ElevatedButton(
                                 onPressed: () async {
-                                  FocusScope.of(
-                                    context,
-                                  ).unfocus();
+                                  FocusScope.of(context).unfocus();
 
-                                  bool success =
-                                      await userProfileViewModel
-                                          .saveProfile();
+                                  final userProfileViewModel =
+                                      context.read<UserProfileViewModel>();
 
-                                  if (!success) {
-                                    ScaffoldMessenger.of(
-                                      context,
-                                    ).showSnackBar(
+                                  final success = await userProfileViewModel.saveProfile();
+
+                                  if (!context.mounted) return;
+
+                                  if (success) {
+                                    Navigator.of(context).pushAndRemoveUntil(
+                                      MaterialPageRoute(
+                                        builder: (_) => const AuthWrapper(),
+                                      ),
+                                      (route) => false,
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        behavior:
-                                            SnackBarBehavior
-                                                .floating,
                                         content: Text(
-                                          userProfileViewModel
-                                                  .errorMessage ??
-                                              "Error occurred",
+                                          userProfileViewModel.errorMessage ?? "Error occurred",
                                         ),
                                       ),
                                     );
@@ -203,24 +189,18 @@ class ProfileView extends StatelessWidget {
 
                                 style: ElevatedButton.styleFrom(
                                   elevation: 0,
-                                  backgroundColor:
-                                      const Color(0xFF4FC3CF),
+                                  backgroundColor: const Color(0xFF4FC3CF),
 
-                                  shape:
-                                      RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(
-                                              18,
-                                            ),
-                                      ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
                                 ),
 
                                 child: const Text(
                                   "Save Profile",
                                   style: TextStyle(
                                     fontSize: 17,
-                                    fontWeight:
-                                        FontWeight.bold,
+                                    fontWeight: FontWeight.bold,
                                     color: Colors.white,
                                   ),
                                 ),
@@ -252,10 +232,7 @@ class ProfileView extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 15,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
         ),
 
         const SizedBox(height: 10),
@@ -273,9 +250,7 @@ class ProfileView extends StatelessWidget {
             filled: true,
             fillColor: Colors.grey.shade100,
 
-            contentPadding: const EdgeInsets.symmetric(
-              vertical: 18,
-            ),
+            contentPadding: const EdgeInsets.symmetric(vertical: 18),
 
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(18),

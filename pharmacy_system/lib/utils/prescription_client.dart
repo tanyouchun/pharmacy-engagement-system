@@ -11,9 +11,13 @@ class PrescriptionClient {
   }) {
     final nameController = TextEditingController();
     final notesController = TextEditingController();
+    String? medicationNameError;
 
     String frequency = "Once Daily";
-
+    String strength = "100mg";
+    String dose = "1 pill";
+    String durationOption = "3";
+    final durationController = TextEditingController();
     final prescriptionViewModel = Provider.of<PrescriptionViewModel>(
       context,
       listen: false,
@@ -97,6 +101,113 @@ class PrescriptionClient {
                         hint: "Enter medicine name",
 
                         icon: Icons.local_pharmacy_outlined,
+                        errorText: medicationNameError,
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      /// STRENGTH
+                      const Text(
+                        "Strength",
+
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+
+                          fontSize: 15,
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: strength,
+
+                            isExpanded: true,
+
+                            items:
+                                ["100mg", "250mg", "500mg", "5ml", "10ml"]
+                                    .map(
+                                      (value) => DropdownMenuItem(
+                                        value: value,
+
+                                        child: Text(value),
+                                      ),
+                                    )
+                                    .toList(),
+
+                            onChanged: (value) {
+                              setState(() {
+                                strength = value!;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      /// DOSE
+                      const Text(
+                        "Dose",
+
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+
+                          fontSize: 15,
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: dose,
+
+                            isExpanded: true,
+
+                            items:
+                                [
+                                      "1 pill",
+                                      "2 pills",
+                                      "1 tablet",
+                                      "2 tablets",
+                                      "1 teaspoon",
+                                    ]
+                                    .map(
+                                      (value) => DropdownMenuItem(
+                                        value: value,
+
+                                        child: Text(value),
+                                      ),
+                                    )
+                                    .toList(),
+
+                            onChanged: (value) {
+                              setState(() {
+                                dose = value!;
+                              });
+                            },
+                          ),
+                        ),
                       ),
 
                       const SizedBox(height: 18),
@@ -156,6 +267,96 @@ class PrescriptionClient {
 
                       const SizedBox(height: 18),
 
+                      /// DURATION
+                      const Text(
+                        "Duration",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: durationOption,
+                            isExpanded: true,
+                            items: const [
+                              DropdownMenuItem(
+                                value: "1",
+                                child: Text("1 day"),
+                              ),
+                              DropdownMenuItem(
+                                value: "3",
+                                child: Text("3 days"),
+                              ),
+                              DropdownMenuItem(
+                                value: "5",
+                                child: Text("5 days"),
+                              ),
+                              DropdownMenuItem(
+                                value: "7",
+                                child: Text("7 days"),
+                              ),
+                              DropdownMenuItem(
+                                value: "14",
+                                child: Text("14 days"),
+                              ),
+                              DropdownMenuItem(
+                                value: "30",
+                                child: Text("30 days"),
+                              ),
+                              DropdownMenuItem(
+                                value: "other",
+                                child: Text("Other"),
+                              ),
+                            ],
+                            onChanged: (value) {
+                              setState(() {
+                                durationOption = value!;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+
+                      if (durationOption == "other") ...[
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: durationController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            hintText: "Enter duration in days",
+                            prefixIcon: const Icon(Icons.calendar_today),
+                            filled: true,
+                            fillColor: Colors.grey.shade100,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(18),
+                              borderSide: BorderSide.none,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(18),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(18),
+                              borderSide: const BorderSide(
+                                color: Color(0xFF4FC3CF),
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 18),
+
                       /// NOTES
                       _buildTextField(
                         controller: notesController,
@@ -201,14 +402,34 @@ class PrescriptionClient {
                           Expanded(
                             child: ElevatedButton(
                               onPressed: () async {
+                                if (nameController.text.trim().isEmpty) {
+                                  setState(() {
+                                    medicationNameError =
+                                        "Medication name is required";
+                                  });
+                                  return;
+                                }
+
                                 final prescription = Prescription(
                                   prescriptionId: "",
 
-                                  medicineName: nameController.text,
+                                  medicationName: nameController.text,
+
+                                  strength: strength,
+
+                                  dose: dose,
 
                                   notes: notesController.text,
 
                                   frequency: frequency,
+
+                                  duration:
+                                      durationOption == "other"
+                                          ? int.tryParse(
+                                                durationController.text,
+                                              ) ??
+                                              3
+                                          : int.parse(durationOption),
 
                                   addedBy: "",
 
@@ -276,12 +497,30 @@ class PrescriptionClient {
     String? userId,
   }) {
     final nameController = TextEditingController(
-      text: prescription.medicineName,
+      text: prescription.medicationName,
     );
 
     final notesController = TextEditingController(text: prescription.notes);
+    String? medicationNameError;
 
     String frequency = prescription.frequency;
+    String strength = prescription.strength;
+    String dose = prescription.dose;
+    String durationOption =
+        [
+              "1",
+              "3",
+              "5",
+              "7",
+              "14",
+              "30",
+            ].contains(prescription.duration.toString())
+            ? prescription.duration.toString()
+            : "other";
+
+    final durationController = TextEditingController(
+      text: prescription.duration.toString(),
+    );
 
     final prescriptionViewModel = Provider.of<PrescriptionViewModel>(
       context,
@@ -332,6 +571,111 @@ class PrescriptionClient {
                         hint: "Enter medicine name",
 
                         icon: Icons.local_pharmacy_outlined,
+                        errorText: medicationNameError,
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      const Text(
+                        "Strength",
+
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+
+                          fontSize: 15,
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: strength,
+
+                            isExpanded: true,
+
+                            items:
+                                ["100mg", "250mg", "500mg", "5ml", "10ml"]
+                                    .map(
+                                      (value) => DropdownMenuItem(
+                                        value: value,
+
+                                        child: Text(value),
+                                      ),
+                                    )
+                                    .toList(),
+
+                            onChanged: (value) {
+                              setState(() {
+                                strength = value!;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      const Text(
+                        "Dose",
+
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+
+                          fontSize: 15,
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: dose,
+
+                            isExpanded: true,
+
+                            items:
+                                [
+                                      "1 pill",
+                                      "2 pills",
+                                      "1 tablet",
+                                      "2 tablets",
+                                      "1 teaspoon",
+                                    ]
+                                    .map(
+                                      (value) => DropdownMenuItem(
+                                        value: value,
+
+                                        child: Text(value),
+                                      ),
+                                    )
+                                    .toList(),
+
+                            onChanged: (value) {
+                              setState(() {
+                                dose = value!;
+                              });
+                            },
+                          ),
+                        ),
                       ),
 
                       const SizedBox(height: 18),
@@ -386,6 +730,98 @@ class PrescriptionClient {
 
                       const SizedBox(height: 18),
 
+                      /// DURATION
+                      const Text(
+                        "Duration",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: durationOption,
+                            isExpanded: true,
+                            items: const [
+                              DropdownMenuItem(
+                                value: "1",
+                                child: Text("1 day"),
+                              ),
+                              DropdownMenuItem(
+                                value: "3",
+                                child: Text("3 days"),
+                              ),
+                              DropdownMenuItem(
+                                value: "5",
+                                child: Text("5 days"),
+                              ),
+                              DropdownMenuItem(
+                                value: "7",
+                                child: Text("7 days"),
+                              ),
+                              DropdownMenuItem(
+                                value: "14",
+                                child: Text("14 days"),
+                              ),
+                              DropdownMenuItem(
+                                value: "30",
+                                child: Text("30 days"),
+                              ),
+                              DropdownMenuItem(
+                                value: "other",
+                                child: Text("Other"),
+                              ),
+                            ],
+                            onChanged: (value) {
+                              setState(() {
+                                durationOption = value!;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+
+                      if (durationOption == "other") ...[
+                        const SizedBox(height: 12),
+
+                        TextField(
+                          controller: durationController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            hintText: "Enter duration in days",
+                            prefixIcon: const Icon(Icons.calendar_today),
+                            filled: true,
+                            fillColor: Colors.grey.shade100,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(18),
+                              borderSide: BorderSide.none,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(18),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(18),
+                              borderSide: const BorderSide(
+                                color: Color(0xFF4FC3CF),
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+
+                      const SizedBox(height: 18),
+
                       _buildTextField(
                         controller: notesController,
 
@@ -417,12 +853,31 @@ class PrescriptionClient {
                           Expanded(
                             child: ElevatedButton(
                               onPressed: () async {
+                                if (nameController.text.trim().isEmpty) {
+                                  setState(() {
+                                    medicationNameError =
+                                        "Medication name is required";
+                                  });
+                                  return;
+                                }
                                 final updated = prescription.copyWith(
-                                  medicineName: nameController.text,
+                                  medicationName: nameController.text,
+
+                                  strength: strength,
+
+                                  dose: dose,
 
                                   notes: notesController.text,
 
                                   frequency: frequency,
+
+                                  duration:
+                                      durationOption == "other"
+                                          ? int.tryParse(
+                                                durationController.text,
+                                              ) ??
+                                              prescription.duration
+                                          : int.parse(durationOption),
                                 );
 
                                 if (userId != null) {
@@ -472,11 +927,10 @@ class PrescriptionClient {
 
   static Widget _buildTextField({
     required TextEditingController controller,
-
     required String label,
     required String hint,
     required IconData icon,
-
+    String? errorText,
     int maxLines = 1,
   }) {
     return Column(
@@ -496,6 +950,7 @@ class PrescriptionClient {
           maxLines: maxLines,
 
           decoration: InputDecoration(
+            errorText: errorText,
             hintText: hint,
 
             prefixIcon: Icon(icon),
@@ -528,5 +983,71 @@ class PrescriptionClient {
         ),
       ],
     );
+  }
+
+  static Future<bool> showDeleteConfirmation(
+    BuildContext context,
+    String medicationName,
+  ) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+              title: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.delete_outline, color: Colors.red),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text("Delete Prescription"),
+                ],
+              ),
+              content: RichText(
+                text: TextSpan(
+                  style: const TextStyle(color: Colors.black87, fontSize: 15),
+                  children: [
+                    const TextSpan(
+                      text:
+                          "Are you sure you want to delete the prescription for ",
+                    ),
+                    TextSpan(
+                      text: medicationName,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const TextSpan(text: "?\n\nThis action cannot be undone."),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, false);
+                  },
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  },
+                  icon: const Icon(Icons.delete, size: 18),
+                  label: const Text("Delete"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
   }
 }
