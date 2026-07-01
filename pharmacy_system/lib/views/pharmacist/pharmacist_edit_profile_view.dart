@@ -26,26 +26,6 @@ class PharmacistEditProfileView extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
 
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 10),
-
-            child: TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-
-              child: const Text(
-                "Cancel",
-
-                style: TextStyle(
-                  color: Color(0xFF4FC3CF),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
 
       body: SafeArea(
@@ -141,7 +121,6 @@ class PharmacistEditProfileView extends StatelessWidget {
 
                       icon: Icons.badge_outlined,
 
-                      keyboardType: TextInputType.number,
                     ),
 
                     const SizedBox(height: 18),

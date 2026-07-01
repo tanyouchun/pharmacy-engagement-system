@@ -12,7 +12,20 @@
           "package_name": "com.example.pharmacy_system"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "131499170989-5irggmd6r2ldh7kavj081479sftlpphs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.pharmacy_system",
+            "certificate_hash": "fecc078c95236df0e6ea0155b7f088e8f0cd06e4"
+          }
+        },
+        {
+          "client_id": "131499170989-0c265sppoh1pp9fe40j2966pept6l9nt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCdGORnOPR33MOmg-67tzhQyDkyjKuv8g4"
@@ -20,7 +33,55 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "131499170989-0c265sppoh1pp9fe40j2966pept6l9nt.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "131499170989-qued5h0attp8v4ip2mjch6kji7ur0nto.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.pharmacySystem"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:131499170989:android:9b8404edaa0716d0f93a24",
+        "android_client_info": {
+          "package_name": "com.pharmacareai.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "131499170989-0c265sppoh1pp9fe40j2966pept6l9nt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdGORnOPR33MOmg-67tzhQyDkyjKuv8g4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "131499170989-0c265sppoh1pp9fe40j2966pept6l9nt.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "131499170989-qued5h0attp8v4ip2mjch6kji7ur0nto.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.pharmacySystem"
+              }
+            }
+          ]
         }
       }
     }

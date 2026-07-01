@@ -25,26 +25,6 @@ class EditProfileView extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 10),
-
-            child: TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-
-              child: const Text(
-                "Cancel",
-                style: TextStyle(
-                  color: Color(0xFF4FC3CF),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
 
       body: SafeArea(
