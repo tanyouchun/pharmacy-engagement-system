@@ -42,11 +42,12 @@ pharmacy_system/
 ├── android/
 ├── ios/
 ├── lib/
+│   ├── constants/
 │   ├── models/
-│   ├── screens/
 │   ├── services/
-│   ├── widgets/
-│   └── main.dart
+│   ├── utils/
+│   ├── viewmodels/
+│   └── views/
 ├── assets/
 ├── pubspec.yaml
 └── README.md
