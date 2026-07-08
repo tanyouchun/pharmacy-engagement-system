@@ -12,6 +12,9 @@ class Reminder {
   final String frequency; // e.g. "Once daily"
   final List<String> reminderTimes; // e.g. ["08:00", "20:00"]
   final bool isActive;
+  final int consecutiveMissedDoses;
+  final bool adherenceAlertSent;
+  final String lastDoseStatus;
 
   Reminder({
     required this.reminderId,
@@ -25,6 +28,9 @@ class Reminder {
     required this.frequency,
     required this.reminderTimes,
     required this.isActive,
+    this.consecutiveMissedDoses = 0,
+    this.adherenceAlertSent = false,
+    this.lastDoseStatus = 'none',
   });
 
   Map<String, dynamic> toMap() {
@@ -40,6 +46,9 @@ class Reminder {
       'frequency': frequency,
       'reminderTimes': reminderTimes,
       'isActive': isActive,
+      'consecutiveMissedDoses': consecutiveMissedDoses,
+      'adherenceAlertSent': adherenceAlertSent,
+      'lastDoseStatus': lastDoseStatus,
     };
   }
 
@@ -58,12 +67,15 @@ class Reminder {
               ? DateTime.parse(map['scheduleTime'])
               : DateTime.now(),
       frequency: map['frequency'] ?? '',
-      duration: map['duration'] ?? '',
+      duration: map['duration'] ?? 0,
       reminderTimes:
           map['reminderTimes'] != null
               ? List<String>.from(map['reminderTimes'])
               : [],
       isActive: map['isActive'] ?? false,
+      consecutiveMissedDoses: map['consecutiveMissedDoses'] ?? 0,
+      adherenceAlertSent: map['adherenceAlertSent'] ?? false,
+      lastDoseStatus: map['lastDoseStatus'] ?? 'none',
     );
   }
 
@@ -77,6 +89,9 @@ class Reminder {
     List<String>? reminderTimes,
     bool? isActive,
     int? duration,
+    int? consecutiveMissedDoses,
+    bool? adherenceAlertSent,
+    String? lastDoseStatus,
   }) {
     return Reminder(
       reminderId: reminderId,
@@ -90,6 +105,10 @@ class Reminder {
       reminderTimes: reminderTimes ?? this.reminderTimes,
       isActive: isActive ?? this.isActive,
       duration: duration ?? this.duration,
+      consecutiveMissedDoses:
+          consecutiveMissedDoses ?? this.consecutiveMissedDoses,
+      adherenceAlertSent: adherenceAlertSent ?? this.adherenceAlertSent,
+      lastDoseStatus: lastDoseStatus ?? this.lastDoseStatus,
     );
   }
 }

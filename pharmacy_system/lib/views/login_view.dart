@@ -264,6 +264,7 @@ Future<void> _createGoogleUser({required String role}) async {
     "email": user.email ?? "",
     "name": user.displayName ?? "",
     "role": role,
+    "approvalStatus": role == "pharmacist" ? "pending" : "approved",
     "createdAt": FieldValue.serverTimestamp(),
     "isBlocked": false,
     "suspendUntil": null,

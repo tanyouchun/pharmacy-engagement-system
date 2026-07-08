@@ -289,13 +289,21 @@ class PrescriptionClient {
                             value: durationOption,
                             isExpanded: true,
                             items: const [
-                              DropdownMenuItem(
+                              DropdownMenuItem( 
                                 value: "1",
                                 child: Text("1 day"),
+                              ),
+                              DropdownMenuItem( 
+                                value: "2",
+                                child: Text("2 days"),
                               ),
                               DropdownMenuItem(
                                 value: "3",
                                 child: Text("3 days"),
+                              ),
+                              DropdownMenuItem( 
+                                value: "4",
+                                child: Text("4 days"),
                               ),
                               DropdownMenuItem(
                                 value: "5",
@@ -757,8 +765,16 @@ class PrescriptionClient {
                                 child: Text("1 day"),
                               ),
                               DropdownMenuItem(
+                                value: "2",
+                                child: Text("2 days"),
+                              ),
+                              DropdownMenuItem(
                                 value: "3",
                                 child: Text("3 days"),
+                              ),
+                              DropdownMenuItem(
+                                value: "4",
+                                child: Text("4 days"),
                               ),
                               DropdownMenuItem(
                                 value: "5",

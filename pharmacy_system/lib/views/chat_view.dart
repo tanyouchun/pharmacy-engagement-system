@@ -14,7 +14,11 @@ class ChatView extends StatefulWidget {
   final String chatId;
   final String? otherUserId;
 
-  const ChatView({super.key, required this.chatId, this.otherUserId});
+  const ChatView({
+    super.key,
+    required this.chatId,
+    this.otherUserId,
+  });
 
   @override
   State<ChatView> createState() => _ChatViewState();

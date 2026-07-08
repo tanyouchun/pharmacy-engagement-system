@@ -15,6 +15,7 @@ import 'viewmodels/pharmacist_profile_viewmodel.dart';
 import 'viewmodels/chatbot_viewmodel.dart';
 
 import 'services/notification_service.dart';
+import 'services/app_navigation_service.dart';
 
 import 'views/auth_wrapper.dart';
 import 'views/pharmacist/pharmacist_profile_Form_view.dart';
@@ -51,6 +52,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
+        navigatorKey: appNavigatorKey,
         routes: {
           '/pharmacistProfile': (context) => const PharmacistProfileFormView(),
         },

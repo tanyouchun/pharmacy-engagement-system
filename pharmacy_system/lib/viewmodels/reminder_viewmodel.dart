@@ -94,7 +94,7 @@ class ReminderViewModel extends ChangeNotifier {
     } else {
       log("Editing existing reminder with id: ${existingReminder!.reminderId}");
       await updateReminder(
-        existingReminder!.copyWith(
+        existingReminder.copyWith(
           prescriptionId: selectedPrescription.prescriptionId,
           medicationName:
               selectedPrescription.medicationName.isNotEmpty
@@ -124,6 +124,7 @@ class ReminderViewModel extends ChangeNotifier {
 
       await NotificationService.instance.scheduleReminderTimes(
         reminderId: docRef.id,
+        prescriptionId: reminder.prescriptionId,
         userId: reminder.userId,
         medicationName: reminder.medicationName,
         reminderTimes: reminder.reminderTimes,
@@ -173,6 +174,7 @@ class ReminderViewModel extends ChangeNotifier {
 
       await NotificationService.instance.scheduleReminderTimes(
         reminderId: reminder.reminderId,
+        prescriptionId: reminder.prescriptionId,
         userId: reminder.userId,
         medicationName: reminder.medicationName,
         reminderTimes: reminder.reminderTimes,

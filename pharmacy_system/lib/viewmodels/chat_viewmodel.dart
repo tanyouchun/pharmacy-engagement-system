@@ -58,7 +58,7 @@ class ChatViewModel extends ChangeNotifier {
 
     final diff = DateTime.now().difference(timestamp.toDate());
 
-    showAIHelper = (senderId == currentUserId && diff.inHours >= 2);
+    showAIHelper = (senderId == currentUserId && diff.inMinutes >= 2);
 
     notifyListeners();
   }

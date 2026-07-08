@@ -89,8 +89,17 @@ class LoginViewModel extends ChangeNotifier {
       final uid = userCredential.user?.uid;
 
       if (uid != null) {
-        return await _checkUserStatus(uid);
+        final statusError = await _checkUserStatus(uid);
+        if (statusError != null) {
+          errorMessage = statusError;
+          return statusError;
+        }
+
+        return null;
       }
+
+      errorMessage = "Unable to verify account status";
+      return errorMessage;
     } catch (e) {
       log("Google Sign in error. ${ErrorMessage.LOGIN_ERROR}: $e");
       errorMessage = e.toString().replaceAll("Exception: ", "");
@@ -120,12 +129,12 @@ class LoginViewModel extends ChangeNotifier {
       final approvalStatus = data?['approvalStatus'];
 
       if (role == 'pharmacist') {
-        if (approvalStatus == 'pending') {
-          return null;
+        if (approvalStatus == 'pending' || approvalStatus == null) {
+          return "PENDING_PHARMACIST_APPROVAL";
         }
 
         if (approvalStatus == 'rejected') {
-          return null;
+          return "REJECTED_PHARMACIST_APPROVAL";
         }
       }
 

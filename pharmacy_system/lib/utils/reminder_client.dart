@@ -7,7 +7,7 @@ import '../viewmodels/prescription_viewmodel.dart';
 import '../models/prescription.dart';
 
 class ReminderClient {
-  static void showReminderForm(
+  static Future<void> showReminderForm(
     BuildContext context, {
     Reminder? reminder,
     String? initialMedicationName,
@@ -16,12 +16,18 @@ class ReminderClient {
     String? initialFrequency,
     String? initialPrescriptionId,
     int? initialDuration,
-  }) {
+  }) async {
     final isEditing = reminder != null;
     final prescriptionViewModel = Provider.of<PrescriptionViewModel>(
       context,
       listen: false,
     );
+
+    await prescriptionViewModel.loadPrescriptions();
+
+    if (!context.mounted) {
+      return;
+    }
 
     String? prescriptionError;
 
@@ -426,8 +432,16 @@ class ReminderClient {
                                 child: Text("1 day"),
                               ),
                               DropdownMenuItem(
+                                value: "2",
+                                child: Text("2 days"),
+                              ),
+                              DropdownMenuItem(
                                 value: "3",
                                 child: Text("3 days"),
+                              ),
+                              DropdownMenuItem(
+                                value: "4",
+                                child: Text("4 days"),
                               ),
                               DropdownMenuItem(
                                 value: "5",
@@ -600,7 +614,7 @@ class ReminderClient {
     );
   }
 
-  static void showReminderFormFromPrescription(
+  static Future<void> showReminderFormFromPrescription(
     BuildContext context, {
     required String prescriptionId,
     required String medicationName,
@@ -608,8 +622,8 @@ class ReminderClient {
     String? dose,
     required String frequency,
     required int duration,
-  }) {
-    showReminderForm(
+  }) async {
+    await showReminderForm(
       context,
       initialPrescriptionId: prescriptionId,
       initialMedicationName: medicationName,

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
@@ -68,7 +68,7 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
 
               children: [
                 Text(
-                  "Hello 👋",
+                  "Hello ≡ƒæï",
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.9),
                     fontSize: 13,
@@ -597,7 +597,7 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                                                                   horizontal: 8,
                                                                 ),
                                                             child: Text(
-                                                              "•",
+                                                              "ΓÇó",
                                                               style: TextStyle(
                                                                 color:
                                                                     Colors.grey,
@@ -741,8 +741,6 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
   }
 
   void _showReminderDetails(BuildContext context, Reminder reminder) {
-    final takenNotifier = ValueNotifier<bool>(false);
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -871,59 +869,195 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                           );
                         }
 
-                        return FutureBuilder<bool>(
-                          future: MedicationLogService().alreadyTaken(
-                            reminderId: reminder.reminderId!,
+                        return FutureBuilder<String?>(
+                          future: MedicationLogService().getDoseStatus(
+                            reminderId: reminder.reminderId,
                             reminderTime: currentTime,
                           ),
                           builder: (context, snapshot) {
-                            final taken = snapshot.data ?? false;
+                            final doseStatus = snapshot.data;
+                            final taken = doseStatus == 'taken';
+                            final missed = doseStatus == 'missed';
 
-                            return Row(
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                ElevatedButton.icon(
-                                  onPressed:
-                                      taken
-                                          ? null
-                                          : () async {
-                                            await MedicationLogService()
-                                                .createAndMarkTaken(
-                                                  reminderId:
-                                                      reminder.reminderId!,
-                                                  userId: reminder.userId!,
-                                                  reminderTime: currentTime,
-                                                );
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: ElevatedButton.icon(
+                                        onPressed:
+                                            taken
+                                                ? null
+                                                : () async {
+                                                  final result =
+                                                      await MedicationLogService()
+                                                          .recordDoseStatus(
+                                                            reminderId:
+                                                                reminder.reminderId,
+                                                            prescriptionId:
+                                                                reminder
+                                                                    .prescriptionId,
+                                                            userId:
+                                                                reminder.userId,
+                                                            reminderTime:
+                                                                currentTime,
+                                                            medicationName:
+                                                                reminder
+                                                                    .medicationName,
+                                                            status: 'taken',
+                                                          );
 
-                                            setState(
-                                              () {},
-                                            ); // 🔥 forces refresh for next reminder
-                                          },
-                                  icon: const Icon(Icons.check),
-                                  label: const Text("Taken"),
+                                                  if (result.shouldRunAIAnalysis) {
+                                                    await NotificationService
+                                                        .instance
+                                                        .analyzeAndShowRecommendation(
+                                                          doseResult: result,
+                                                          reminderId:
+                                                              reminder.reminderId,
+                                                          prescriptionId:
+                                                              reminder
+                                                                  .prescriptionId,
+                                                          userId:
+                                                              reminder.userId,
+                                                          medicationName:
+                                                              reminder
+                                                                  .medicationName,
+                                                          frequency:
+                                                              reminder.frequency,
+                                                        );
+                                                  }
+
+                                                  if (result.shouldShowLowMedicationWarning) {
+                                                    await NotificationService
+                                                        .instance
+                                                        .showLowMedicationWarning(
+                                                          reminderId:
+                                                              reminder.reminderId,
+                                                          prescriptionId:
+                                                              reminder
+                                                                  .prescriptionId,
+                                                          userId:
+                                                              reminder.userId,
+                                                          medicationName:
+                                                              reminder
+                                                                  .medicationName,
+                                                        );
+                                                  }
+
+                                                  setState(() {});
+                                                },
+                                        icon: const Icon(Icons.check),
+                                        label: const Text("Taken"),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: OutlinedButton.icon(
+                                        onPressed:
+                                            (taken || missed)
+                                                ? null
+                                                : () async {
+                                                  final result =
+                                                      await MedicationLogService()
+                                                          .recordDoseStatus(
+                                                            reminderId:
+                                                                reminder.reminderId,
+                                                            prescriptionId:
+                                                                reminder
+                                                                    .prescriptionId,
+                                                            userId:
+                                                                reminder.userId,
+                                                            reminderTime:
+                                                                currentTime,
+                                                            medicationName:
+                                                                reminder
+                                                                    .medicationName,
+                                                            status: 'missed',
+                                                          );
+
+                                                  if (result.shouldRunAIAnalysis) {
+                                                    await NotificationService
+                                                        .instance
+                                                        .analyzeAndShowRecommendation(
+                                                          doseResult: result,
+                                                          reminderId:
+                                                              reminder.reminderId,
+                                                          prescriptionId:
+                                                              reminder
+                                                                  .prescriptionId,
+                                                          userId:
+                                                              reminder.userId,
+                                                          medicationName:
+                                                              reminder
+                                                                  .medicationName,
+                                                          frequency:
+                                                              reminder.frequency,
+                                                        );
+                                                  }
+
+                                                  if (result.shouldShowLowMedicationWarning) {
+                                                    await NotificationService
+                                                        .instance
+                                                        .showLowMedicationWarning(
+                                                          reminderId:
+                                                              reminder.reminderId,
+                                                          prescriptionId:
+                                                              reminder
+                                                                  .prescriptionId,
+                                                          userId:
+                                                              reminder.userId,
+                                                          medicationName:
+                                                              reminder
+                                                                  .medicationName,
+                                                        );
+                                                  }
+
+                                                  setState(() {});
+                                                },
+                                        icon: const Icon(Icons.close),
+                                        label: const Text("Missed"),
+                                      ),
+                                    ),
+                                  ],
                                 ),
 
-                                const SizedBox(width: 12),
+                                const SizedBox(height: 12),
 
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 8,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color:
-                                        taken
-                                            ? Colors.green.shade100
-                                            : Colors.red.shade100,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Text(
-                                    taken ? "Medicine Taken" : "Not Taken",
-                                    style: TextStyle(
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
                                       color:
                                           taken
-                                              ? Colors.green.shade700
-                                              : Colors.red.shade700,
-                                      fontWeight: FontWeight.bold,
+                                              ? Colors.green.shade100
+                                              : missed
+                                              ? Colors.red.shade100
+                                              : Colors.grey.shade100,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      taken
+                                          ? "Medicine Taken"
+                                          : missed
+                                          ? "Medicine Missed"
+                                          : "Not Recorded",
+                                      style: TextStyle(
+                                        color:
+                                            taken
+                                                ? Colors.green.shade700
+                                                : missed
+                                                ? Colors.red.shade700
+                                                : Colors.grey.shade700,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                 ),
