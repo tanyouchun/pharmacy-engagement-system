@@ -8,8 +8,8 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../views/home_page.dart';
-import 'MedicationAdherenceAIService .dart';
-import '../models/MedicationAIResult .dart';
+import 'MedicationAdherenceAIService.dart';
+import '../models/MedicationAIResult.dart';
 import 'medication_log_service.dart';
 import 'app_navigation_service.dart';
 
