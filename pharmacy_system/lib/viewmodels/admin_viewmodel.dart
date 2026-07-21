@@ -7,6 +7,14 @@ import 'package:flutter/material.dart';
 import '../models/account_issue.dart';
 import '../models/admin_profile.dart';
 
+/// ViewModel responsible for administrative user management.
+///
+/// This ViewModel handles:
+/// - Retrieving registered users
+/// - Monitoring account issue reports
+/// - Submitting user reports
+/// - Blocking and unblocking user accounts
+/// - Managing real-time Firestore updates
 class AdminManageUserViewModel extends ChangeNotifier {
   final _usersRef = FirebaseFirestore.instance.collection('users');
 
@@ -30,6 +38,10 @@ class AdminManageUserViewModel extends ChangeNotifier {
   StreamSubscription? _usersSub;
   StreamSubscription? _reportsSub;
 
+  /// Submits an account issue report against a user.
+  ///
+  /// Reports are stored in Firestore and reviewed
+  /// by administrators before account action is taken.
   Future<bool> submitReport({
     required String reportedUserId,
     required String reportedName,
@@ -111,6 +123,7 @@ class AdminManageUserViewModel extends ChangeNotifier {
     );
   }
 
+  /// Creates real-time listener for account issue reports.
   void listenToReports() {
     _reportsSub?.cancel();
     _reportError = null;
@@ -138,6 +151,7 @@ class AdminManageUserViewModel extends ChangeNotifier {
         );
   }
 
+  /// Updates report status after administrator review.
   Future<void> setStatus(String reportId) async {
     try {
       await FirebaseFirestore.instance
@@ -150,6 +164,13 @@ class AdminManageUserViewModel extends ChangeNotifier {
     }
   }
 
+  /// Blocks user account temporarily or permanently.
+  ///
+  /// Temporary suspension:
+  /// - Account is disabled until specified date.
+  ///
+  /// Permanent ban:
+  /// - Account remains blocked permanently.
   Future<void> blockAccount(
     String uid, {
     Duration? duration,
@@ -167,13 +188,16 @@ class AdminManageUserViewModel extends ChangeNotifier {
         "suspendUntil": permanent ? null : suspendUntil,
         "isPermanentBan": permanent,
       });
-      log("Blocked user account: $uid, duration: $duration, permanent: $permanent");
+      log(
+        "Blocked user account: $uid, duration: $duration, permanent: $permanent",
+      );
     } catch (e) {
       _userError = e.toString();
       notifyListeners();
     }
   }
 
+  /// Restores access to blocked user account.
   Future<void> unBlockAccount(String uid) async {
     try {
       await _usersRef.doc(uid).update({
@@ -188,6 +212,7 @@ class AdminManageUserViewModel extends ChangeNotifier {
     }
   }
 
+  /// Retrieves user information by user ID.
   AdminProfile? getUserById(String uid) {
     try {
       return _users.firstWhere((u) => u.id == uid);
@@ -209,6 +234,11 @@ class AdminManageUserViewModel extends ChangeNotifier {
   }
 }
 
+/// ViewModel responsible for managing system configuration.
+///
+/// Admin can enable or disable:
+/// - AI chatbot service
+/// - AI medication analysis feature
 class AdminManageConfigViewModel extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -279,6 +309,7 @@ class AdminManageConfigViewModel extends ChangeNotifier {
         );
   }
 
+  /// Updates chatbot availability.
   Future<void> updateChatbotStatus(bool value) async {
     try {
       _isChatbotEnabled = value;
@@ -294,6 +325,7 @@ class AdminManageConfigViewModel extends ChangeNotifier {
     }
   }
 
+  /// Updates AI medication analysis availability.
   Future<void> updateAIAnalysisStatus(bool value) async {
     try {
       _isAIAnalysisEnabled = value;

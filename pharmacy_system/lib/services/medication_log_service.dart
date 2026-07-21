@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// Stores the result after recording a medication intake action.
 class DoseStatusResult {
   final int consecutiveMissedDoses;
   final int totalTaken;
@@ -22,6 +23,15 @@ class DoseStatusResult {
   });
 }
 
+/// Service responsible for recording and analysing medication adherence.
+///
+/// This service manages:
+/// - Medication intake history
+/// - Taken/missed dose records
+/// - Medication adherence calculation
+/// - Remaining medication estimation
+/// - AI analysis trigger conditions
+/// - Low medication detection
 class MedicationLogService {
   final _db = FirebaseFirestore.instance;
 
@@ -94,8 +104,7 @@ class MedicationLogService {
       status: 'snoozed',
     );
 
-    final lowMedicationWarning =
-        await _flagLowMedicationIfNeeded(
+    final lowMedicationWarning = await _flagLowMedicationIfNeeded(
       userId: userId,
       prescriptionId: prescriptionId,
       remainingDays: remainingDays,
@@ -115,6 +124,7 @@ class MedicationLogService {
     );
   }
 
+  /// Records medication as successfully taken.
   Future<void> createAndMarkTaken({
     required String reminderId,
     required String prescriptionId,
@@ -132,6 +142,7 @@ class MedicationLogService {
     );
   }
 
+  /// Records medication as missed by the patient.
   Future<void> createAndMarkMissed({
     required String reminderId,
     required String prescriptionId,
@@ -149,6 +160,7 @@ class MedicationLogService {
     );
   }
 
+  /// Checks whether medication has already been taken
   Future<bool> alreadyTaken({
     required String reminderId,
     required String reminderTime,
@@ -165,6 +177,7 @@ class MedicationLogService {
     return doc.exists && (data?['status'] == 'taken' || data?['taken'] == true);
   }
 
+  /// Retrieves current medication intake status.
   Future<String?> getDoseStatus({
     required String reminderId,
     required String reminderTime,
@@ -185,6 +198,7 @@ class MedicationLogService {
         (data?['taken'] == true ? 'taken' : null);
   }
 
+  /// Extracts medication quantity from dose information.
   int _doseUnitsFromDose(String dose) {
     final match = RegExp(r'\d+').firstMatch(dose);
     if (match == null) {
@@ -194,6 +208,7 @@ class MedicationLogService {
     return int.tryParse(match.group(0) ?? '') ?? 1;
   }
 
+  /// Converts medication frequency into doses per day.
   int _dosesPerDayFromFrequency(String frequency) {
     switch (frequency.toLowerCase()) {
       case 'twice daily':
@@ -207,6 +222,7 @@ class MedicationLogService {
     }
   }
 
+  /// Estimates remaining medication duration.
   Future<double> _estimateRemainingDays({
     required String userId,
     required String prescriptionId,
@@ -249,25 +265,34 @@ class MedicationLogService {
             .docs
             .length;
 
-    final remainingUnits = (quantity - (takenCount * doseUnits)).clamp(0, quantity);
+    final remainingUnits = (quantity - (takenCount * doseUnits)).clamp(
+      0,
+      quantity,
+    );
     return remainingUnits / (doseUnits * dosesPerDay);
   }
 
+  /// Counts medication logs based on status.
   Future<int> _countLogs({
     required String userId,
     required String prescriptionId,
     required String status,
   }) async {
-    final snapshot = await _db
-        .collection('medication_logs')
-        .where('userId', isEqualTo: userId)
-        .where('prescriptionId', isEqualTo: prescriptionId)
-        .where('status', isEqualTo: status)
-        .get();
+    final snapshot =
+        await _db
+            .collection('medication_logs')
+            .where('userId', isEqualTo: userId)
+            .where('prescriptionId', isEqualTo: prescriptionId)
+            .where('status', isEqualTo: status)
+            .get();
 
     return snapshot.docs.length;
   }
 
+  /// Checks whether medication supply is almost finished.
+  ///
+  /// If remaining medication is less than or equal to one day,
+  /// the system generates a pharmacist consultation recommendation.
   Future<bool> _flagLowMedicationIfNeeded({
     required String userId,
     required String prescriptionId,

@@ -6,6 +6,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/chatbot_message.dart';
 import '../services/openai_service.dart';
 
+/// ViewModel for managing chatbot conversations,
+/// communicating with the OpenAI service, and storing chat history
+/// in Firebase Firestore.
 class ChatBotViewModel extends ChangeNotifier {
   final OpenAIService _service = OpenAIService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -23,10 +26,12 @@ class ChatBotViewModel extends ChangeNotifier {
       messages.clear();
 
       if (user == null) {
-        messages.add(const ChatMessage(
-          role: ChatRole.assistant,
-          content: "Please log in to use the chatbot.",
-        ));
+        messages.add(
+          const ChatMessage(
+            role: ChatRole.assistant,
+            content: "Please log in to use the chatbot.",
+          ),
+        );
 
         notifyListeners();
         return;
@@ -37,6 +42,8 @@ class ChatBotViewModel extends ChangeNotifier {
     });
   }
 
+  /// Converts local chat messages into the format required
+  /// by the OpenAI Chat Completion API.
   List<Map<String, String>> getOpenAIMessages() {
     return messages
         .where((m) => m.role == ChatRole.user || m.role == ChatRole.assistant)
@@ -44,20 +51,26 @@ class ChatBotViewModel extends ChangeNotifier {
         .toList();
   }
 
+  /// Loads previous chatbot conversation from Firestore.
   Future<void> _loadChat() async {
     if (_uid == null) return;
 
     try {
-      final snapshot = await _firestore
-          .collection("users")
-          .doc(_uid)
-          .collection("chatbot_messages")
-          .orderBy("timestamp")
-          .get();
+      final snapshot =
+          await _firestore
+              .collection("users")
+              .doc(_uid)
+              .collection("chatbot_messages")
+              .orderBy("timestamp")
+              .get();
 
-      messages = snapshot.docs
-          .map((doc) => ChatMessage.fromMap(doc.data() as Map<String, dynamic>))
-          .toList();
+      messages =
+          snapshot.docs
+              .map(
+                (doc) =>
+                    ChatMessage.fromMap(doc.data() as Map<String, dynamic>),
+              )
+              .toList();
     } catch (e) {
       log("Error loading chatbot chat: $e");
       messages = [];
@@ -70,19 +83,23 @@ class ChatBotViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Adds the default greeting shown to first-time users.
   void _addWelcomeMessage() {
-    messages.add(const ChatMessage(
-      role: ChatRole.assistant,
-      content:
-          "Hi! I’m your pharmacist assistant 💊.\n\n"
-          "I can help with:\n"
-          "• Medication usage\n"
-          "• Side effects\n"
-          "• Dosage guidance\n\n"
-          "How can I help you today?",
-    ));
+    messages.add(
+      const ChatMessage(
+        role: ChatRole.assistant,
+        content:
+            "Hi! I’m your pharmacist assistant 💊.\n\n"
+            "I can help with:\n"
+            "• Medication usage\n"
+            "• Side effects\n"
+            "• Dosage guidance\n\n"
+            "How can I help you today?",
+      ),
+    );
   }
 
+  /// Saves an individual chat message into Firestore.
   Future<void> _saveMessage(String role, String content) async {
     if (_uid == null) return;
 
@@ -101,6 +118,7 @@ class ChatBotViewModel extends ChangeNotifier {
     }
   }
 
+  /// Sends a user message to OpenAI and retrieves the AI response.
   Future<void> sendMessage(String userMessage) async {
     if (_uid == null) return;
     if (userMessage.trim().isEmpty) return;
@@ -124,16 +142,19 @@ class ChatBotViewModel extends ChangeNotifier {
     } catch (e) {
       log("Error: $e");
 
-      messages.add(const ChatMessage(
-        role: ChatRole.assistant,
-        content: "Something went wrong. Please try again later.",
-      ));
+      messages.add(
+        const ChatMessage(
+          role: ChatRole.assistant,
+          content: "Something went wrong. Please try again later.",
+        ),
+      );
     }
 
     isLoading = false;
     notifyListeners();
   }
 
+  /// Releases resources when the ViewModel is disposed.
   @override
   void dispose() {
     _authSub?.cancel();

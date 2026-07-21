@@ -4,6 +4,15 @@ import 'package:provider/provider.dart';
 import '../../viewmodels/pharmacist_profile_viewmodel.dart';
 import '../../utils/report_client.dart';
 
+/// Displays detailed information of a selected pharmacist.
+///
+/// This page is accessed by patients when viewing a pharmacist profile
+/// before starting a chat or consultation.
+///
+/// Features:
+/// - Displays pharmacist professional information.
+/// - Shows license, experience, and active status.
+/// - Allows users to report inappropriate pharmacist accounts.
 class PharmacistProfileDetailsView extends StatefulWidget {
   final String pharmacistId;
 
@@ -263,6 +272,10 @@ class _PharmacistProfileDetailsViewState
     return scaffold;
   }
 
+  /// Builds reusable statistic card component.
+  ///
+  /// Used to display pharmacist information such as
+  /// license number, experience, and account status.
   Widget _buildStatCard({
     required IconData icon,
     required String title,

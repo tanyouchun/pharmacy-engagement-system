@@ -9,25 +9,38 @@ import '../models/message.dart';
 import '../services/chat_service.dart';
 import '../constants/error_message.dart';
 
+/// ViewModel for managing chat conversations
+/// between customers and pharmacists.
+/// It handles chat creation, message management,
+/// read status, and real-time message synchronization.
 class ChatViewModel extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   List<Message> messages = [];
   String? errorMessage;
   StreamSubscription? _messageSubscription;
+  // Controls whether the AI helper suggestion is displayed.
   bool showAIHelper = false;
+
   bool isPharmacist = false;
 
   final ChatService _chatService = ChatService();
 
+  /// Creates a new chat or retrieves an existing
+  /// conversation between the customer and pharmacist.
   Future<String> startChat(String pharmacistId) async {
     return await _chatService.createOrGetChat(pharmacistId);
   }
 
+  /// Returns the subtitle displayed in the chat page
+  /// based on the current user's role.
   String get chatSubtitle {
     return isPharmacist ? "" : "Healthcare Consultation";
   }
 
+  /// Determines whether the AI helper should be shown
+  /// when the pharmacist has not replied within
+  /// the specified time threshold.
   Future<void> checkLastReply({
     required String chatId,
     required String currentUserId,
@@ -63,6 +76,7 @@ class ChatViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Retrieves the current user's role from Firestore.
   Future<void> loadUserRole() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -81,6 +95,8 @@ class ChatViewModel extends ChangeNotifier {
 
   String otherUserName = "User";
 
+  /// Loads the profile information of the other user
+  /// participating in the conversation.
   Future<void> loadOtherUser(String? otherUserId) async {
     if (otherUserId == null) return;
 
@@ -116,6 +132,8 @@ class ChatViewModel extends ChangeNotifier {
     }
   }
 
+  /// Sends a new message to the selected chat
+  /// and updates the latest chat information.
   Future<void> sendMessage(String chatId, String text) async {
     final user = FirebaseAuth.instance.currentUser;
 
@@ -150,6 +168,8 @@ class ChatViewModel extends ChangeNotifier {
     }
   }
 
+  /// Marks unread messages as read when
+  /// the conversation is opened.
   Future<void> markMessagesAsRead(String chatId) async {
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -177,6 +197,8 @@ class ChatViewModel extends ChangeNotifier {
     }
   }
 
+  /// Updates the content of a previously sent message.
+  /// Only the original sender is allowed to edit the message.
   Future<void> editMessage(
     String chatId,
     String messageId,
@@ -211,6 +233,8 @@ class ChatViewModel extends ChangeNotifier {
     }
   }
 
+  /// Deletes a previously sent message.
+  /// Only the original sender is allowed to delete the message.
   Future<void> deleteMessage(String chatId, String messageId) async {
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -236,6 +260,8 @@ class ChatViewModel extends ChangeNotifier {
     }
   }
 
+  /// Listens for real-time message updates
+  /// from the Firestore chat collection.
   void listenMessages(String chatId) {
     try {
       _messageSubscription?.cancel();
@@ -261,6 +287,8 @@ class ChatViewModel extends ChangeNotifier {
     }
   }
 
+  /// Stops listening for real-time updates
+  /// when the chat page is closed.
   void disposeListener() {
     log("Disposing chat listener");
     _messageSubscription?.cancel();

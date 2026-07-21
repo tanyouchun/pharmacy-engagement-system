@@ -4,6 +4,16 @@ import 'package:provider/provider.dart';
 import '../../viewmodels/user_profile_viewmodel.dart';
 import '../auth_wrapper.dart';
 
+/// ProfileView allows users to create and manage their personal healthcare profile.
+///
+/// Users can provide personal information such as:
+/// - Name
+/// - Age
+/// - Gender
+/// - Weight
+/// - Height
+/// - Allergies
+/// - Medical conditions
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
 
@@ -165,7 +175,8 @@ class ProfileView extends StatelessWidget {
                                   final userProfileViewModel =
                                       context.read<UserProfileViewModel>();
 
-                                  final success = await userProfileViewModel.saveProfile();
+                                  final success =
+                                      await userProfileViewModel.saveProfile();
 
                                   if (!context.mounted) return;
 
@@ -180,7 +191,8 @@ class ProfileView extends StatelessWidget {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text(
-                                          userProfileViewModel.errorMessage ?? "Error occurred",
+                                          userProfileViewModel.errorMessage ??
+                                              "Error occurred",
                                         ),
                                       ),
                                     );
@@ -218,6 +230,10 @@ class ProfileView extends StatelessWidget {
     );
   }
 
+  /// Creates a reusable text input field widget.
+  ///
+  /// This function reduces duplicated code by generating
+  /// consistent input fields for different profile attributes.
   static Widget _buildTextField({
     required TextEditingController controller,
     required String label,

@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 import '../models/pharmacist_profile.dart';
 import '../constants/error_message.dart';
 
+/// for managing pharmacist profile data.
+/// It performs CRUD (Create, Read, Update, Delete) operations
+/// using Cloud Firestore and maintains the profile state for the UI.
 class PharmacistProfileViewModel extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -27,6 +30,8 @@ class PharmacistProfileViewModel extends ChangeNotifier {
   // User? get _currentUser => FirebaseAuth.instance.currentUser;
   // String? get _uid => _currentUser?.uid;
 
+  /// Checks whether the currently authenticated pharmacist
+  /// has an existing profile stored in Firestore.
   Future<void> checkProfileExists() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -53,6 +58,8 @@ class PharmacistProfileViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Retrieves the authenticated pharmacist's profile
+  /// from Firestore and populates the UI controllers.
   Future<void> loadProfile() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -67,6 +74,7 @@ class PharmacistProfileViewModel extends ChangeNotifier {
       if (doc.exists) {
         final profile = PharmacistProfile.fromDoc(doc);
 
+        // Cache profile information locally.
         name = profile.name;
         license = profile.license;
         pharmacyName = profile.pharmacyName;
@@ -90,6 +98,9 @@ class PharmacistProfileViewModel extends ChangeNotifier {
     }
   }
 
+  /// Creates a new pharmacist profile in Firestore.
+  /// This method is called when the pharmacist completes
+  /// profile registration for the first time.
   Future<bool> saveProfile() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return false;
@@ -124,6 +135,7 @@ class PharmacistProfileViewModel extends ChangeNotifier {
     }
   }
 
+  /// Updates an existing pharmacist profile in Firestore.
   Future<bool> updateProfile() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return false;
@@ -157,6 +169,8 @@ class PharmacistProfileViewModel extends ChangeNotifier {
     }
   }
 
+  /// Deletes the pharmacist profile from Firestore
+  /// and clears all locally stored profile information.
   Future<bool> deleteProfile() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return false;
@@ -190,6 +204,11 @@ class PharmacistProfileViewModel extends ChangeNotifier {
     }
   }
 
+  /// Retrieves another pharmacist's profile using
+  /// the supplied user ID.
+  ///
+  /// This method is primarily used when customers
+  /// view pharmacist information before consultation.
   Future<void> loadPharmacistById(String userId) async {
     try {
       isLoading = true;
@@ -219,6 +238,8 @@ class PharmacistProfileViewModel extends ChangeNotifier {
     }
   }
 
+  /// Releases all TextEditingController resources
+  /// when the ViewModel is no longer required.
   @override
   void dispose() {
     nameController.dispose();

@@ -4,7 +4,21 @@ import 'package:provider/provider.dart';
 import '../models/prescription.dart';
 import '../viewmodels/prescription_viewmodel.dart';
 
+/// PrescriptionClient provides reusable UI components for prescription operations.
+///
+/// This class acts as a helper layer between the View and ViewModel in the MVVM
+/// architecture.
+///
+/// Responsibilities:
+/// - Display add prescription form
+/// - Display edit prescription form
+/// - Display delete confirmation dialog
+/// - Collect user input
+/// - Create/update Prescription model objects
+/// - Communicate with PrescriptionViewModel for Firestore operations
 class PrescriptionClient {
+  /// Displays the Add Prescription dialog.
+  /// This function allows patients or pharmacists to create a new prescription.
   static void showAddPrescription({
     required BuildContext context,
     String? userId,
@@ -289,11 +303,11 @@ class PrescriptionClient {
                             value: durationOption,
                             isExpanded: true,
                             items: const [
-                              DropdownMenuItem( 
+                              DropdownMenuItem(
                                 value: "1",
                                 child: Text("1 day"),
                               ),
-                              DropdownMenuItem( 
+                              DropdownMenuItem(
                                 value: "2",
                                 child: Text("2 days"),
                               ),
@@ -301,7 +315,7 @@ class PrescriptionClient {
                                 value: "3",
                                 child: Text("3 days"),
                               ),
-                              DropdownMenuItem( 
+                              DropdownMenuItem(
                                 value: "4",
                                 child: Text("4 days"),
                               ),
@@ -499,6 +513,9 @@ class PrescriptionClient {
     );
   }
 
+  /// Displays the Edit Prescription dialog.
+  ///
+  /// This function allows users to modify existing prescription information.
   static void showEditPrescription(
     BuildContext context,
     Prescription prescription, {
@@ -941,6 +958,9 @@ class PrescriptionClient {
     );
   }
 
+  /// Creates a reusable text field widget.
+  /// Used by both Add Prescription and Edit Prescription forms
+  /// to reduce duplicate UI code.
   static Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -1001,6 +1021,7 @@ class PrescriptionClient {
     );
   }
 
+  /// Displays delete confirmation dialog before removing a prescription.
   static Future<bool> showDeleteConfirmation(
     BuildContext context,
     String medicationName,

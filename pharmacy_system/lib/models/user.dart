@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// Stores common user attributes shared by all user types.
 abstract class User {
   final String id;
   final String name;
@@ -7,6 +8,9 @@ abstract class User {
   User({required this.id, required this.name});
 }
 
+/// Represents a registered user account in PharmaCareAI.
+/// This model is used for both customers and pharmacists,
+/// including account status and moderation information.
 class UserAccount extends User {
   final String email;
   final String role;

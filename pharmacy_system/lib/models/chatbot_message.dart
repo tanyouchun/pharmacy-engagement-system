@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum ChatRole {
-  user,
-  assistant,
-  system,
-}
+/// Defines the supported message sender roles
+/// within the chatbot conversation.
+enum ChatRole { user, assistant, system }
 
+/// Extension that provides helper methods
+/// for the ChatRole enum.
 extension ChatRoleExtension on ChatRole {
   String get value {
     return name;
@@ -16,6 +16,7 @@ extension ChatRoleExtension on ChatRole {
   bool get isSystem => this == ChatRole.system;
 }
 
+/// Model representing a chatbot conversation message.
 class ChatMessage {
   final ChatRole role;
   final String content;
@@ -27,11 +28,7 @@ class ChatMessage {
     this.timestamp,
   });
 
-  ChatMessage copyWith({
-    ChatRole? role,
-    String? content,
-    DateTime? timestamp,
-  }) {
+  ChatMessage copyWith({ChatRole? role, String? content, DateTime? timestamp}) {
     return ChatMessage(
       role: role ?? this.role,
       content: content ?? this.content,
@@ -57,9 +54,10 @@ class ChatMessage {
         orElse: () => ChatRole.user,
       ),
       content: map['content'] as String? ?? '',
-      timestamp: timestampValue is Timestamp
-          ? timestampValue.toDate()
-          : timestampValue is DateTime
+      timestamp:
+          timestampValue is Timestamp
+              ? timestampValue.toDate()
+              : timestampValue is DateTime
               ? timestampValue
               : null,
     );

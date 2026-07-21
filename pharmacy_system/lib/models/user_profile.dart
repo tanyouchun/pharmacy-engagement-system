@@ -1,6 +1,12 @@
 import 'user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// Model representing a patient's profile information.
+///
+/// This model extends the base User class by storing additional
+/// health-related information such as age, gender, physical
+/// measurements, allergies, and medical conditions. It also provides
+/// helper methods for Firestore serialization and immutable updates.
 class UserProfile extends User {
   final int age;
   final String gender;

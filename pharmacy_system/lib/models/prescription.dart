@@ -1,5 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// Prescription model class represents a patient's medication prescription data.
+///
+/// - Storing prescription information
+/// - Converting Firestore documents into Dart objects
+/// - Converting Dart objects into Firestore-compatible data
+/// - Updating existing prescription records using copyWith()
 class Prescription {
   final String prescriptionId;
   final String medicationName;

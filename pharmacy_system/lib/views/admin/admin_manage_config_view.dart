@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../../viewmodels/admin_viewmodel.dart';
 
+/// Screen that allows administrators to enable or disable
+/// system-wide AI features such as the chatbot and AI analysis.
 class AdminManageConfigView extends StatefulWidget {
   const AdminManageConfigView({super.key});
 
@@ -11,6 +13,8 @@ class AdminManageConfigView extends StatefulWidget {
 }
 
 class _AdminManageConfigViewState extends State<AdminManageConfigView> {
+  /// Displays a confirmation dialog before updating
+  /// the chatbot availability.
   Future<void> _toggleChatbot(BuildContext context, bool value) async {
     final adminManageConfigViewModel = Provider.of<AdminManageConfigViewModel>(
       context,
@@ -54,6 +58,8 @@ class _AdminManageConfigViewState extends State<AdminManageConfigView> {
     }
   }
 
+  /// Displays a confirmation dialog before updating
+  /// the AI analysis availability.
   Future<void> _toggleAIAnalysis(BuildContext context, bool value) async {
     final adminManageConfigViewModel = Provider.of<AdminManageConfigViewModel>(
       context,

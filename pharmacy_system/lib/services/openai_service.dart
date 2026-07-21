@@ -5,9 +5,14 @@ import 'package:http/http.dart' as http;
 import 'package:yaml/yaml.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+/// Service for communicating with the OpenAI API.
+/// It loads predefined prompts from a YAML file and generates
+/// AI responses based on the provided user messages.
 class OpenAIService {
   final String _apiKey = dotenv.env['OPENAI_API_KEY'] ?? '';
 
+  /// Loads a predefined system prompt from the YAML file
+  /// using the specified prompt key.
   Future<String> _loadPrompt(String key) async {
     final yamlString = await rootBundle.loadString(
       'assets/prompts/prompts.yaml',
@@ -18,10 +23,25 @@ class OpenAIService {
     return yamlMap['prompt'][key];
   }
 
+  /// Sends a chat completion request to the OpenAI API.
+  ///
+  /// Workflow:
+  /// 1. Load the corresponding system prompt.
+  /// 2. Combine the system prompt with user messages.
+  /// 3. Submit the request to the OpenAI API.
+  /// 4. Return the generated AI response.
   Future<String> sendMessage({
     required List<Map<String, String>> messages,
     required String promptKey,
   }) async {
+    // Load the system prompt from the YAML configuration.
+
+    // Combine the system prompt with the conversation history.
+
+    // Send the request to the OpenAI Chat Completions API.
+
+    // Return the generated response if the request succeeds,
+    // otherwise throw an exception.
     final systemPrompt = await _loadPrompt(promptKey);
     log("System Prompt loaded from yaml file: $systemPrompt");
 

@@ -5,6 +5,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../viewmodels/chat_viewmodel.dart';
 import '../chat_view.dart';
 
+/// PharmacistListView displays the list of approved pharmacists
+/// that patients can select to start a chat consultation.
+///
+/// This view retrieves pharmacist information from Firebase Firestore
+/// and uses ChatViewModel to create or retrieve an existing chat session.
 class PharmacistListView extends StatelessWidget {
   const PharmacistListView({super.key});
 
@@ -100,7 +105,10 @@ class PharmacistListView extends StatelessWidget {
             ),
           ),
 
-          /// LIST
+          /// Pharmacist list section
+          /// Retrieves pharmacist records from Firestore where:
+          /// - User role is pharmacist
+          /// - Pharmacist account has been approved by admin
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream:

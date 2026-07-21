@@ -1,5 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// Message model represents an individual message
+/// exchanged between users in a chat conversation.
+///
+/// This model stores:
+/// - Message identifier.
+/// - Sender information.
+/// - Message content.
+/// - Message editing status.
+/// - Read status.
+/// - Sent timestamp.
 class Message {
   final String messageId;
   final String senderId;

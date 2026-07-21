@@ -4,6 +4,8 @@ import '../viewmodels/signup_viewmodel.dart';
 import '../utils/custom_textfield.dart';
 import 'login_view.dart';
 
+/// Registration screen that allows new users to create
+/// either a customer or pharmacist account.
 class SignupView extends StatefulWidget {
   const SignupView({super.key});
   @override
@@ -17,6 +19,8 @@ class _SignupViewState extends State<SignupView> {
   void initState() {
     super.initState();
 
+    // Register a listener to evaluate password strength
+    // whenever the password field changes.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final signupViewModel = Provider.of<SignupViewModel>(
         context,
@@ -125,6 +129,9 @@ class _SignupViewState extends State<SignupView> {
                   ),
 
                 const SizedBox(height: 20),
+
+                // Allow the user to choose whether
+                // to register as a pharmacist or regular user.
                 Row(
                   children: [
                     const Text("Are you a pharmacist?"),

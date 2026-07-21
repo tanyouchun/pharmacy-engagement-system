@@ -20,6 +20,8 @@ import 'dashboard.dart';
 import 'pharmacist/pharmacist_pending_approval_view.dart';
 import 'admin/admin_pharmacist_approval_view.dart';
 
+/// Main application page that provides role-based navigation
+/// for customers, pharmacists, and administrators.
 class HomePage extends StatefulWidget {
   final int initialIndex;
 
@@ -48,6 +50,8 @@ class _HomePageState extends State<HomePage> {
     _loadUserRole();
   }
 
+  /// Retrieves the authenticated user's role and
+  /// approval status from Firestore.
   Future<void> _loadUserRole() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -81,6 +85,8 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  /// Signs the user out, disposes active chat listeners,
+  /// and redirects to the authentication screen.
   Future<void> _logout() async {
     try {
       final chatViewModel = context.read<ChatViewModel>();
@@ -101,6 +107,8 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  /// Returns the page title according to the
+  /// current user role and selected tab.
   String get _title {
     if (_role == 'admin') {
       final titles = [
@@ -120,6 +128,8 @@ class _HomePageState extends State<HomePage> {
     return (_currentIndex < titles.length) ? titles[_currentIndex] : "Home";
   }
 
+  /// Builds the list of pages displayed in the
+  /// BottomNavigationBar based on the user's role.
   List<Widget> get _pages {
     // Shared first, second and fourth tabs
     final home = ReminderHomeView(

@@ -5,6 +5,14 @@ import '../../viewmodels/user_profile_viewmodel.dart';
 import '../../viewmodels/admin_viewmodel.dart';
 import '../../models/prescription.dart';
 
+/// AI Analysis bottom sheet widget.
+///
+/// This component provides an interface for users to generate
+/// AI-powered medication analysis based on:
+/// - User profile information.
+/// - Medical conditions.
+/// - Allergies.
+/// - Prescription history.
 class AIAnalysisSheet extends StatefulWidget {
   final String userId;
 

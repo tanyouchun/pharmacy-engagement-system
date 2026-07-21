@@ -7,6 +7,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pharmacy_system/services/auth_service.dart';
 import '../constants/error_message.dart';
 
+/// for user authentication.
+/// It handles email/password login, Google Sign-In,
+/// and verifies user account status before allowing access.
 class LoginViewModel extends ChangeNotifier {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -15,7 +18,12 @@ class LoginViewModel extends ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
 
-  // Email and password login
+  /// Authenticates the user using email and password.
+  ///
+  /// Workflow:
+  /// 1. Authenticate with Firebase Authentication.
+  /// 2. Verify account status from Firestore.
+  /// 3. Return appropriate error message if access is restricted.
   Future<void> login() async {
     try {
       log("login function called with email: ${emailController.text}");
@@ -23,6 +31,7 @@ class LoginViewModel extends ChangeNotifier {
       errorMessage = null;
       notifyListeners();
 
+      // Authenticate using Firebase Authentication.
       final credential = await _authService.signInWithEmail(
         emailController.text,
         passwordController.text,
@@ -73,12 +82,16 @@ class LoginViewModel extends ChangeNotifier {
     }
   }
 
-  // Google Sign-In
+  /// Authenticates the user using Google Sign-In.
+  ///
+  /// Existing users proceed to account verification,
+  /// while new users are identified for profile creation.
   Future<String?> signInWithGoogle() async {
     try {
       isLoading = true;
       notifyListeners();
 
+      // Launch Google Sign-In authentication flow.
       final userCredential = await _authService.signInWithGoogle();
       if (userCredential == null) {
         log("Google sign-in cancelled by user");
@@ -110,6 +123,13 @@ class LoginViewModel extends ChangeNotifier {
     }
   }
 
+  /// Verifies the user's account status stored in Firestore.
+  ///
+  /// This method checks:
+  /// - Whether the user profile exists.
+  /// - Pharmacist approval status.
+  /// - Temporary suspension.
+  /// - Permanent account ban.
   Future<String?> _checkUserStatus(String uid) async {
     try {
       log("Checking user status for $uid");
@@ -128,6 +148,7 @@ class LoginViewModel extends ChangeNotifier {
       final role = data?['role'];
       final approvalStatus = data?['approvalStatus'];
 
+      // Validate pharmacist approval before granting access.
       if (role == 'pharmacist') {
         if (approvalStatus == 'pending' || approvalStatus == null) {
           return "PENDING_PHARMACIST_APPROVAL";
@@ -138,6 +159,7 @@ class LoginViewModel extends ChangeNotifier {
         }
       }
 
+      // Check whether the account has been blocked.
       if (data?['isBlocked'] == true) {
         final suspendUntil = data?['suspendUntil'];
 

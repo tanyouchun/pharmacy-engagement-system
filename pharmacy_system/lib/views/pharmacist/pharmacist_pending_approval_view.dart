@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../auth_wrapper.dart';
 
+/// Displays a waiting screen for pharmacists whose accounts
+/// have not yet been approved or have been rejected by the admin.
 class PharmacistPendingApprovalView extends StatelessWidget {
   final String approvalStatus;
 
@@ -28,18 +30,13 @@ class PharmacistPendingApprovalView extends StatelessWidget {
               Icon(
                 isRejected ? Icons.cancel : Icons.hourglass_top,
                 size: 80,
-                color:
-                    isRejected
-                        ? Colors.red
-                        : const Color(0xFF4FC3CF),
+                color: isRejected ? Colors.red : const Color(0xFF4FC3CF),
               ),
 
               const SizedBox(height: 20),
 
               Text(
-                isRejected
-                    ? "Account Rejected"
-                    : "Account Pending Approval",
+                isRejected ? "Account Rejected" : "Account Pending Approval",
 
                 style: const TextStyle(
                   fontSize: 20,
@@ -56,9 +53,7 @@ class PharmacistPendingApprovalView extends StatelessWidget {
 
                 textAlign: TextAlign.center,
 
-                style: TextStyle(
-                  color: isRejected ? Colors.red : Colors.grey,
-                ),
+                style: TextStyle(color: isRejected ? Colors.red : Colors.grey),
               ),
 
               const SizedBox(height: 30),
@@ -71,9 +66,7 @@ class PharmacistPendingApprovalView extends StatelessWidget {
 
                   Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(
-                      builder: (_) => const AuthWrapper(),
-                    ),
+                    MaterialPageRoute(builder: (_) => const AuthWrapper()),
                     (route) => false,
                   );
                 },

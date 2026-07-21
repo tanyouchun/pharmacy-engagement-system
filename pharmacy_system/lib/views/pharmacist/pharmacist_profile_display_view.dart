@@ -3,6 +3,12 @@ import 'package:provider/provider.dart';
 import '../../viewmodels/pharmacist_profile_viewmodel.dart';
 import 'pharmacist_edit_profile_view.dart';
 
+/// PharmacistProfileDisplayView displays the pharmacist's professional profile.
+///
+/// This page allows pharmacists to:
+/// - View their registered professional information.
+/// - View license and experience details.
+/// - Access profile editing functionality.
 class PharmacistProfileDisplayView extends StatefulWidget {
   const PharmacistProfileDisplayView({super.key});
 
@@ -22,14 +28,6 @@ class _PharmacistProfileDisplayViewState
       context.read<PharmacistProfileViewModel>().loadProfile();
     });
   }
-
-  // Future<void> _loadData() async {
-  //   final vm = context.read<PharmacistProfileViewModel>();
-
-  //   await vm.loadProfile();
-
-  //   if (!mounted) return;
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -194,7 +192,7 @@ class _PharmacistProfileDisplayViewState
         ),
       ),
 
-      /// EDIT BUTTON
+      /// Floating button to navigate to profile editing page.
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           await Navigator.push(
@@ -216,6 +214,12 @@ class _PharmacistProfileDisplayViewState
     );
   }
 
+  /// Builds reusable professional information card.
+  ///
+  /// Used for displaying:
+  /// - License number
+  /// - Experience years
+  /// - Account status
   Widget _buildStatCard({
     required IconData icon,
     required String title,

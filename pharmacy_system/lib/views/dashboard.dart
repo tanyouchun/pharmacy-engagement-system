@@ -9,6 +9,14 @@ import '../utils/reminder_client.dart';
 import '../services/notification_service.dart';
 import '../services/medication_log_service.dart';
 
+/// Home view for displaying medication reminders and AI assistant access.
+/// It provides:
+/// - A calendar view for selecting dates
+/// - A list of medication reminders for the selected date
+/// - Access to the AI assistant for users to ask medicine-related questions
+/// The view adapts based on the user's role:
+/// - Pharmacists and Admins see an AI-focused empty state.
+/// - Regular users see their medication reminders and can manage them.
 class ReminderHomeView extends StatefulWidget {
   final String? role;
   final VoidCallback? onOpenChatbot;
@@ -725,21 +733,10 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                 label: const Text("Add new reminder"),
                 icon: const Icon(Icons.add),
               ),
-      // floatingActionButton: Column(
-      //   mainAxisSize: MainAxisSize.min,
-      //   children: [
-      //     FloatingActionButton(
-      //       heroTag: "test",
-      //       onPressed: () async {
-      //         await NotificationService.instance.scheduleTest();
-      //       },
-      //       child: const Icon(Icons.notifications),
-      //     ),
-      //   ],
-      // ),
     );
   }
 
+  /// Displays detailed information about a specific reminder in a bottom sheet.
   void _showReminderDetails(BuildContext context, Reminder reminder) {
     showModalBottomSheet(
       context: context,
@@ -883,7 +880,8 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
                                   children: [
                                     SizedBox(
                                       width: double.infinity,
@@ -896,7 +894,8 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                                                       await MedicationLogService()
                                                           .recordDoseStatus(
                                                             reminderId:
-                                                                reminder.reminderId,
+                                                                reminder
+                                                                    .reminderId,
                                                             prescriptionId:
                                                                 reminder
                                                                     .prescriptionId,
@@ -910,13 +909,15 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                                                             status: 'taken',
                                                           );
 
-                                                  if (result.shouldRunAIAnalysis) {
+                                                  if (result
+                                                      .shouldRunAIAnalysis) {
                                                     await NotificationService
                                                         .instance
                                                         .analyzeAndShowRecommendation(
                                                           doseResult: result,
                                                           reminderId:
-                                                              reminder.reminderId,
+                                                              reminder
+                                                                  .reminderId,
                                                           prescriptionId:
                                                               reminder
                                                                   .prescriptionId,
@@ -926,16 +927,19 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                                                               reminder
                                                                   .medicationName,
                                                           frequency:
-                                                              reminder.frequency,
+                                                              reminder
+                                                                  .frequency,
                                                         );
                                                   }
 
-                                                  if (result.shouldShowLowMedicationWarning) {
+                                                  if (result
+                                                      .shouldShowLowMedicationWarning) {
                                                     await NotificationService
                                                         .instance
                                                         .showLowMedicationWarning(
                                                           reminderId:
-                                                              reminder.reminderId,
+                                                              reminder
+                                                                  .reminderId,
                                                           prescriptionId:
                                                               reminder
                                                                   .prescriptionId,
@@ -965,7 +969,8 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                                                       await MedicationLogService()
                                                           .recordDoseStatus(
                                                             reminderId:
-                                                                reminder.reminderId,
+                                                                reminder
+                                                                    .reminderId,
                                                             prescriptionId:
                                                                 reminder
                                                                     .prescriptionId,
@@ -979,13 +984,15 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                                                             status: 'missed',
                                                           );
 
-                                                  if (result.shouldRunAIAnalysis) {
+                                                  if (result
+                                                      .shouldRunAIAnalysis) {
                                                     await NotificationService
                                                         .instance
                                                         .analyzeAndShowRecommendation(
                                                           doseResult: result,
                                                           reminderId:
-                                                              reminder.reminderId,
+                                                              reminder
+                                                                  .reminderId,
                                                           prescriptionId:
                                                               reminder
                                                                   .prescriptionId,
@@ -995,16 +1002,19 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
                                                               reminder
                                                                   .medicationName,
                                                           frequency:
-                                                              reminder.frequency,
+                                                              reminder
+                                                                  .frequency,
                                                         );
                                                   }
 
-                                                  if (result.shouldShowLowMedicationWarning) {
+                                                  if (result
+                                                      .shouldShowLowMedicationWarning) {
                                                     await NotificationService
                                                         .instance
                                                         .showLowMedicationWarning(
                                                           reminderId:
-                                                              reminder.reminderId,
+                                                              reminder
+                                                                  .reminderId,
                                                           prescriptionId:
                                                               reminder
                                                                   .prescriptionId,
@@ -1359,6 +1369,7 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
     );
   }
 
+  /// Checks whether the "Take" button should be enabled based on the current time and reminder times.
   bool isTakeButtonEnabled(List<String> reminderTimes) {
     final now = DateTime.now();
 
@@ -1383,6 +1394,7 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
     return false;
   }
 
+  /// Retrieves the current reminder time based on the current time and reminder times.
   String? getCurrentReminderTime(List<String> reminderTimes) {
     final now = DateTime.now();
 
@@ -1406,6 +1418,7 @@ class _ReminderHomeViewState extends State<ReminderHomeView> {
     return null;
   }
 
+  /// Displays a confirmation dialog before deleting a reminder.
   void _confirmDelete(BuildContext context, Reminder reminder) {
     final reminderViewModel = Provider.of<ReminderViewModel>(
       context,

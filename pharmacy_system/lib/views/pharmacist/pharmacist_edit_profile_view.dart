@@ -3,6 +3,13 @@ import 'package:provider/provider.dart';
 
 import '../../viewmodels/pharmacist_profile_viewmodel.dart';
 
+/// PharmacistEditProfileView allows pharmacists to update their existing
+/// professional profile information.
+///
+/// Features:
+/// - Update pharmacist details.
+/// - Save modified information into Firebase through ViewModel.
+/// - Delete pharmacist profile with confirmation dialog.
 class PharmacistEditProfileView extends StatelessWidget {
   const PharmacistEditProfileView({super.key});
 
@@ -25,7 +32,6 @@ class PharmacistEditProfileView extends StatelessWidget {
           "Edit Profile",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-
       ),
 
       body: SafeArea(
@@ -120,7 +126,6 @@ class PharmacistEditProfileView extends StatelessWidget {
                       hint: "Enter license number",
 
                       icon: Icons.badge_outlined,
-
                     ),
 
                     const SizedBox(height: 18),
@@ -259,6 +264,13 @@ class PharmacistEditProfileView extends StatelessWidget {
     );
   }
 
+  /// Creates reusable input field component.
+  ///
+  /// Used for:
+  /// - Name
+  /// - License number
+  /// - Pharmacy name
+  /// - Experience
   static Widget _buildTextField({
     required TextEditingController controller,
 
@@ -324,6 +336,9 @@ class PharmacistEditProfileView extends StatelessWidget {
   }
 }
 
+/// Displays confirmation dialog before deleting pharmacist profile.
+///
+/// Prevents accidental deletion by requiring user confirmation.
 void _showDeleteDialog(BuildContext context) {
   final parentContext = context;
 

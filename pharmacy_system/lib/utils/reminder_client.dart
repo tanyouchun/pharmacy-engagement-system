@@ -6,7 +6,17 @@ import '../viewmodels/reminder_viewmodel.dart';
 import '../viewmodels/prescription_viewmodel.dart';
 import '../models/prescription.dart';
 
+/// Client class responsible for displaying and managing the medication
+/// reminder creation/editing form.
+///
+/// This class acts as the UI helper layer between the reminder interface
+/// and ReminderViewModel.
 class ReminderClient {
+  /// Displays medication reminder form dialog.
+  ///
+  /// This method is used for both:
+  /// - Creating a new reminder
+  /// - Updating an existing reminder
   static Future<void> showReminderForm(
     BuildContext context, {
     Reminder? reminder,
@@ -614,6 +624,7 @@ class ReminderClient {
     );
   }
 
+  /// Opens reminder creation form from prescription page.
   static Future<void> showReminderFormFromPrescription(
     BuildContext context, {
     required String prescriptionId,

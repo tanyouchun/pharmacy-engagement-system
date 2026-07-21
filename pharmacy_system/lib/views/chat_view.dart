@@ -10,15 +10,14 @@ import '../views/user/pharmacist_profile_details_view.dart';
 import '../viewmodels/chat_viewmodel.dart';
 import 'home_page.dart';
 
+/// Main chat interface for communication between patients and pharmacists.
+/// This view displays real-time conversations, supports message management,
+/// and provides AI assistance when pharmacist responses are delayed.
 class ChatView extends StatefulWidget {
   final String chatId;
   final String? otherUserId;
 
-  const ChatView({
-    super.key,
-    required this.chatId,
-    this.otherUserId,
-  });
+  const ChatView({super.key, required this.chatId, this.otherUserId});
 
   @override
   State<ChatView> createState() => _ChatViewState();
@@ -27,6 +26,12 @@ class ChatView extends StatefulWidget {
 class _ChatViewState extends State<ChatView> {
   final TextEditingController controller = TextEditingController();
 
+  /// Initializes the chat screen by:
+  /// - Starting the real-time message listener.
+  /// - Loading the current user's role.
+  /// - Retrieving the other participant's information.
+  /// - Checking whether the AI assistant recommendation should be displayed.
+  /// - Marking unread messages as read.
   @override
   void initState() {
     super.initState();
@@ -50,6 +55,11 @@ class _ChatViewState extends State<ChatView> {
     });
   }
 
+  /// Builds the main chat interface, including:
+  /// - Chat header with participant information.
+  /// - AI assistant recommendation banner.
+  /// - Real-time message list.
+  /// - Message input area for sending new messages.
   @override
   Widget build(BuildContext context) {
     // final user = FirebaseAuth.instance.currentUser!;
@@ -423,6 +433,10 @@ class _ChatViewState extends State<ChatView> {
     );
   }
 
+  /// Displays available actions for a selected message.
+  ///
+  /// Users can edit or delete their own messages within
+  /// 30 minutes after sending.
   void _showOptions(
     BuildContext context,
     String messageId,
@@ -590,6 +604,7 @@ class _ChatViewState extends State<ChatView> {
     );
   }
 
+  /// Creates a reusable action tile used in the message options panel.
   Widget _actionTile({
     required IconData icon,
     required String title,
@@ -651,6 +666,8 @@ class _ChatViewState extends State<ChatView> {
     );
   }
 
+  /// Displays a bottom sheet allowing users to edit
+  /// an existing message before saving the changes.
   void _showEditDialog(String messageId, String oldText) {
     final editController = TextEditingController(text: oldText);
 
@@ -795,6 +812,8 @@ class _ChatViewState extends State<ChatView> {
     );
   }
 
+/// Displays a confirmation dialog before permanently
+/// deleting the selected message.
   void _showDeleteConfirmation(String messageId) {
     showDialog(
       context: context,

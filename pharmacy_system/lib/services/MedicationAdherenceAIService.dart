@@ -1,12 +1,33 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:pharmacy_system/models/MedicationAIResult .dart';
+import 'package:pharmacy_system/models/MedicationAIResult.dart';
 import 'package:pharmacy_system/services/openai_service.dart';
 
+/// Service responsible for analysing patient medication adherence using AI.
+///
+/// This service integrates with OpenAI to analyse medication behaviour
+/// based on the patient's medication intake history.
+///
+/// The AI analysis considers:
+/// - Consecutive missed doses
+/// - Total medication intake history
+/// - Reminder interaction behaviour
+/// - Medication frequency
 class MedicationAdherenceAIService {
   final OpenAIService _openAI = OpenAIService();
 
+  /// Performs AI-based medication adherence analysis.
+  ///
+  /// This method prepares patient medication behaviour data into a prompt
+  /// and sends it to OpenAI using a predefined system prompt.
+  ///
+  /// The AI evaluates the patient's adherence behaviour and returns:
+  /// - Adherence score
+  /// - Adherence status
+  /// - Medication behaviour summary
+  /// - Recommendation
+  /// - Pharmacist follow-up requirement
   Future<MedicationAIResult> analyze({
     required int consecutiveMissed,
     required int totalTaken,

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// Admin screen for reviewing and approving/rejecting pharmacist accounts.
 class AdminPharmacistApprovalView extends StatelessWidget {
   const AdminPharmacistApprovalView({super.key});
 
+  /// Updates the approval status of a pharmacist account in Firestore.
   Future<void> _updateStatus(String userId, String status) async {
     await FirebaseFirestore.instance.collection('users').doc(userId).update({
       'approvalStatus': status,
@@ -111,6 +113,8 @@ class AdminPharmacistApprovalView extends StatelessWidget {
     );
   }
 
+  /// Builds a reusable information row containing an icon,
+  /// title, and corresponding value.
   Widget _buildInfoTile(IconData icon, String title, String value) {
     return Row(
       children: [
@@ -152,6 +156,7 @@ class AdminPharmacistApprovalView extends StatelessWidget {
     );
   }
 
+  /// Returns a status badge based on pharmacist approval status.
   Widget _buildStatusBadge(String status) {
     Color bgColor;
     Color textColor;
@@ -204,6 +209,7 @@ class AdminPharmacistApprovalView extends StatelessWidget {
     );
   }
 
+  /// Displays a placeholder widget when a section has no data.
   Widget _buildEmptySection({required IconData icon, required String text}) {
     return Container(
       width: double.infinity,
@@ -232,6 +238,8 @@ class AdminPharmacistApprovalView extends StatelessWidget {
     );
   }
 
+  /// Builds a pharmacist information card together with
+  /// approval/rejection actions.
   Widget _buildPharmacistCard(BuildContext context, QueryDocumentSnapshot doc) {
     final userData = doc.data() as Map<String, dynamic>;
     final userId = doc.id;
@@ -445,6 +453,8 @@ class AdminPharmacistApprovalView extends StatelessWidget {
     );
   }
 
+  /// Displays a confirmation dialog before approving
+  /// or rejecting a pharmacist account.
   Future<void> _showConfirmationDialog({
     required BuildContext context,
     required String userId,

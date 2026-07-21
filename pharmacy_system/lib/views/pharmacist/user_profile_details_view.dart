@@ -10,6 +10,14 @@ import 'package:pharmacy_system/viewmodels/prescription_viewmodel.dart';
 import 'package:pharmacy_system/utils/prescription_client.dart';
 import '../ai_analysis_sheet.dart';
 
+/// UserProfileDetailsView displays detailed information of a selected patient.
+///
+/// This view is mainly used by pharmacists/admin to:
+/// - View customer's personal information
+/// - View medical conditions and allergies
+/// - Access prescription history based on patient's privacy setting
+/// - Add, edit, and delete customer prescriptions
+/// - Generate AI-based medication analysis
 class UserProfileDetailsView extends StatefulWidget {
   final String userId;
   const UserProfileDetailsView({super.key, required this.userId});
@@ -563,6 +571,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
     );
   }
 
+  /// Displays detailed information of a prescription in a bottom sheet.
   void _showPrescriptionDetails(BuildContext context, prescription) {
     showModalBottomSheet(
       context: context,
@@ -826,6 +835,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
     );
   }
 
+  /// Builds a card widget displaying a statistic with an icon, title, and value.
   Widget _buildStatCard({
     required IconData icon,
     required String title,
@@ -866,6 +876,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
     );
   }
 
+  /// Builds a card widget for displaying a section with a title, icon, and child content.
   Widget _buildSectionCard({
     required String title,
     required IconData icon,
@@ -920,6 +931,7 @@ class _UserProfileDetailsViewState extends State<UserProfileDetailsView> {
     );
   }
 
+  /// Generates AI medication analysis for the selected patient.
   void _generateAIAnalysis(BuildContext context) {
     final userProfileViewModel = Provider.of<UserProfileViewModel>(
       context,

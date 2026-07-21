@@ -7,6 +7,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/prescription.dart';
 import '../constants/error_message.dart';
 
+/// PrescriptionViewModel manages all prescription-related operations
+/// between the Flutter user interface and Firebase Firestore database.
+///
+/// - Retrieving prescription records from Firestore
+/// - Adding new prescriptions
+/// - Updating existing prescriptions
+/// - Deleting prescriptions
+/// - Managing prescription visibility settings
+/// - Handling authentication validation and error messages
 class PrescriptionViewModel extends ChangeNotifier {
   final _firestore = FirebaseFirestore.instance;
 
@@ -49,6 +58,10 @@ class PrescriptionViewModel extends ChangeNotifier {
     }
   }
 
+  /// Loads the current prescription visibility setting of a user.
+  ///
+  /// The visibility setting determines whether pharmacists are allowed
+  /// to access the patient's prescription information.
   Future<void> loadPrescriptionVisibility(String userId) async {
     try {
       final doc =
@@ -62,6 +75,10 @@ class PrescriptionViewModel extends ChangeNotifier {
     }
   }
 
+  /// Updates prescription visibility permission in Firestore.
+  ///
+  /// This allows patients to control whether pharmacists can view
+  /// their prescription records.
   Future<void> updatePrescriptionVisibility(bool value) async {
     try {
       _requireAuth();
@@ -115,7 +132,10 @@ class PrescriptionViewModel extends ChangeNotifier {
     }
   }
 
-  //add: user_profiles/{userId}/prescriptions
+  /// Adds a new prescription for the current user.
+  ///
+  /// Firestore path:
+  /// user_profiles/{userId}/prescriptions
   Future<void> storePrescription(Prescription prescription) async {
     try {
       _requireAuth();
@@ -146,7 +166,13 @@ class PrescriptionViewModel extends ChangeNotifier {
     }
   }
 
-  //add: user_profiles/{userId}/prescriptions/{prescriptionId}
+  /// Allows pharmacists to add prescriptions for customers.
+  ///
+  /// Firestore path:
+  /// user_profiles/{userId}/prescriptions
+  ///
+  /// The pharmacist identity is stored as the prescription creator
+  /// for accountability and tracking purposes.
   Future<void> storeUserPrescription(
     String userId,
     Prescription prescription,
@@ -180,7 +206,10 @@ class PrescriptionViewModel extends ChangeNotifier {
     }
   }
 
-  //update: user_profiles/{userId}/prescriptions/{prescriptionId}
+  /// Updates an existing prescription belonging to the current user.
+  ///
+  /// Firestore path:
+  /// user_profiles/{userId}/prescriptions/{prescriptionId}
   Future<void> updatePrescription(Prescription prescription) async {
     try {
       _requireAuth();
@@ -211,7 +240,10 @@ class PrescriptionViewModel extends ChangeNotifier {
     }
   }
 
-  //update: user_profiles/{userId}/prescriptions/{prescriptionId}
+  /// Updates a customer's prescription record by pharmacist.
+  ///
+  /// Used when pharmacists modify prescription information
+  /// on behalf of customers.
   Future<void> updateUserPrescription(
     String userId,
     Prescription prescription,
@@ -242,7 +274,7 @@ class PrescriptionViewModel extends ChangeNotifier {
     }
   }
 
-  //delete: user_profiles/{userId}/prescriptions/{prescriptionId}
+  /// Deletes a prescription belonging to the current user.
   Future<void> deletePrescription(String id) async {
     try {
       _requireAuth();
@@ -263,7 +295,9 @@ class PrescriptionViewModel extends ChangeNotifier {
     }
   }
 
-  //delete: user_profiles/{userId}/prescriptions/{prescriptionId}
+  /// Deletes a customer's prescription record.
+  ///
+  /// Used by pharmacists when managing customer prescriptions.
   Future<void> deleteUserPrescription(String userId, String id) async {
     try {
       await _firestore
@@ -281,6 +315,10 @@ class PrescriptionViewModel extends ChangeNotifier {
     }
   }
 
+  /// Checks whether a user is authenticated before performing
+  /// prescription-related operations.
+  ///
+  /// Prevents unauthorized access to prescription data.
   void _requireAuth() {
     if (_uid == null) {
       errorMessage =

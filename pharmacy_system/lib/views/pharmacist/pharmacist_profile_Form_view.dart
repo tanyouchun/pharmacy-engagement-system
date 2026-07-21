@@ -4,6 +4,13 @@ import 'package:provider/provider.dart';
 import '../../viewmodels/pharmacist_profile_viewmodel.dart';
 import '../home_page.dart';
 
+/// PharmacistProfileFormView allows pharmacists to create their professional profile.
+///
+/// Pharmacists are required to provide:
+/// - Full name
+/// - License number
+/// - Pharmacy name
+/// - Years of experience
 class PharmacistProfileFormView extends StatefulWidget {
   const PharmacistProfileFormView({super.key});
 
@@ -220,6 +227,12 @@ class _PharmacistProfileFormViewState extends State<PharmacistProfileFormView> {
     );
   }
 
+  /// Handles pharmacist profile submission.
+  ///
+  /// Steps:
+  /// 1. Validate required fields.
+  /// 2. Save pharmacist profile through ViewModel.
+  /// 3. Navigate to home page after successful saving.
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -253,6 +266,10 @@ class _PharmacistProfileFormViewState extends State<PharmacistProfileFormView> {
     );
   }
 
+  /// Creates reusable pharmacist input fields.
+  ///
+  /// This function reduces duplicated UI code
+  /// and provides consistent styling for all fields.
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,

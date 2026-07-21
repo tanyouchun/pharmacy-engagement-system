@@ -9,6 +9,14 @@ import '../models/prescription.dart';
 import '../constants/error_message.dart';
 import '../services/notification_service.dart';
 
+/// ViewModel responsible for managing medication reminders.
+/// It handles:
+/// - Retrieving user reminders
+/// - Creating new reminders
+/// - Updating existing reminders
+/// - Deleting reminders
+/// - Scheduling medication notifications
+/// - Managing medication reminder schedules
 class ReminderViewModel extends ChangeNotifier {
   final _db = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
@@ -18,7 +26,7 @@ class ReminderViewModel extends ChangeNotifier {
 
   String get userId => _auth.currentUser!.uid;
 
-  // get reminders/?userId={userId}
+  /// Retrieves all medication reminders created by the current user.
   Future<void> fetchReminders() async {
     final snapshot =
         await _db
@@ -34,6 +42,11 @@ class ReminderViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Creates a new medication reminder or updates an existing reminder.
+  ///
+  /// Validation is performed to ensure:
+  /// - A prescription has been selected.
+  /// - Duplicate reminders are prevented for the same prescription.
   Future<String?> saveReminder({
     required bool isEditing,
     Reminder? existingReminder,
@@ -114,7 +127,10 @@ class ReminderViewModel extends ChangeNotifier {
     return null;
   }
 
-  // add reminders/
+  /// Adds a new reminder into Firestore database.
+  ///
+  /// After storing the reminder, notification schedules are created
+  /// using NotificationService to remind users when medication should be taken.
   Future<void> createReminder(Reminder reminder) async {
     try {
       final docRef = _db.collection('reminders').doc();
@@ -138,7 +154,13 @@ class ReminderViewModel extends ChangeNotifier {
     }
   }
 
-  //update reminders/{id}
+  /// Updates an existing medication reminder.
+  ///
+  /// Before updating:
+  /// - Existing notifications are cancelled.
+  /// - Previous medication logs are removed.
+  ///
+  /// New notification schedules are created after updating the reminder.
   Future<void> updateReminder(Reminder reminder) async {
     try {
       log(
@@ -188,7 +210,7 @@ class ReminderViewModel extends ChangeNotifier {
     }
   }
 
-  // delete reminders/{id}
+  /// Deletes a medication reminder.
   Future<void> deleteReminder(Reminder reminder) async {
     try {
       await NotificationService.instance.cancelReminder(
@@ -224,6 +246,7 @@ class ReminderViewModel extends ChangeNotifier {
     }
   }
 
+  /// Generates medication reminder times based on frequency.
   List<String> generateReminderTimes(TimeOfDay startTime, String frequency) {
     int timesPerDay = 1;
 
@@ -260,6 +283,7 @@ class ReminderViewModel extends ChangeNotifier {
     return times;
   }
 
+  /// Checks whether a reminder already exists for a prescription.
   Future<bool> reminderExists(String prescriptionId) async {
     final snapshot =
         await _db
@@ -279,6 +303,7 @@ class ReminderViewModel extends ChangeNotifier {
     return snapshot.docs.isNotEmpty;
   }
 
+  /// Determines whether the medication reminder time has passed.
   bool canTake(String time) {
     final now = DateTime.now();
 

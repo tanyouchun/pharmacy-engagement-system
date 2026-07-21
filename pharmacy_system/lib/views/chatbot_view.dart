@@ -5,6 +5,8 @@ import '../models/chatbot_message.dart';
 import '../viewmodels/chatbot_viewmodel.dart';
 import '../viewmodels/admin_viewmodel.dart';
 
+/// Chatbot interface that allows users to communicate
+/// with the AI pharmacist assistant.
 class ChatbotView extends StatefulWidget {
   const ChatbotView({super.key});
 

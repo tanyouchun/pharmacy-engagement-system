@@ -2,6 +2,8 @@ import 'user.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// Model representing a pharmacist's profile information.
+/// Extends the base User model with pharmacist-specific details.
 class PharmacistProfile extends User {
   final String license;
   final String pharmacyName;

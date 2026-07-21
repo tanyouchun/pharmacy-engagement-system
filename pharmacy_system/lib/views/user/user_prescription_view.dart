@@ -6,6 +6,14 @@ import 'package:pharmacy_system/utils/prescription_client.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:pharmacy_system/utils/reminder_client.dart';
 
+/// PrescriptionPage displays the patient's prescription management interface.
+///
+/// This page is responsible for:
+/// - Displaying patient's prescription records
+/// - Allowing users to add, edit, and delete prescriptions
+/// - Allowing users to create medication reminders from prescriptions
+/// - Managing prescription visibility permission for pharmacists
+/// - Displaying detailed prescription information
 class PrescriptionPage extends StatefulWidget {
   const PrescriptionPage({super.key});
 
@@ -14,6 +22,13 @@ class PrescriptionPage extends StatefulWidget {
 }
 
 class _PrescriptionPageState extends State<PrescriptionPage> {
+  /// Loads prescription data after the page is initialized.
+  ///
+  /// The function retrieves:
+  /// - Current user's prescription list
+  /// - Prescription visibility permission setting
+  ///
+  /// Data is obtained through PrescriptionViewModel
   @override
   void initState() {
     super.initState();
@@ -266,7 +281,8 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
                                         context,
                                         prescriptionId:
                                             prescription.prescriptionId,
-                                        medicationName: prescription.medicationName,
+                                        medicationName:
+                                            prescription.medicationName,
                                         strength: prescription.strength,
                                         dose: prescription.dose,
                                         frequency: prescription.frequency,
@@ -474,6 +490,19 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
     );
   }
 
+  /// Displays complete prescription information in a bottom sheet.
+  ///
+  /// Information displayed:
+  /// - Medication name
+  /// - Frequency
+  /// - Strength
+  /// - Dosage
+  /// - Duration
+  /// - Additional notes
+  /// - Added date
+  /// - Creator information
+  ///
+  /// This provides users with a detailed overview of their medication record.
   void _showPrescriptionDetails(BuildContext context, prescription) {
     showModalBottomSheet(
       context: context,

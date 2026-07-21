@@ -3,6 +3,15 @@ import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+/// Authentication service class.
+///
+/// This class handles all authentication-related operations
+/// using Firebase Authentication, including:
+/// - User registration.
+/// - Email and password login.
+/// - Google authentication.
+/// - Password reset.
+/// - User logout.
 class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
@@ -42,6 +51,17 @@ class AuthService {
     }
   }
 
+  /// Authenticates user using Google Sign-In.
+  ///
+  /// Process:
+  /// 1. Opens Google account selection.
+  /// 2. Retrieves Google authentication token.
+  /// 3. Creates Firebase credential.
+  /// 4. Signs in using Firebase Authentication.
+  ///
+  /// Returns:
+  /// - UserCredential if successful.
+  /// - Null if user cancels Google login.
   Future<UserCredential?> signInWithGoogle() async {
     try {
       final GoogleSignInAccount? gUser = await GoogleSignIn().signIn();

@@ -6,6 +6,14 @@ import '../../viewmodels/admin_viewmodel.dart';
 import '../user/pharmacist_profile_details_view.dart';
 import '../pharmacist/user_profile_details_view.dart';
 
+/// Admin interface for managing reported user accounts.
+///
+/// This screen allows administrators to:
+/// - View submitted account issue reports.
+/// - Review reported user information.
+/// - Access user profile details.
+/// - Suspend or permanently ban user accounts.
+/// - Remove account suspension.
 class AdminManageUserView extends StatefulWidget {
   const AdminManageUserView({super.key});
 
@@ -281,6 +289,10 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
     );
   }
 
+  /// Opens the corresponding profile page based on user role.
+  ///
+  /// Pharmacists and normal users have different
+  /// profile interfaces.
   void _checkAccount(String userId, String role) {
     if (role == 'pharmacist') {
       Navigator.push(
@@ -303,6 +315,12 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
     }
   }
 
+  /// Displays suspension options.
+  ///
+  /// Administrator can choose:
+  /// - Suspend for 1 day
+  /// - Suspend for 7 days
+  /// - Permanently ban account
   void _showSuspendDialog(
     AdminManageUserViewModel adminManageUserViewModel,
     String userId,
@@ -381,6 +399,8 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
     );
   }
 
+  /// Displays confirmation dialog before performing
+  /// suspension or permanent ban.
   Future<bool> _confirmSuspend(String title, String message) async {
     return await showDialog<bool>(
           context: context,
@@ -406,6 +426,12 @@ class _AdminManageUserViewState extends State<AdminManageUserView> {
         false;
   }
 
+  /// Creates account status indicator.
+  ///
+  /// Status values:
+  /// - Active
+  /// - Suspended
+  /// - Permanently Banned
   Widget _buildStatusChip({
     required bool isBlocked,
     required DateTime? untilDate,

@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../viewmodels/login_viewmodel.dart';
+import '../viewmodels/signup_viewmodel.dart';
 import '../utils/custom_textfield.dart';
 import 'signup_view.dart';
 import 'user/user_create_profile_view.dart';
 import 'pharmacist/pharmacist_profile_Form_view.dart';
 
+/// Login screen that provides user authentication through
+/// email/password and Google Sign-In.
 class LoginView extends StatelessWidget {
   const LoginView({super.key});
 
@@ -185,6 +186,8 @@ class LoginView extends StatelessWidget {
   }
 }
 
+/// Displays a dialog allowing new Google users
+/// to select either a customer or pharmacist account.
 void _showRoleSelectionDialog(BuildContext context) {
   showDialog(
     context: context,
@@ -211,7 +214,9 @@ void _showRoleSelectionDialog(BuildContext context) {
                 icon: const Icon(Icons.person),
                 label: const Text("Normal User"),
                 onPressed: () async {
-                  await _createGoogleUser(role: "user");
+                  await context.read<SignupViewModel>().createGoogleUser(
+                    role: "user",
+                  );
 
                   if (context.mounted) {
                     Navigator.pop(context);
@@ -233,7 +238,9 @@ void _showRoleSelectionDialog(BuildContext context) {
                 icon: const Icon(Icons.local_pharmacy),
                 label: const Text("Pharmacist"),
                 onPressed: () async {
-                  await _createGoogleUser(role: "pharmacist");
+                  await context.read<SignupViewModel>().createGoogleUser(
+                    role: "pharmacist",
+                  );
 
                   if (context.mounted) {
                     Navigator.pop(context);
@@ -255,24 +262,8 @@ void _showRoleSelectionDialog(BuildContext context) {
   );
 }
 
-Future<void> _createGoogleUser({required String role}) async {
-  final user = FirebaseAuth.instance.currentUser;
-
-  if (user == null) return;
-
-  await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-    "email": user.email ?? "",
-    "name": user.displayName ?? "",
-    "role": role,
-    "approvalStatus": role == "pharmacist" ? "pending" : "approved",
-    "createdAt": FieldValue.serverTimestamp(),
-    "isBlocked": false,
-    "suspendUntil": null,
-    "reportCount": 0,
-    "isPermanentBan": false,
-  });
-}
-
+/// Creates a reusable social authentication button
+/// used for Google Sign-In.
 Widget _socialButton({
   required String icon,
   required String text,

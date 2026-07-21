@@ -1,5 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// This model stores medication scheduling information and medication
+/// adherence tracking data. It is used to transfer reminder information
+/// between the Flutter application and Firebase Firestore database.
 class Reminder {
   final String reminderId;
   final String userId;

@@ -1,5 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// Chat model represents a conversation between users.
+///
+/// This model stores:
+/// - Chat identifier.
+/// - Users involved in the conversation.
+/// - Latest message information.
+/// - Latest message timestamp.
 class Chat {
   final String chatId;
   final List<String> participants;

@@ -3,9 +3,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../models/chat.dart';
 
+/// Service responsible for creating and retrieving chat sessions
+/// between patients and pharmacists.
+///
+/// This service ensures that only one chat conversation exists
+/// for each patient-pharmacist pair.
 class ChatService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  /// Creates a new chat or returns an existing chat ID.
   Future<String> createOrGetChat(String pharmacistId) async {
     final user = FirebaseAuth.instance.currentUser!;
     final chats = _firestore.collection('chats');
@@ -19,7 +25,7 @@ class ChatService {
         return doc.id; // existing chat
       }
     }
-
+    // Create a new chat if no existing conversation is found.
     final chat = Chat(
       chatId: '',
       participants: [user.uid, pharmacistId],

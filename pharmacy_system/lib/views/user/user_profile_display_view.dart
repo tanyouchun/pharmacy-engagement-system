@@ -5,6 +5,14 @@ import '../ai_analysis_sheet.dart';
 import 'user_edit_profile_view.dart';
 import '../../viewmodels/prescription_viewmodel.dart';
 
+/// UserProfileDisplayView displays the user's healthcare profile information.
+///
+/// This page allows users to:
+/// - View personal information.
+/// - View health statistics.
+/// - View allergies and medical conditions.
+/// - Request AI-powered health profile analysis.
+/// - Navigate to edit profile page.
 class UserProfileDisplayView extends StatefulWidget {
   const UserProfileDisplayView({super.key});
 
@@ -215,6 +223,9 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
         ),
       ),
 
+      /// Floating buttons:
+      /// - AI Analysis button for generating AI health insights.
+      /// - Edit Profile button for updating information.
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
 
       floatingActionButton: Padding(
@@ -260,6 +271,7 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
     );
   }
 
+  /// Creates statistic card displaying health information.
   Widget _buildStatCard({
     required IconData icon,
     required String title,
@@ -300,6 +312,7 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
     );
   }
 
+  /// Creates reusable information section card.
   Widget _buildSectionCard({
     required String title,
     required IconData icon,
@@ -354,6 +367,10 @@ class _UserProfileDisplayViewState extends State<UserProfileDisplayView> {
     );
   }
 
+  /// Opens AI analysis bottom sheet.
+  ///
+  /// Passes user health information and prescription history
+  /// to AIAnalysisSheet for generating AI-based insights.
   void _generateAIAnalysis(BuildContext context) {
     final userProfileViewModel = Provider.of<UserProfileViewModel>(
       context,

@@ -1,5 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// Model representing an account issue report submitted by a user.
+///
+/// This model is used in the Account Management module where users
+/// can report inappropriate behaviour or account-related issues.
 class AccountIssueReport {
   final String? issueId;
   final String reportedUserId;
@@ -21,7 +25,7 @@ class AccountIssueReport {
     this.createdAt,
   });
 
-  /// 🔹 Convert model → Firestore
+  /// Convert model → Firestore
   Map<String, dynamic> toMap() {
     return {
       "reportedUserId": reportedUserId,
@@ -34,7 +38,7 @@ class AccountIssueReport {
     };
   }
 
-  /// 🔹 Convert Firestore → model
+  /// Convert Firestore → model
   factory AccountIssueReport.fromDoc(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
 

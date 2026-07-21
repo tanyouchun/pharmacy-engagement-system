@@ -5,6 +5,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../chat_view.dart';
 import '../../utils/format_time.dart';
 
+/// PharmacistChatListView displays all conversations between pharmacists
+/// and patients.
+///
+/// This page allows pharmacists to:
+/// - View patient conversations.
+/// - Search patient chats.
+/// - Preview the latest message.
+/// - Identify unread messages.
+/// - Navigate to individual chat sessions.
 class PharmacistChatListView extends StatefulWidget {
   const PharmacistChatListView({super.key});
 
@@ -110,7 +119,9 @@ class _PharmacistChatListViewState extends State<PharmacistChatListView> {
 
           const SizedBox(height: 14),
 
-          /// CHAT LIST
+          /// Chat list section.
+          /// Retrieves all chats where the current pharmacist
+          /// is one of the participants.
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream:

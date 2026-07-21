@@ -6,6 +6,9 @@ import '../chat_view.dart';
 import 'pharmacist_list_view.dart';
 import '../../utils/format_time.dart';
 
+/// Displays the user's conversation list with pharmacists.
+/// Provides chat search, unread message indicators,
+/// and navigation to individual chat sessions.
 class ChatListView extends StatefulWidget {
   const ChatListView({super.key});
 
@@ -16,6 +19,12 @@ class ChatListView extends StatefulWidget {
 class _ChatListViewState extends State<ChatListView> {
   String _searchQuery = '';
 
+  /// Builds the chat list interface, including:
+  /// - Header with search functionality.
+  /// - Real-time conversation list from Firestore.
+  /// - Latest message preview and timestamp.
+  /// - Unread message indicators.
+  /// - Button to start a new conversation.
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser!;
@@ -437,7 +446,9 @@ class _ChatListViewState extends State<ChatListView> {
           ),
         ],
       ),
-
+      
+      // Floating action button for starting
+      // a new conversation with a pharmacist.
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.push(

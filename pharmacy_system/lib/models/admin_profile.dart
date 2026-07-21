@@ -1,6 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'user.dart';
 
+/// Model representing a user profile managed by the administrator.
+///
+/// This model extends the base User model by including additional
+/// administrative information used for account management.
 class AdminProfile extends User {
   final String role;
   final String? email;
@@ -41,9 +45,10 @@ class AdminProfile extends User {
       email: map['email'] as String?,
       isBlocked: map['isBlocked'] as bool? ?? false,
       isPermanentBan: map['isPermanentBan'] as bool? ?? false,
-      suspendUntil: map['suspendUntil'] != null
-          ? (map['suspendUntil'] as Timestamp).toDate()
-          : null,
+      suspendUntil:
+          map['suspendUntil'] != null
+              ? (map['suspendUntil'] as Timestamp).toDate()
+              : null,
       approvalStatus: map['approvalStatus'] as String?,
     );
   }
@@ -51,9 +56,6 @@ class AdminProfile extends User {
   factory AdminProfile.fromSnapshot(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>?;
 
-    return AdminProfile.fromMap(
-      data ?? {},
-      id: doc.id,
-    );
+    return AdminProfile.fromMap(data ?? {}, id: doc.id);
   }
 }

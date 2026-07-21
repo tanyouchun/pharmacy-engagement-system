@@ -13,11 +13,29 @@ import '../models/MedicationAIResult.dart';
 import 'medication_log_service.dart';
 import 'app_navigation_service.dart';
 
+/// Background callback function triggered when a notification action
+/// is selected while the application is running in the background.
+///
+/// This allows notification actions such as marking medication as taken
+/// or missed to continue working even when the app is not active.
 @pragma('vm:entry-point')
 void notificationTapBackground(NotificationResponse response) {
   NotificationService.instance.handleNotificationResponse(response);
 }
 
+/// Service class responsible for managing all application notifications.
+///
+/// This class handles:
+/// - Initializing local notifications
+/// - Scheduling medication reminders
+/// - Cancelling reminder notifications
+/// - Processing user notification actions
+/// - Tracking medication intake status
+/// - Triggering AI-based medication adherence recommendations
+/// - Redirecting users to pharmacist communication page
+///
+/// NotificationService follows the Singleton pattern to ensure only one
+/// notification manager instance exists throughout the application.
 class NotificationService {
   NotificationService._();
 
@@ -33,6 +51,7 @@ class NotificationService {
   static const String _aiRecommendationType = 'ai_recommendation';
   static const String _lowMedicationType = 'low_medication';
 
+  /// Initializes the local notification service.
   Future<void> initialize() async {
     tz.initializeTimeZones();
     tz.setLocalLocation(tz.getLocation('Asia/Kuala_Lumpur'));
@@ -50,8 +69,7 @@ class NotificationService {
     );
 
     final launchDetails = await _plugin.getNotificationAppLaunchDetails();
-    if (launchDetails?.didNotificationLaunchApp ?? false) {
-    }
+    if (launchDetails?.didNotificationLaunchApp ?? false) {}
 
     final permissionGranted =
         await _plugin
@@ -82,6 +100,7 @@ class NotificationService {
     });
   }
 
+  /// Schedules a daily medication reminder notification.
   Future<void> scheduleDailyReminder({
     required int notificationId,
     required String medicationName,
@@ -150,6 +169,7 @@ class NotificationService {
     );
   }
 
+  /// Creates notification schedules for all medication times.
   Future<void> scheduleReminderTimes({
     required String reminderId,
     required String prescriptionId,
@@ -187,6 +207,7 @@ class NotificationService {
     }
   }
 
+  /// Cancels all notifications related to a reminder.
   Future<void> cancelReminder(String reminderId, int totalTimes) async {
     for (int i = 0; i < totalTimes; i++) {
       await _plugin.cancel(_notificationId(reminderId, i));
@@ -197,6 +218,10 @@ class NotificationService {
     await _plugin.cancelAll();
   }
 
+  /// Displays AI-generated medication adherence recommendations.
+  ///
+  /// This notification is triggered when AI detects potential medication
+  /// adherence issues and recommends patient follow-up with pharmacist.
   Future<void> showAIRecommendation({
     required MedicationAIResult aiResult,
     required String reminderId,
@@ -207,7 +232,9 @@ class NotificationService {
     await _plugin.show(
       _notificationId('ai_$reminderId', 0),
       'Medication Recommendation',
-      aiResult.recommendation.isNotEmpty ? aiResult.recommendation : aiResult.summary,
+      aiResult.recommendation.isNotEmpty
+          ? aiResult.recommendation
+          : aiResult.summary,
       NotificationDetails(
         android: AndroidNotificationDetails(
           'ai_recommendation_channel',
@@ -240,6 +267,10 @@ class NotificationService {
     );
   }
 
+  /// Displays warning notification when medication supply is almost finished.
+  ///
+  /// This feature improves pharmacist-patient engagement by encouraging
+  /// users to contact pharmacists for refill or consultation.
   Future<void> showLowMedicationWarning({
     required String reminderId,
     required String prescriptionId,
@@ -276,6 +307,14 @@ class NotificationService {
     );
   }
 
+  /// Performs AI medication adherence analysis.
+  ///
+  /// The AI service evaluates:
+  /// - Consecutive missed doses
+  /// - Total medication intake history
+  /// - Remaining medication duration
+  ///
+  /// If risk is detected, an AI recommendation notification is displayed.
   Future<void> analyzeAndShowRecommendation({
     required DoseStatusResult doseResult,
     required String reminderId,
@@ -309,6 +348,7 @@ class NotificationService {
     }
   }
 
+  /// Handles user interaction with notification buttons.
   Future<void> _handleNotificationResponse(
     NotificationResponse response,
   ) async {
@@ -332,6 +372,7 @@ class NotificationService {
         status: response.actionId == _doseTakenActionId ? 'taken' : 'missed',
       );
 
+      // Trigger AI analysis when adherence risk is detected.
       if (result.shouldRunAIAnalysis) {
         await analyzeAndShowRecommendation(
           doseResult: result,
@@ -379,16 +420,18 @@ class NotificationService {
     }
   }
 
+  /// Retrieves medication frequency from Firestore.
   Future<String> _getReminderFrequency(String reminderId) async {
     if (reminderId.isEmpty) {
       return '';
     }
 
     try {
-      final doc = await FirebaseFirestore.instance
-          .collection('reminders')
-          .doc(reminderId)
-          .get();
+      final doc =
+          await FirebaseFirestore.instance
+              .collection('reminders')
+              .doc(reminderId)
+              .get();
       return doc.data()?['frequency'] as String? ?? '';
     } catch (e) {
       log('Failed to load reminder frequency for AI analysis: $e');
@@ -396,6 +439,11 @@ class NotificationService {
     }
   }
 
+  /// Opens pharmacist chat page.
+  ///
+  /// Allows users to communicate with pharmacists after:
+  /// - AI recommendation
+  /// - Medication refill warning
   void _openChatPage() {
     log("Opening chat page");
     final navigator = appNavigatorKey.currentState;

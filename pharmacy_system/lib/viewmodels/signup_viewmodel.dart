@@ -8,8 +8,13 @@ import '../models/user.dart';
 import '../services/auth_service.dart';
 import '../constants/error_message.dart';
 
+/// handling user registration logic.
+/// It manages form validation, password strength checking,
+/// Firebase Authentication, and Firestore user creation.
 class SignupViewModel extends ChangeNotifier {
   final _authService = AuthService();
+
+  // Controllers for retrieving user input from the signup form.
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
@@ -22,6 +27,14 @@ class SignupViewModel extends ChangeNotifier {
   String passwordStrength = "";
   Color passwordStrengthColor = Colors.grey;
 
+  /// Evaluates password strength based on:
+  /// - Minimum length
+  /// - Uppercase letter
+  /// - Lowercase letter
+  /// - Number
+  /// - Special character
+  ///
+  /// The result is displayed to the user as Weak, Medium, or Strong.
   void checkPasswordStrength(String password) {
     if (password.isEmpty) {
       passwordStrength = "";
@@ -50,6 +63,13 @@ class SignupViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Handles user registration process.
+  ///
+  /// Workflow:
+  /// 1. Validate user input.
+  /// 2. Create Firebase Authentication account.
+  /// 3. Store user profile in Firestore.
+  /// 4. Redirect user based on selected role.
   Future<void> signup(BuildContext context) async {
     try {
       errors.clear();
@@ -138,5 +158,28 @@ class SignupViewModel extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
+  }
+
+  /// Creates a Firestore user record for users
+  /// who authenticate using Google Sign-In.
+  ///
+  /// The user's role, approval status, and account
+  /// information are initialized after successful authentication.
+  Future<void> createGoogleUser({required String role}) async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) return;
+
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+      "email": user.email ?? "",
+      "name": user.displayName ?? "",
+      "role": role,
+      "approvalStatus": role == "pharmacist" ? "pending" : "approved",
+      "createdAt": FieldValue.serverTimestamp(),
+      "isBlocked": false,
+      "suspendUntil": null,
+      "reportCount": 0,
+      "isPermanentBan": false,
+    });
   }
 }

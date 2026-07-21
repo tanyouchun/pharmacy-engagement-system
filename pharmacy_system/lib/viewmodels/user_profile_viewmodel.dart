@@ -8,8 +8,13 @@ import '../services/openai_service.dart';
 import '../models/user_profile.dart';
 import '../constants/error_message.dart';
 
+/// ViewModel for managing customer profile information.
+/// It performs CRUD (Create, Read, Update, Delete) operations
+/// using Cloud Firestore and generates AI-powered medication analysis.
 class UserProfileViewModel extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  // OpenAI service for generating medication analysis.
   final OpenAIService _openAIService = OpenAIService();
 
   UserProfile? profile;
@@ -40,6 +45,8 @@ class UserProfileViewModel extends ChangeNotifier {
     medicalConditionsController.clear();
   }
 
+  /// Checks whether the authenticated user
+  /// has an existing profile in Firestore.
   Future<void> checkProfileExists() async {
     log("Checking user profile existence for UID: ${_uid}");
     _requireAuth();
@@ -50,6 +57,8 @@ class UserProfileViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Retrieves the authenticated user's profile
+  /// from Firestore and populates the form controllers.
   Future<void> loadProfile() async {
     try {
       _requireAuth();
@@ -84,6 +93,8 @@ class UserProfileViewModel extends ChangeNotifier {
     }
   }
 
+  /// Retrieves another user's profile using
+  /// the specified user ID.
   Future<void> loadUserProfile(String userId) async {
     try {
       final doc =
@@ -108,6 +119,7 @@ class UserProfileViewModel extends ChangeNotifier {
     }
   }
 
+  /// Creates a new user profile in Firestore.
   Future<bool> saveProfile() async {
     try {
       isLoading = true;
@@ -159,6 +171,8 @@ class UserProfileViewModel extends ChangeNotifier {
     }
   }
 
+  /// Updates the existing user profile
+  /// with the latest information.
   Future<bool> updateProfile() async {
     try {
       isLoading = true;
@@ -212,6 +226,8 @@ class UserProfileViewModel extends ChangeNotifier {
     }
   }
 
+  /// Deletes the user profile from Firestore
+  /// and clears all locally stored profile information.
   Future<bool> deleteProfile() async {
     try {
       isLoading = true;
@@ -237,6 +253,8 @@ class UserProfileViewModel extends ChangeNotifier {
     }
   }
 
+  /// Generates an AI-powered medication analysis
+  /// based on the user's profile and prescription history.
   Future<String> generateAIAnalysis({
     required String name,
     required String age,
@@ -293,6 +311,8 @@ class UserProfileViewModel extends ChangeNotifier {
     }
   }
 
+  /// Ensures the user is authenticated before
+  /// performing any profile-related operations.
   void _requireAuth() {
     if (_uid == null) {
       hasProfile = false;
